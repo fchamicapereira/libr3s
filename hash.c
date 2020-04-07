@@ -7,6 +7,112 @@
 #include "util.h"
 #include "hash.h"
 
+size_t pf_sz_bits(packet_field_t pf)
+{
+    switch (pf)
+    {
+        case PF_UDP_OUTER:  return sizeof(port_t)  * 8;
+        case PF_VNI:        return sizeof(vni_t)   * 8;
+        case PF_IPV4_SRC:   return sizeof(ipv4_t)  * 8;
+        case PF_IPV4_DST:   return sizeof(ipv4_t)  * 8;
+        case PF_IPV6_SRC:   return sizeof(ipv6_t)  * 8;
+        case PF_IPV6_DST:   return sizeof(ipv6_t)  * 8;
+        case PF_TCP_SRC:    return sizeof(port_t)  * 8;
+        case PF_TCP_DST:    return sizeof(port_t)  * 8;
+        case PF_UDP_SRC:    return sizeof(port_t)  * 8;
+        case PF_UDP_DST:    return sizeof(port_t)  * 8;
+        case PF_SCTP_SRC:   return sizeof(port_t)  * 8;
+        case PF_SCTP_DST:   return sizeof(port_t)  * 8;
+        case PF_SCTP_V_TAG: return sizeof(v_tag_t) * 8;
+        // TODO: missing PF_L2_TYPE
+        default:            assert(false);
+    }
+}
+
+unsigned packet_field_offset_be_bits(hash_cfg_t cfg, packet_field_t pf)
+{
+    unsigned offset = 0;
+
+    // TODO: check the order
+    // TODO: missing PF_L2_TYPE
+
+    switch(pf)
+    {
+        case PF_UDP_OUTER:
+            offset += hash_cfg_check_field(cfg, PF_UDP_OUTER)  ? pf_sz_bits(PF_UDP_OUTER) : 0;
+        case PF_VNI:        
+            offset += hash_cfg_check_field(cfg, PF_VNI)        ? pf_sz_bits(PF_VNI) : 0;
+        case PF_TCP_DST:    
+            offset += hash_cfg_check_field(cfg, PF_TCP_DST)    ? pf_sz_bits(PF_TCP_DST) : 0;
+        case PF_TCP_SRC:    
+            offset += hash_cfg_check_field(cfg, PF_TCP_SRC)    ? pf_sz_bits(PF_TCP_SRC) : 0;
+        case PF_UDP_DST:    
+            offset += hash_cfg_check_field(cfg, PF_UDP_DST)    ? pf_sz_bits(PF_UDP_DST) : 0;
+        case PF_UDP_SRC:    
+            offset += hash_cfg_check_field(cfg, PF_UDP_SRC)    ? pf_sz_bits(PF_UDP_SRC) : 0;
+        case PF_SCTP_DST:   
+            offset += hash_cfg_check_field(cfg, PF_SCTP_DST)   ? pf_sz_bits(PF_SCTP_DST) : 0;
+        case PF_SCTP_SRC:   
+            offset += hash_cfg_check_field(cfg, PF_SCTP_SRC)   ? pf_sz_bits(PF_SCTP_SRC) : 0;
+        case PF_IPV4_DST:   
+            offset += hash_cfg_check_field(cfg, PF_IPV4_DST)   ? pf_sz_bits(PF_IPV4_DST) : 0;
+        case PF_IPV4_SRC:
+            offset += hash_cfg_check_field(cfg, PF_IPV4_SRC)   ? pf_sz_bits(PF_IPV4_SRC) : 0;
+        case PF_IPV6_DST:
+            offset += hash_cfg_check_field(cfg, PF_IPV6_DST)   ? pf_sz_bits(PF_IPV6_DST) : 0;
+        case PF_IPV6_SRC:
+            offset += hash_cfg_check_field(cfg, PF_IPV6_SRC)   ? pf_sz_bits(PF_IPV6_SRC) : 0;
+        case PF_SCTP_V_TAG:
+            offset += hash_cfg_check_field(cfg, PF_SCTP_V_TAG) ? pf_sz_bits(PF_SCTP_V_TAG) : 0;
+            break;
+    }
+
+    assert(offset < cfg.input_size);
+    return offset;
+}
+
+unsigned packet_field_offset_le_bits(hash_cfg_t cfg, packet_field_t pf)
+{
+    unsigned offset = cfg.input_size;
+
+    // TODO: check the order
+    // TODO: missing PF_L2_TYPE
+
+    switch(pf)
+    {
+        case PF_UDP_OUTER:
+            offset -= hash_cfg_check_field(cfg, PF_UDP_OUTER)  ? pf_sz_bits(PF_UDP_OUTER) : 0;
+        case PF_VNI:        
+            offset -= hash_cfg_check_field(cfg, PF_VNI)        ? pf_sz_bits(PF_VNI) : 0;
+        case PF_TCP_DST:    
+            offset -= hash_cfg_check_field(cfg, PF_TCP_DST)    ? pf_sz_bits(PF_TCP_DST) : 0;
+        case PF_TCP_SRC:    
+            offset -= hash_cfg_check_field(cfg, PF_TCP_SRC)    ? pf_sz_bits(PF_TCP_SRC) : 0;
+        case PF_UDP_DST:    
+            offset -= hash_cfg_check_field(cfg, PF_UDP_DST)    ? pf_sz_bits(PF_UDP_DST) : 0;
+        case PF_UDP_SRC:    
+            offset -= hash_cfg_check_field(cfg, PF_UDP_SRC)    ? pf_sz_bits(PF_UDP_SRC) : 0;
+        case PF_SCTP_DST:   
+            offset -= hash_cfg_check_field(cfg, PF_SCTP_DST)   ? pf_sz_bits(PF_SCTP_DST) : 0;
+        case PF_SCTP_SRC:   
+            offset -= hash_cfg_check_field(cfg, PF_SCTP_SRC)   ? pf_sz_bits(PF_SCTP_SRC) : 0;
+        case PF_IPV4_DST:   
+            offset -= hash_cfg_check_field(cfg, PF_IPV4_DST)   ? pf_sz_bits(PF_IPV4_DST) : 0;
+        case PF_IPV4_SRC:
+            offset -= hash_cfg_check_field(cfg, PF_IPV4_SRC)   ? pf_sz_bits(PF_IPV4_SRC) : 0;
+        case PF_IPV6_DST:
+            offset -= hash_cfg_check_field(cfg, PF_IPV6_DST)   ? pf_sz_bits(PF_IPV6_DST) : 0;
+        case PF_IPV6_SRC:
+            offset -= hash_cfg_check_field(cfg, PF_IPV6_SRC)   ? pf_sz_bits(PF_IPV6_SRC) : 0;
+        case PF_SCTP_V_TAG:
+            offset -= hash_cfg_check_field(cfg, PF_SCTP_V_TAG) ? pf_sz_bits(PF_SCTP_V_TAG) : 0;
+            break;
+    }
+
+    assert(offset < cfg.input_size);
+    return offset;
+}
+
 void print_headers_verbose(headers_t headers)
 {
     printf("src IP    %hu.%hu.%hu.%hu\n",
@@ -137,9 +243,48 @@ bool is_zero_key(rss_key_t key)
     return true;
 }
 
-hash_input_t header_to_hash_input(headers_t headers)
+void try_extract_pf_from_headers(
+    hash_cfg_t     cfg,
+    headers_t      h,
+    packet_field_t pf,
+    hash_input_t   hi
+    )
 {
-    hash_input_t hi = (hash_input_t) malloc(HASH_INPUT_SIZE);
+    unsigned offset, sz;
+    byte_t   *field;
+
+    if (!hash_cfg_check_field(cfg, pf)) return;
+
+    sz     = packet_field_sz_bits(pf) / 8;
+    offset = packet_field_offset_be_bits(cfg, pf) / 8;
+
+    switch (pf)
+    {
+        case PF_UDP_OUTER:  field = &(h.udp_outer);  break;
+        case PF_VNI:        field = &(h.vni);        break;
+        case PF_IPV4_SRC:   field = &(h.ipv6_src);   break;
+        case PF_IPV4_DST:   field = &(h.ipv4_dst);   break;
+        case PF_IPV6_SRC:   field = &(h.ipv6_src);   break;
+        case PF_IPV6_DST:   field = &(h.ipv6_dst);   break;
+        case PF_TCP_SRC:    field = &(h.tcp_src);    break;
+        case PF_TCP_DST:    field = &(h.tcp_dst);    break;
+        case PF_UDP_SRC:    field = &(h.udp_src);    break;
+        case PF_UDP_DST:    field = &(h.udp_dst);    break;
+        case PF_SCTP_SRC:   field = &(h.sctp_src);   break;
+        case PF_SCTP_DST:   field = &(h.sctp_dst);   break;
+        case PF_SCTP_V_TAG: field = &(h.sctp_v_tag); break;
+    }
+
+    for (unsigned byte = 0; byte < sz; byte++)
+    {
+        hi[offset + byte] = *field & 0xff;
+        field += 1;
+    }
+}
+
+hash_input_t header_to_hash_input(hash_cfg_t cfg, headers_t headers)
+{
+    hash_input_t hi = (hash_input_t) malloc(cfg.input_size);
     unsigned offset;
 
     offset = packet_field_offset_be_bits(SRC_IP);
@@ -173,42 +318,63 @@ hash_input_t header_to_hash_input(headers_t headers)
     return hi;
 }
 
-headers_t hash_input_to_header(hash_input_t hi)
+
+void try_extract_pf_from_hash_input(
+    hash_cfg_t     cfg,
+    hash_input_t   hi,
+    packet_field_t pf,
+    headers_t      *h
+    )
+{
+    unsigned offset, sz;
+    byte_t   *field;
+
+    if (!hash_cfg_check_field(cfg, pf)) return;
+
+    sz     = packet_field_sz_bits(pf) / 8;
+    offset = packet_field_offset_be_bits(cfg, pf) / 8;
+
+    switch (pf)
+    {
+        case PF_UDP_OUTER:  field = &(h->udp_outer);  break;
+        case PF_VNI:        field = &(h->vni);        break;
+        case PF_IPV4_SRC:   field = &(h->ipv6_src);   break;
+        case PF_IPV4_DST:   field = &(h->ipv4_dst);   break;
+        case PF_IPV6_SRC:   field = &(h->ipv6_src);   break;
+        case PF_IPV6_DST:   field = &(h->ipv6_dst);   break;
+        case PF_TCP_SRC:    field = &(h->tcp_src);    break;
+        case PF_TCP_DST:    field = &(h->tcp_dst);    break;
+        case PF_UDP_SRC:    field = &(h->udp_src);    break;
+        case PF_UDP_DST:    field = &(h->udp_dst);    break;
+        case PF_SCTP_SRC:   field = &(h->sctp_src);   break;
+        case PF_SCTP_DST:   field = &(h->sctp_dst);   break;
+        case PF_SCTP_V_TAG: field = &(h->sctp_v_tag); break;
+    }
+
+    for (unsigned byte = 0; byte < sz; byte++)
+    {
+        *field = hi[offset + (sz - byte - 1)] & 0xff;
+        field += 1;
+    }
+}
+
+headers_t hash_input_to_header(hash_cfg_t cfg, hash_input_t hi)
 {
     headers_t headers;
-    unsigned offset;
 
-    offset = packet_field_offset_be_bits(SRC_IP);
-    
-    headers.src_ip   = 0;
-    headers.src_ip   = (headers.src_ip << 8) | (hi[offset / 8 + 0] & 0xff);
-    headers.src_ip   = (headers.src_ip << 8) | (hi[offset / 8 + 1] & 0xff);
-    headers.src_ip   = (headers.src_ip << 8) | (hi[offset / 8 + 2] & 0xff);
-    headers.src_ip   = (headers.src_ip << 8) | (hi[offset / 8 + 3] & 0xff);
-
-    offset = packet_field_offset_be_bits(DST_IP);
-
-    headers.dst_ip   = 0;
-    headers.dst_ip   = (headers.dst_ip << 8) | (hi[offset / 8 + 0] & 0xff);
-    headers.dst_ip   = (headers.dst_ip << 8) | (hi[offset / 8 + 1] & 0xff);
-    headers.dst_ip   = (headers.dst_ip << 8) | (hi[offset / 8 + 2] & 0xff);
-    headers.dst_ip   = (headers.dst_ip << 8) | (hi[offset / 8 + 3] & 0xff);
-
-    offset = packet_field_offset_be_bits(SRC_PORT);
-
-    headers.src_port = 0;
-    headers.src_port = (headers.src_port << 8) | (hi[offset / 8 + 0] & 0xff);
-    headers.src_port = (headers.src_port << 8) | (hi[offset / 8 + 1] & 0xff);
-
-    offset = packet_field_offset_be_bits(DST_PORT);
-
-    headers.dst_port = 0;
-    headers.dst_port = (headers.dst_port << 8) | (hi[offset / 8 + 0] & 0xff);
-    headers.dst_port = (headers.dst_port << 8) | (hi[offset / 8 + 1] & 0xff);
-
-    offset = packet_field_offset_be_bits(PROTOCOL);
-
-    headers.protocol = headers.protocol | (hi[offset / 8] & 0xff);
+    try_extract_pf_from_hash_input(cfg, hi, PF_UDP_OUTER, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_VNI, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_IPV4_SRC, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_IPV4_DST, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_IPV6_SRC, &headers);   
+    try_extract_pf_from_hash_input(cfg, hi, PF_IPV6_DST, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_TCP_SRC, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_TCP_DST, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_UDP_SRC, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_UDP_DST, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_SCTP_SRC, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_SCTP_DST, &headers);
+    try_extract_pf_from_hash_input(cfg, hi, PF_SCTP_V_TAG, &headers);
 
     return headers;
 }
@@ -301,59 +467,10 @@ bool k_test_dist(rss_key_t k)
     return dm <= DIST_THRESHOLD;
 }
 
-unsigned packet_field_offset_be_bits(packet_field_t pf)
-{
-    unsigned offset = 0;
-
-    switch(pf)
-    {
-        case PROTOCOL: offset += sizeof(port_t) * 8;
-        case DST_PORT: offset += sizeof(port_t) * 8;
-        case SRC_PORT: offset += sizeof(ipv4_t) * 8;
-        case DST_IP:   offset += sizeof(ipv4_t) * 8;
-        case SRC_IP:   break;
-        default:       assert(false);
-    }
-
-    assert(offset < HASH_INPUT_SIZE_BITS);
-    return offset;
-}
-
-unsigned packet_field_offset_le_bits(packet_field_t pf)
-{
-    unsigned offset = HASH_INPUT_SIZE_BITS;
-
-    switch(pf)
-    {
-        case PROTOCOL: offset -= sizeof(protocol_t) * 8;
-        case DST_PORT: offset -= sizeof(port_t) * 8;
-        case SRC_PORT: offset -= sizeof(port_t) * 8;
-        case DST_IP:   offset -= sizeof(ipv4_t) * 8;
-        case SRC_IP:   offset -= sizeof(ipv4_t) * 8; break;
-        default:       assert(false);
-    }
-
-    assert(offset < HASH_INPUT_SIZE_BITS);
-    return offset;
-}
-
-size_t packet_field_sz_bits(packet_field_t pf)
-{
-    switch (pf)
-    {
-        case PROTOCOL: return sizeof(protocol_t) * 8;
-        case DST_PORT: return sizeof(port_t) * 8;
-        case SRC_PORT: return sizeof(port_t) * 8;
-        case DST_IP:   return sizeof(ipv4_t) * 8;
-        case SRC_IP:   return sizeof(ipv4_t) * 8;
-        default:       assert(false);
-    }
-}
-
 hash_cfg_t hash_cfg_init()
 {
     hash_cfg_t cfg = {
-        .input_cfg     = 0,
+        .input_cfg  = 0,
         .input_size = 0
     };
 
@@ -366,59 +483,61 @@ void hash_cfg_load_input_cfg(hash_cfg_t *cfg, rss_input_cfg_t input_cfg)
 
     switch (input_cfg)
     {
-        case GENEVE_OAM:
-        case VXLAN_GPE_OAM:
-            hash_cfg_load_field(cfg, UDP_OUTER);
-            hash_cfg_load_field(cfg, VNI);
+        case INPUT_CFG_GENEVE_OAM:
+        case INPUT_CFG_VXLAN_GPE_OAM:
+            hash_cfg_load_field(cfg, PF_UDP_OUTER);
+            hash_cfg_load_field(cfg, PF_VNI);
             break;
-        case NON_FRAG_IPV4_UDP:
-            hash_cfg_load_field(cfg, IPV4_SRC);
-            hash_cfg_load_field(cfg, IPV4_DST);
-            hash_cfg_load_field(cfg, UDP_SRC);
-            hash_cfg_load_field(cfg, UDP_DST);
+        case INPUT_CFG_NON_FRAG_IPV4_UDP:
+            hash_cfg_load_field(cfg, PF_IPV4_SRC);
+            hash_cfg_load_field(cfg, PF_IPV4_DST);
+            hash_cfg_load_field(cfg, PF_UDP_SRC);
+            hash_cfg_load_field(cfg, PF_UDP_DST);
             break;
-        case NON_FRAG_IPV4_TCP:
-            hash_cfg_load_field(cfg, IPV4_SRC);
-            hash_cfg_load_field(cfg, IPV4_DST);
-            hash_cfg_load_field(cfg, TCP_SRC);
-            hash_cfg_load_field(cfg, TCP_DST);
+        case INPUT_CFG_NON_FRAG_IPV4_TCP:
+            hash_cfg_load_field(cfg, PF_IPV4_SRC);
+            hash_cfg_load_field(cfg, PF_IPV4_DST);
+            hash_cfg_load_field(cfg, PF_TCP_SRC);
+            hash_cfg_load_field(cfg, PF_TCP_DST);
             break;
-        case NON_FRAG_IPV4_SCTP:
-            hash_cfg_load_field(cfg, IPV4_SRC);
-            hash_cfg_load_field(cfg, IPV4_DST);
-            hash_cfg_load_field(cfg, SCTP_SRC);
-            hash_cfg_load_field(cfg, SCTP_DST);
-            hash_cfg_load_field(cfg, SCTP_V_TAG);
+        case INPUT_CFG_NON_FRAG_IPV4_SCTP:
+            hash_cfg_load_field(cfg, PF_IPV4_SRC);
+            hash_cfg_load_field(cfg, PF_IPV4_DST);
+            hash_cfg_load_field(cfg, PF_SCTP_SRC);
+            hash_cfg_load_field(cfg, PF_SCTP_DST);
+            hash_cfg_load_field(cfg, PF_SCTP_V_TAG);
             break;
-        case NON_FRAG_IPV4:
-        case FRAG_IPV4:
-            hash_cfg_load_field(cfg, IPV4_SRC);
-            hash_cfg_load_field(cfg, IPV4_DST);
+        case INPUT_CFG_NON_FRAG_IPV4:
+        case INPUT_CFG_FRAG_IPV4:
+            hash_cfg_load_field(cfg, PF_IPV4_SRC);
+            hash_cfg_load_field(cfg, PF_IPV4_DST);
             break;
-        case NON_FRAG_IPV6_UDP:
-            hash_cfg_load_field(cfg, IPV6_SRC);
-            hash_cfg_load_field(cfg, IPV6_DST);
-            hash_cfg_load_field(cfg, UDP_SRC);
-            hash_cfg_load_field(cfg, UDP_DST);
+        case INPUT_CFG_NON_FRAG_IPV6_UDP:
+            hash_cfg_load_field(cfg, PF_IPV6_SRC);
+            hash_cfg_load_field(cfg, PF_IPV6_DST);
+            hash_cfg_load_field(cfg, PF_UDP_SRC);
+            hash_cfg_load_field(cfg, PF_UDP_DST);
             break;
-        case NON_FRAG_IPV6_TCP:
-            hash_cfg_load_field(cfg, IPV6_SRC);
-            hash_cfg_load_field(cfg, IPV6_DST);
-            hash_cfg_load_field(cfg, TCP_SRC);
-            hash_cfg_load_field(cfg, TCP_DST);
+        case INPUT_CFG_NON_FRAG_IPV6_TCP:
+            hash_cfg_load_field(cfg, PF_IPV6_SRC);
+            hash_cfg_load_field(cfg, PF_IPV6_DST);
+            hash_cfg_load_field(cfg, PF_TCP_SRC);
+            hash_cfg_load_field(cfg, PF_TCP_DST);
             break;
-        case NON_FRAG_IPV6_SCTP:
-            hash_cfg_load_field(cfg, IPV6_SRC);
-            hash_cfg_load_field(cfg, IPV6_DST);
-            hash_cfg_load_field(cfg, SCTP_SRC);
-            hash_cfg_load_field(cfg, SCTP_DST);
-            hash_cfg_load_field(cfg, SCTP_V_TAG);
+        case INPUT_CFG_NON_FRAG_IPV6_SCTP:
+            hash_cfg_load_field(cfg, PF_IPV6_SRC);
+            hash_cfg_load_field(cfg, PF_IPV6_DST);
+            hash_cfg_load_field(cfg, PF_SCTP_SRC);
+            hash_cfg_load_field(cfg, PF_SCTP_DST);
+            hash_cfg_load_field(cfg, PF_SCTP_V_TAG);
             break;
-        case NON_FRAG_IPV6:
-        case FRAG_IPV6:
-            hash_cfg_load_field(cfg, IPV6_SRC);
-            hash_cfg_load_field(cfg, IPV6_DST);
+        case INPUT_CFG_NON_FRAG_IPV6:
+        case INPUT_CFG_FRAG_IPV6:
+            hash_cfg_load_field(cfg, PF_IPV6_SRC);
+            hash_cfg_load_field(cfg, PF_IPV6_DST);
             break;
+        case INPUT_CFG_L2_TYPE:
+            hash_cfg_load_field(cfg, PF_L2_TYPE);
         default:
             DEBUG_LOG("Input configuration unknown: %d\n", input_cfg);
             assert(false);
@@ -429,11 +548,13 @@ void hash_cfg_load_field(hash_cfg_t *cfg, packet_field_t pf)
 {
     if (hash_cfg_check_field(*cfg, pf)) return;
 
+    // TODO: check incompatible packet fields (eg TCP + UDP)
+
     cfg->input_cfg  = cfg->input_cfg | (1 << pf);
     cfg->input_size += packet_field_sz_bits(pf);
 }
 
-bool hash_cfg_check_field(hash_cfg_t cfg, packet_field_t pf);
+bool hash_cfg_check_field(hash_cfg_t cfg, packet_field_t pf)
 {
     return (cfg.input_cfg >> pf) & 1;
 }
