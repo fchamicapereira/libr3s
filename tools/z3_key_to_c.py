@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
 k = sys.argv[1]
 
 k_bytes = [ k[2:][i:i+2] for i in range(0, len(k[2:]), 2) ]
-code = "rss_key_t k = {"
+code = "RSSKS_key_t k = {"
 
 for i, b in enumerate(k_bytes):
     if i % 8 == 0: code += "\n\t"

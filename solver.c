@@ -72,7 +72,7 @@ Z3_ast mk_var(Z3_context ctx, const char *name, Z3_sort ty)
     return Z3_mk_const(ctx, s, ty);
 }
 
-void d_ast_to_hash_input(Z3_context ctx, Z3_ast d, hash_input_t hi)
+void d_ast_to_hash_input(Z3_context ctx, Z3_ast d, RSSKS_in_t hi)
 {
     /*
      *  I know what you're thinking. Getting the value of a bit vector
@@ -113,7 +113,7 @@ void d_ast_to_hash_input(Z3_context ctx, Z3_ast d, hash_input_t hi)
     free(res);
 }
 
-void k_ast_to_rss_key(Z3_context ctx, Z3_ast k, rss_key_t rssk)
+void k_ast_to_rss_key(Z3_context ctx, Z3_ast k, RSSKS_key_t rssk)
 {
     /*
      *  I know what you're thinking. Getting the value of a bit vector
@@ -283,7 +283,7 @@ Z3_ast mk_hash_eq(Z3_context ctx, Z3_ast key, Z3_ast d1, Z3_ast d2)
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
 }
 
-Z3_ast mk_d_const(Z3_context ctx, Z3_ast input, headers_t headers)
+Z3_ast mk_d_const(Z3_context ctx, Z3_ast input, RSSKS_headers_t headers)
 {
     Z3_ast src_ip, src_ip_const;
     Z3_ast dst_ip, dst_ip_const;
@@ -300,8 +300,8 @@ Z3_ast mk_d_const(Z3_context ctx, Z3_ast input, headers_t headers)
     unsigned dst_port_offset = packet_field_offset_le_bits(DST_PORT);
     unsigned protocol_offset = packet_field_offset_le_bits(PROTOCOL);
 
-    unsigned ip_sz    = sizeof(ipv4_t) * 8;
-    unsigned port_sz  = sizeof(port_t) * 8;
+    unsigned ip_sz    = sizeof(RSSKS_ipv4_t) * 8;
+    unsigned port_sz  = sizeof(RSSKS_port_t) * 8;
     unsigned proto_sz = sizeof(protocol_t) * 8; 
 
     ip_sort        = Z3_mk_bv_sort(ctx, 32);
@@ -332,7 +332,7 @@ Z3_ast mk_d_const(Z3_context ctx, Z3_ast input, headers_t headers)
     return Z3_mk_and(ctx, 5, and_args);
 }
 
-Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, byte_t value)
+Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, RSSKS_byte_t value)
 {
     Z3_ast  value_const;
     Z3_ast  key_slice;
@@ -346,7 +346,7 @@ Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, byte_t value
     return Z3_mk_eq(ctx, key_slice, value_const);
 }
 
-Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, rss_key_t k)
+Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
 {
     Z3_ast  and_args[KEY_SIZE];
 
@@ -356,7 +356,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, rss_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-void z3_hash(rss_key_t k, headers_t h)
+void z3_hash(RSSKS_key_t k, RSSKS_headers_t h)
 {
     Z3_context ctx;
     Z3_solver  s;
@@ -391,7 +391,7 @@ void z3_hash(rss_key_t k, headers_t h)
     Z3_del_context(ctx);
 }
 
-headers_t header_from_constraints(headers_t h)
+RSSKS_headers_t header_from_constraints(RSSKS_headers_t h)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -405,8 +405,8 @@ headers_t header_from_constraints(headers_t h)
     Z3_ast       d1, d2, d2_model;
     Z3_ast       stmt;
 
-    headers_t    h2;
-    hash_input_t hi2;
+    RSSKS_headers_t    h2;
+    RSSKS_in_t hi2;
 
     ctx       = mk_context();
     s         = mk_solver(ctx);
@@ -440,11 +440,11 @@ headers_t header_from_constraints(headers_t h)
 
     if (m) {
         d2_model = Z3_model_get_const_interp(ctx, m, d2_decl);
-        hi2      = (hash_input_t) malloc(HASH_INPUT_SIZE);
+        hi2      = (RSSKS_in_t) malloc(HASH_INPUT_SIZE);
 
         d_ast_to_hash_input(ctx, d2_model, hi2);
 
-        h2 = hash_input_to_header(hi2);
+        h2 = RSSKS_in_to_header(hi2);
         
         free(hi2);
         Z3_model_dec_ref(ctx, m);
@@ -573,7 +573,7 @@ void check_unsat_core(Z3_context ctx, Z3_solver s, unsigned num_soft_cnstrs, Z3_
     free(aux_vars);
 }
 
-void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast key, rss_key_t key_proposal)
+void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast key, RSSKS_key_t key_proposal)
 {
     Z3_ast       key_constr[KEY_SIZE_BITS];
 
@@ -610,7 +610,7 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast key, rss_key_t ke
     }
 }
 
-void adjust_key_to_cnstrs(rss_key_t k)
+void adjust_key_to_cnstrs(RSSKS_key_t k)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -656,7 +656,7 @@ int wp;
 
 void alarm_handler(int sig)
 {
-    rss_key_t key;
+    RSSKS_key_t key;
 
     zero_key(key);
     write(wp, key, KEY_SIZE);
@@ -668,7 +668,7 @@ void alarm_handler(int sig)
 
 void worker()
 {
-    rss_key_t key;
+    RSSKS_key_t key;
 
     DEBUG_PLOG("started\n");
 
@@ -703,7 +703,7 @@ void launch_worker(int p, comm_t comm)
     comm.pid[p] = pid;
 }
 
-void master(int np, comm_t comm, rss_key_t key)
+void master(int np, comm_t comm, RSSKS_key_t key)
 {
     int       wstatus;
     int       maxfd;
@@ -751,7 +751,7 @@ void master(int np, comm_t comm, rss_key_t key)
     }
 }
 
-void find_k(rss_key_t k)
+void find_k(RSSKS_key_t k)
 {
     int    nworkers;
     comm_t comm;
@@ -778,7 +778,7 @@ void find_k(rss_key_t k)
     free(comm.wpipe);
 }
 
-void check_d_constraints(headers_t h1, headers_t h2)
+void check_d_constraints(RSSKS_headers_t h1, RSSKS_headers_t h2)
 {
     Z3_context ctx;
     Z3_solver  s;

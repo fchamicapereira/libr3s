@@ -15,7 +15,7 @@
 
 #define SOLVER_TIMEOUT_SEC      (60 * 10) // 10 minutes
 
-hash_input_t header_to_hash_input(headers_t headers);
-headers_t hash_input_to_header(hash_input_t hi);
+RSSKS_in_t header_to_hash_input(RSSKS_headers_t headers);
+RSSKS_headers_t RSSKS_in_to_header(RSSKS_in_t hi);
 
 #endif
