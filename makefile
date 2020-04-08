@@ -11,8 +11,14 @@ run: main
 debug: CFLAGS += -D DEBUG
 debug: run
 
-main: solver.o hash.o main.o util.o
-	$(CC) -o main main.o solver.o hash.o util.o $(CFLAGS) $(LIB_FLAGS)
+#main: solver.o hash.o main.o util.o
+#	$(CC) -o main main.o solver.o hash.o util.o $(CFLAGS) $(LIB_FLAGS)
+
+#main.o: main.c
+#	$(CC) -c main.c $(CFLAGS) $(LIB_FLAGS)
+
+main: hash.o main.o util.o
+	$(CC) -o main main.o hash.o util.o $(CFLAGS) $(LIB_FLAGS)
 
 main.o: main.c
 	$(CC) -c main.c $(CFLAGS) $(LIB_FLAGS)
@@ -20,7 +26,7 @@ main.o: main.c
 solver.o: solver.c solver.h util.h hash.h rssks.h
 	$(CC) -c solver.c $(CFLAGS) $(LIB_FLAGS)
 
-hash.o: hash.c hash.h rssks.h
+hash.o: hash.c hash.h util.h rssks.h
 	$(CC) -c hash.c $(CFLAGS) $(LIB_FLAGS)
 
 util.o: util.c

@@ -30,23 +30,27 @@ size_t pf_sz_bits(RSSKS_pf_t pf)
     }
 }
 
-RSSKS_byte_t* field_from_headers(RSSKS_headers_t *h, RSSKS_pf_t pf)
+RSSKS_bytes_t field_from_headers(RSSKS_headers_t *h, RSSKS_pf_t pf)
 {
     switch (pf)
     {
-        case RSSKS_PF_UDP_OUTER:  return &(h->udp_outer);
-        case RSSKS_PF_VNI:        return &(h->vni);
-        case RSSKS_PF_IPV4_SRC:   return &(h->ipv6_src);
-        case RSSKS_PF_IPV4_DST:   return &(h->ipv4_dst);
-        case RSSKS_PF_IPV6_SRC:   return &(h->ipv6_src);
-        case RSSKS_PF_IPV6_DST:   return &(h->ipv6_dst);
-        case RSSKS_PF_TCP_SRC:    return &(h->tcp_src);
-        case RSSKS_PF_TCP_DST:    return &(h->tcp_dst);
-        case RSSKS_PF_UDP_SRC:    return &(h->udp_src);
-        case RSSKS_PF_UDP_DST:    return &(h->udp_dst);
-        case RSSKS_PF_SCTP_SRC:   return &(h->sctp_src);
-        case RSSKS_PF_SCTP_DST:   return &(h->sctp_dst);
-        case RSSKS_PF_SCTP_V_TAG: return &(h->sctp_v_tag);
+        case RSSKS_PF_UDP_OUTER:  return (RSSKS_bytes_t) h->udp_outer;
+        case RSSKS_PF_VNI:        return (RSSKS_bytes_t) h->vni;
+        case RSSKS_PF_IPV4_SRC:   return (RSSKS_bytes_t) h->ipv6_src;
+        case RSSKS_PF_IPV4_DST:   return (RSSKS_bytes_t) h->ipv4_dst;
+        case RSSKS_PF_IPV6_SRC:   return (RSSKS_bytes_t) h->ipv6_src;
+        case RSSKS_PF_IPV6_DST:   return (RSSKS_bytes_t) h->ipv6_dst;
+        case RSSKS_PF_TCP_SRC:    return (RSSKS_bytes_t) h->tcp_src;
+        case RSSKS_PF_TCP_DST:    return (RSSKS_bytes_t) h->tcp_dst;
+        case RSSKS_PF_UDP_SRC:    return (RSSKS_bytes_t) h->udp_src;
+        case RSSKS_PF_UDP_DST:    return (RSSKS_bytes_t) h->udp_dst;
+        case RSSKS_PF_SCTP_SRC:   return (RSSKS_bytes_t) h->sctp_src;
+        case RSSKS_PF_SCTP_DST:   return (RSSKS_bytes_t) h->sctp_dst;
+        case RSSKS_PF_SCTP_V_TAG: return (RSSKS_bytes_t) h->sctp_v_tag;
+        case RSSKS_PF_L2_TYPE:
+            // TODO: fix this
+            puts("[field_from_headers] l2 not implemented");
+            exit(1);
     }
     
     printf("ERROR: field %d not found on header\n", pf);
@@ -88,6 +92,13 @@ unsigned packet_field_offset_be_bits(RSSKS_cfg_t cfg, RSSKS_pf_t pf)
             offset += RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_SRC)   ? pf_sz_bits(RSSKS_PF_IPV6_SRC) : 0;
         case RSSKS_PF_SCTP_V_TAG:
             offset += RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_V_TAG) ? pf_sz_bits(RSSKS_PF_SCTP_V_TAG) : 0;
+            
+            // TODO: fix this
+            break;
+        case RSSKS_PF_L2_TYPE:
+            puts("[field_from_headers] l2 not implemented");
+            exit(1);
+    
     }
 
     assert(offset < cfg.in_sz);
@@ -129,6 +140,12 @@ unsigned packet_field_offset_le_bits(RSSKS_cfg_t cfg, RSSKS_pf_t pf)
             offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_SRC)   ? pf_sz_bits(RSSKS_PF_IPV6_SRC) : 0;
         case RSSKS_PF_SCTP_V_TAG:
             offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_V_TAG) ? pf_sz_bits(RSSKS_PF_SCTP_V_TAG) : 0;
+    
+        // TODO: fix this
+            break;
+        case RSSKS_PF_L2_TYPE:
+            puts("[field_from_headers] l2 not implemented");
+            exit(1);
     }
 
     assert(offset < cfg.in_sz);
@@ -180,7 +197,7 @@ void print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
     if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_SRC))
         printf("sctp src  : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_src));
     if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_DST))
-        printf("scto dst  : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_dst));
+        printf("sctp dst  : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_dst));
     if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_V_TAG))
         printf("sctp v tag: %u\n", _4_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_v_tag));
 }
@@ -188,7 +205,7 @@ void print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
 void print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi)
 {
     printf("input     ");
-    for (int i = 0; i < cfg.in_sz; i++)
+    for (unsigned i = 0; i < cfg.in_sz; i++)
         printf("%02x ", hi[i] & 0xff);
     puts("");
 }
@@ -265,7 +282,7 @@ bool is_zero_key(RSSKS_key_t key)
     return true;
 }
 
-void try_pf_RSSKS_headers_to_hash_input(
+void try_pf_headers_to_hash_input(
     RSSKS_cfg_t     cfg,
     RSSKS_headers_t h,
     RSSKS_pf_t      pf,
@@ -277,7 +294,7 @@ void try_pf_RSSKS_headers_to_hash_input(
 
     if (!RSSKS_cfg_check_pf(cfg, pf)) return;
 
-    sz     = packet_field_sz_bits(pf) / 8;
+    sz     = pf_sz_bits(pf) / 8;
     offset = packet_field_offset_be_bits(cfg, pf) / 8;
     field  = field_from_headers(&h, pf);
     
@@ -292,25 +309,25 @@ RSSKS_in_t header_to_hash_input(RSSKS_cfg_t cfg, RSSKS_headers_t h)
 {
     RSSKS_in_t hi = (RSSKS_in_t) malloc(cfg.in_sz);
 
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_UDP_OUTER,  &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_VNI,        &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_IPV4_SRC,   &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_IPV4_DST,   &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_IPV6_SRC,   &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_IPV6_DST,   &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_TCP_SRC,    &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_TCP_DST,    &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_UDP_SRC,    &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_UDP_DST,    &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_SCTP_SRC,   &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_SCTP_DST,   &hi);
-    try_pf_RSSKS_headers_to_hash_input(cfg, h, RSSKS_PF_SCTP_V_TAG, &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_UDP_OUTER,  &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_VNI,        &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_IPV4_SRC,   &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_IPV4_DST,   &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_IPV6_SRC,   &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_IPV6_DST,   &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_TCP_SRC,    &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_TCP_DST,    &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_UDP_SRC,    &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_UDP_DST,    &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_SCTP_SRC,   &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_SCTP_DST,   &hi);
+    try_pf_headers_to_hash_input(cfg, h, RSSKS_PF_SCTP_V_TAG, &hi);
 
     return hi;
 }
 
 
-void try_pf_RSSKS_in_to_headers(
+void try_pf_in_to_headers(
     RSSKS_cfg_t     cfg,
     RSSKS_in_t      hi,
     RSSKS_pf_t      pf,
@@ -322,25 +339,9 @@ void try_pf_RSSKS_in_to_headers(
 
     if (!RSSKS_cfg_check_pf(cfg, pf)) return;
 
-    sz     = packet_field_sz_bits(pf) / 8;
+    sz     = pf_sz_bits(pf) / 8;
     offset = packet_field_offset_be_bits(cfg, pf) / 8;
-
-    switch (pf)
-    {
-        case RSSKS_PF_UDP_OUTER:  field = &(h->udp_outer);  break;
-        case RSSKS_PF_VNI:        field = &(h->vni);        break;
-        case RSSKS_PF_IPV4_SRC:   field = &(h->ipv6_src);   break;
-        case RSSKS_PF_IPV4_DST:   field = &(h->ipv4_dst);   break;
-        case RSSKS_PF_IPV6_SRC:   field = &(h->ipv6_src);   break;
-        case RSSKS_PF_IPV6_DST:   field = &(h->ipv6_dst);   break;
-        case RSSKS_PF_TCP_SRC:    field = &(h->tcp_src);    break;
-        case RSSKS_PF_TCP_DST:    field = &(h->tcp_dst);    break;
-        case RSSKS_PF_UDP_SRC:    field = &(h->udp_src);    break;
-        case RSSKS_PF_UDP_DST:    field = &(h->udp_dst);    break;
-        case RSSKS_PF_SCTP_SRC:   field = &(h->sctp_src);   break;
-        case RSSKS_PF_SCTP_DST:   field = &(h->sctp_dst);   break;
-        case RSSKS_PF_SCTP_V_TAG: field = &(h->sctp_v_tag); break;
-    }
+    field  = field_from_headers(h, pf);
 
     for (unsigned byte = 0; byte < sz; byte++)
     {
@@ -353,19 +354,19 @@ RSSKS_headers_t RSSKS_in_to_header(RSSKS_cfg_t cfg, RSSKS_in_t hi)
 {
     RSSKS_headers_t headers;
 
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_UDP_OUTER,  &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_VNI,        &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_IPV4_SRC,   &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_IPV4_DST,   &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_IPV6_SRC,   &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_IPV6_DST,   &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_TCP_SRC,    &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_TCP_DST,    &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_UDP_SRC,    &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_UDP_DST,    &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_SCTP_SRC,   &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_SCTP_DST,   &headers);
-    try_pf_RSSKS_in_to_headers(cfg, hi, RSSKS_PF_SCTP_V_TAG, &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_UDP_OUTER,  &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_VNI,        &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV4_SRC,   &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV4_DST,   &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV6_SRC,   &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV6_DST,   &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_TCP_SRC,    &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_TCP_DST,    &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_UDP_SRC,    &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_UDP_DST,    &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_SCTP_SRC,   &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_SCTP_DST,   &headers);
+    try_pf_in_to_headers(cfg, hi, RSSKS_PF_SCTP_V_TAG, &headers);
 
     return headers;
 }
@@ -395,7 +396,7 @@ RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
 
     memcpy(k_copy, k, sizeof(RSSKS_byte_t) * KEY_SIZE);
 
-    for (int i = 0; i < cfg.in_sz; i++)
+    for (unsigned i = 0; i < cfg.in_sz; i++)
     {
         // iterate every bit
         for (int shift = 7; shift >= 0; shift--)
@@ -471,8 +472,6 @@ RSSKS_cfg_t RSSKS_cfg_init()
 
 void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
 {
-    if (RSSKS_cfg_check_pf(*cfg, in_opt)) return;
-
     switch (in_opt)
     {
         case RSSKS_IN_OPT_GENEVE_OAM:
@@ -543,7 +542,7 @@ void RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
     // TODO: check incompatible packet fields (eg TCP + UDP)
 
     cfg->in_cfg = cfg->in_cfg | (1 << pf);
-    cfg->in_sz  += packet_field_sz_bits(pf);
+    cfg->in_sz  += pf_sz_bits(pf);
 }
 
 bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf)

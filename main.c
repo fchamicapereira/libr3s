@@ -2,7 +2,9 @@
 #include <stdlib.h>
 
 #include "rssks.h"
+#include "hash.h"
 
+/*
 Z3_ast mk_d_constraints(Z3_context ctx, Z3_ast d1, Z3_ast d2)
 {
     Z3_ast d1_src_ip, d1_dst_ip, d1_src_port, d1_dst_port, d1_protocol;
@@ -68,6 +70,7 @@ void check_k(RSSKS_key_t k)
 
     k_test_dist(k);
 }
+*/
 
 int main () {
     RSSKS_out_t o;
@@ -109,6 +112,14 @@ int main () {
     //print_key(k);
 
     RSSKS_cfg_t cfg = RSSKS_cfg_init();
+    
+    puts("\nheaders");
+    print_headers(cfg, h);
 
-    find_k(k);
+    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV6_SCTP);
+
+    h = rand_headers();
+    puts("\nheaders");
+    print_headers(cfg, h);
+
 }

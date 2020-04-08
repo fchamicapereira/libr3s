@@ -14,9 +14,10 @@
 #define HASH_OUTPUT_SIZE_BITS   (HASH_OUTPUT_SIZE * 8)
 #define KEY_SIZE_BITS           (KEY_SIZE * 8)
 
-typedef unsigned char RSSKS_byte_t;
+typedef unsigned char  RSSKS_byte_t;
+typedef RSSKS_byte_t*  RSSKS_bytes_t;
 
-typedef RSSKS_byte_t*  RSSKS_in_t;
+typedef RSSKS_bytes_t  RSSKS_in_t;
 typedef RSSKS_byte_t   RSSKS_key_t[KEY_SIZE];
 typedef uint32_t       RSSKS_out_t;
 
@@ -25,6 +26,8 @@ typedef RSSKS_byte_t   RSSKS_ipv4_t[4];
 typedef RSSKS_byte_t   RSSKS_v_tag_t[4];  // verification tag (SCTP)
 typedef RSSKS_byte_t   RSSKS_vni_t[3];    // unique identifier for the individual VXLAN segment
 typedef RSSKS_byte_t   RSSKS_port_t[2];
+
+typedef unsigned       RSSKS_in_cfg_t;
 
 typedef enum {
     
@@ -96,7 +99,7 @@ typedef struct {
 } RSSKS_headers_t;
 
 typedef struct {
-    RSSKS_in_opt_t in_cfg;
+    RSSKS_in_cfg_t in_cfg;
     unsigned       in_sz; 
 } RSSKS_cfg_t;
 
