@@ -50,16 +50,25 @@ typedef enum {
 
 } RSSKS_in_opt_t;
 
+/*
+ * The order is important!
+ * From top to bottom, if one field is enumerated first, then
+ * it is placed first on the hash input.
+ * 
+ * Eg, if one configured the hash to accept ipv4 src and dst
+ * and tcp src and dst, then the hash input would be like so:
+ * { ipv4_src, ipv4_dst, tcp_src, tcp_dst }.
+ */
 typedef enum {
 
-    RSSKS_PF_UDP_OUTER,
-    RSSKS_PF_VNI,
+    RSSKS_PF_IPV6_SRC,
+    RSSKS_PF_IPV6_DST,
 
     RSSKS_PF_IPV4_SRC,
     RSSKS_PF_IPV4_DST,
 
-    RSSKS_PF_IPV6_SRC,
-    RSSKS_PF_IPV6_DST,
+    RSSKS_PF_UDP_OUTER,
+    RSSKS_PF_VNI,
 
     RSSKS_PF_TCP_SRC,
     RSSKS_PF_TCP_DST,
@@ -74,6 +83,10 @@ typedef enum {
     RSSKS_PF_L2_TYPE,
 
 } RSSKS_pf_t;
+
+// This is used for RSSKS_pf_t iteration
+#define RSSKS_FIRST_PF RSSKS_PF_IPV6_SRC
+#define RSSKS_LAST_PF  RSSKS_PF_L2_TYPE
 
 typedef struct {
     RSSKS_port_t  udp_outer;
