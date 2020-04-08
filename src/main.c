@@ -113,7 +113,7 @@ int main () {
 
     RSSKS_cfg_t cfg = RSSKS_cfg_init();
     
-    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV6);
+    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV6_TCP);
 
     h.ipv6_dst[0] = 0x3f;
     h.ipv6_dst[1] = 0xfe;
@@ -169,5 +169,4 @@ int main () {
 
     puts("");
     print_hash_output(o);
-
 }

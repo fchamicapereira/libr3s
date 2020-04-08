@@ -255,7 +255,7 @@ RSSKS_in_t header_to_hash_input(RSSKS_cfg_t cfg, RSSKS_headers_t h)
         sz    = pf_sz_bits(pf) / 8;
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
-            hi[offset + byte] = (*field) & 0xff;
+            hi[offset + byte] = *field;
         
         offset += sz;
     }
@@ -263,28 +263,33 @@ RSSKS_in_t header_to_hash_input(RSSKS_cfg_t cfg, RSSKS_headers_t h)
     return hi;
 }
 
-/*
 RSSKS_headers_t RSSKS_in_to_header(RSSKS_cfg_t cfg, RSSKS_in_t hi)
 {
-    RSSKS_headers_t headers;
+    RSSKS_headers_t h;
+    unsigned        sz, offset;
+    RSSKS_byte_t    *field;
+    RSSKS_pf_t      pf;
 
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_UDP_OUTER,  &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_VNI,        &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV4_SRC,   &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV4_DST,   &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV6_SRC,   &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_IPV6_DST,   &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_TCP_SRC,    &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_TCP_DST,    &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_UDP_SRC,    &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_UDP_DST,    &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_SCTP_SRC,   &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_SCTP_DST,   &headers);
-    try_pf_in_to_headers(cfg, hi, RSSKS_PF_SCTP_V_TAG, &headers);
+    offset = 0;
+    sz     = 0;
 
-    return headers;
+    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    {   
+        pf = (RSSKS_pf_t) ipf;
+
+        if (!RSSKS_cfg_check_pf(cfg, pf)) continue;
+
+        field = field_from_headers(&h, pf);
+        sz    = pf_sz_bits(pf) / 8;
+
+        for (unsigned byte = 0; byte < sz; byte++, field++)
+            (*field) = hi[offset + byte];
+        
+        offset += sz;
+    }
+
+    return h;
 }
-*/
 
 void lshift(RSSKS_key_t k)
 {
@@ -308,6 +313,12 @@ RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
 
     output = 0;
     hi     = header_to_hash_input(cfg, h);
+
+    puts("hash input");
+    print_hash_input(cfg, hi);
+
+    puts("headers reversed");
+    print_headers(cfg, RSSKS_in_to_header(cfg, hi));
     
     memcpy(k_copy, k, sizeof(RSSKS_byte_t) * KEY_SIZE);
 

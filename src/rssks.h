@@ -55,8 +55,8 @@ typedef enum {
  * From top to bottom, if one field is enumerated first, then
  * it is placed first on the hash input.
  * 
- * Eg, if one configured the hash to accept ipv4 src and dst
- * and tcp src and dst, then the hash input would be like so:
+ * Eg, if one configured the hash to accept ipv4 src and dst,
+ * and tcp src and dst, then the hash input would be
  * { ipv4_src, ipv4_dst, tcp_src, tcp_dst }.
  */
 typedef enum {
@@ -123,8 +123,16 @@ void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
 void RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
 bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 
+RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h);
+
 void z3_hash(RSSKS_key_t k, RSSKS_headers_t h);
 void check_d_constraints(RSSKS_headers_t h1, RSSKS_headers_t h2);
 void find_k(RSSKS_key_t k);
+
+// DEBUG
+void print_key(RSSKS_key_t k);
+void print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
+void print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi);
+void print_hash_output(RSSKS_out_t output);
 
 #endif

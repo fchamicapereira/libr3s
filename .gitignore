@@ -1,3 +1,6 @@
 *.o
+*.so
 main
+build
+bin
 .vscode
