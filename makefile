@@ -13,22 +13,20 @@ LIB_RSSKS_INCLUDE=$(BUILD)/include
 
 LIB_RSSKS_FLAGS=-lrssks -Wl,-rpath,$(LIB_RSSKS) -L$(LIB_RSSKS) -I$(LIB_RSSKS_INCLUDE)
 
-all: main
+all: build
 
-run: main
-	@./main
-
-debug: CFLAGS += -D DEBUG
-debug: run
+debug: CC += -D DEBUG
+debug: build
 
 build: hash.o util.o solver.o
 	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
 	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
 	@cp $(SRC)/rssks.h $(LIB_RSSKS_INCLUDE)/rssks.h
 
-examples: build
+examples: $(LIB_RSSKS)/librssks.so
 	@mkdir -p $(BIN)
 	$(CC) $(EX)/X710hash.c -o $(BIN)/X710hash $(LIB_FLAGS) $(LIB_RSSKS_FLAGS)
+	$(CC) $(EX)/symmetric_rss.c -o $(BIN)/symmetric_rss $(LIB_FLAGS) $(LIB_RSSKS_FLAGS)
 
 solver.o: $(SRC)/solver.c $(SRC)/solver.h $(SRC)/util.h $(SRC)/hash.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)

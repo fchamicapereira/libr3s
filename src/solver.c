@@ -294,10 +294,14 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
     RSSKS_pf_t   pf;
 
     unsigned offset, sz;
+    unsigned input_sz;
+    unsigned high, low;
 
-    pf_x       = (Z3_ast*) malloc(sizeof(Z3_ast) * (rssks_cfg.in_sz / 8));
-    pf_const   = (Z3_ast*) malloc(sizeof(Z3_ast) * (rssks_cfg.in_sz / 8));
-    and_args   = (Z3_ast*) malloc(sizeof(Z3_ast) * (rssks_cfg.in_sz / 8));
+    input_sz   = rssks_cfg.in_sz / 8;
+
+    pf_x       = (Z3_ast*) malloc(sizeof(Z3_ast) * input_sz);
+    pf_const   = (Z3_ast*) malloc(sizeof(Z3_ast) * input_sz);
+    and_args   = (Z3_ast*) malloc(sizeof(Z3_ast) * input_sz);
 
     byte_sort  = Z3_mk_bv_sort(ctx, 8);
 
@@ -315,15 +319,18 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
         {
+            high = (input_sz - (offset + byte)) * 8 - 1;
+            low  = high - 7;
+
             pf_const[offset + byte] = Z3_mk_int(ctx, *field, byte_sort);
-            pf_x[offset + byte]     = Z3_mk_extract(ctx, offset * 8 + sz * 8 - 1, offset * 8, input);
+            pf_x[offset + byte]     = Z3_mk_extract(ctx, high, low, input);
             and_args[offset + byte] = Z3_mk_eq(ctx, pf_const[offset + byte], pf_x[offset + byte]);
         }
         
         offset += sz;
     }
 
-    d_const = Z3_mk_and(ctx, rssks_cfg.in_sz / 8, and_args);
+    d_const = Z3_mk_and(ctx, input_sz, and_args);
 
     free(pf_x);
     free(pf_const);
@@ -369,15 +376,15 @@ void z3_hash(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k, RSSKS_headers_t h)
     s              = mk_solver(ctx);
      
     d_sort         = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
-    o_sort         = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
+    o_sort         = Z3_mk_bv_sort(ctx, HASH_OUTPUT_SIZE_BITS);
     key_sort       = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
-     
+        
     d              = mk_var(ctx, "d", d_sort);
     o              = mk_var(ctx, "o", o_sort);
     key            = mk_var(ctx, "k", key_sort);
      
     hash           = mk_hash_func(rssks_cfg, ctx, d, key, o);
-   
+    
     key_const      = mk_key_const(ctx, key, k);
     d_const        = mk_d_const(rssks_cfg, ctx, d, h);
 
