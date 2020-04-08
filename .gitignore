@@ -3,4 +3,6 @@
 main
 build
 bin
+symmetric_rss
+X710hash
 .vscode
