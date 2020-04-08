@@ -1,12 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
-
 #include <rssks.h>
 
 int main () {
-    RSSKS_out_t o;
+    RSSKS_cfg_t     cfg;
+    RSSKS_out_t     o;
     RSSKS_headers_t h;
-    RSSKS_key_t k = {
+    RSSKS_key_t     k = {
         0x6d, 0x5a, 0x56, 0xda, 0x25, 0x5b, 0x0e, 0xc2,
         0x41, 0x67, 0x25, 0x3d, 0x43, 0xa3, 0x8f, 0xb0,
         0xd0, 0xca, 0x2b, 0xcb, 0xae, 0x7b, 0x30, 0xb4,
@@ -16,7 +15,7 @@ int main () {
         0x00, 0x00, 0x00, 0x00
     };
 
-    RSSKS_cfg_t cfg = RSSKS_cfg_init();
+    cfg = RSSKS_cfg_init();
     
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV6_TCP);
 
@@ -68,7 +67,6 @@ int main () {
 
     puts("\nheaders");
     print_headers(cfg, h);
-    printf("size %u\n", cfg.in_sz);
 
     o = hash(cfg, k, h);
 

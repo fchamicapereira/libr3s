@@ -314,12 +314,6 @@ RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
     output = 0;
     hi     = header_to_hash_input(cfg, h);
 
-    puts("hash input");
-    print_hash_input(cfg, hi);
-
-    puts("headers reversed");
-    print_headers(cfg, RSSKS_in_to_header(cfg, hi));
-    
     memcpy(k_copy, k, sizeof(RSSKS_byte_t) * KEY_SIZE);
 
     for (unsigned i = 0; i < cfg.in_sz / 8; i++)
