@@ -72,7 +72,7 @@ Z3_ast mk_var(Z3_context ctx, const char *name, Z3_sort ty)
     return Z3_mk_const(ctx, s, ty);
 }
 
-void d_ast_to_hash_input(Z3_context ctx, Z3_ast d, RSSKS_in_t hi)
+void d_ast_to_hash_input(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_in_t hi)
 {
     /*
      *  I know what you're thinking. Getting the value of a bit vector
@@ -96,7 +96,7 @@ void d_ast_to_hash_input(Z3_context ctx, Z3_ast d, RSSKS_in_t hi)
     
     sprintf(divisor, "%s", d_string);
 
-    for (unsigned byte_idx = 0; byte_idx < HASH_INPUT_SIZE; byte_idx++)
+    for (unsigned byte_idx = 0; byte_idx < rssks_cfg.in_sz / 8; byte_idx++)
     {
         digit1 = digit2 = 0;
 
@@ -106,7 +106,7 @@ void d_ast_to_hash_input(Z3_context ctx, Z3_ast d, RSSKS_in_t hi)
         digit1 = str_long_int_div(divisor, 16, res);
         sprintf(divisor, "%s", res);
 
-        hi[HASH_INPUT_SIZE - 1 - byte_idx] = digit1 * 16 + digit2;
+        hi[rssks_cfg.in_sz / 8 - 1 - byte_idx] = digit1 * 16 + digit2;
     }
 
     free(divisor);
@@ -222,7 +222,7 @@ Z3_ast mk_bvxor(Z3_context ctx, Z3_ast bv, unsigned sz)
     return result;
 }
 
-Z3_ast mk_hash_func(Z3_context ctx, Z3_ast d, Z3_ast key, Z3_ast o)
+Z3_ast mk_hash_func(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, Z3_ast key, Z3_ast o)
 {
     Z3_ast k[HASH_OUTPUT_SIZE_BITS];
     Z3_ast d_and_k[HASH_OUTPUT_SIZE_BITS];
@@ -236,11 +236,11 @@ Z3_ast mk_hash_func(Z3_context ctx, Z3_ast d, Z3_ast key, Z3_ast o)
     for (int bit = 0; bit < HASH_OUTPUT_SIZE_BITS; bit++)
     {
         k_high           = (KEY_SIZE_BITS - 1) - bit;
-        k_low            = (KEY_SIZE_BITS - 1) - (bit + HASH_INPUT_SIZE_BITS - 1);
+        k_low            = (KEY_SIZE_BITS - 1) - (bit + rssks_cfg.in_sz - 1);
         k[bit]           = Z3_mk_extract(ctx, k_high, k_low, key);
 
         d_and_k[bit]     = Z3_mk_bvand(ctx, k[bit], d);
-        d_and_k_xor[bit] = mk_bvxor(ctx, d_and_k[bit], HASH_INPUT_SIZE_BITS);
+        d_and_k_xor[bit] = mk_bvxor(ctx, d_and_k[bit], rssks_cfg.in_sz);
 
         o_high           = HASH_OUTPUT_SIZE_BITS - bit - 1;
         o_low            = HASH_OUTPUT_SIZE_BITS - bit - 1;
@@ -252,7 +252,7 @@ Z3_ast mk_hash_func(Z3_context ctx, Z3_ast d, Z3_ast key, Z3_ast o)
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
 }
 
-Z3_ast mk_hash_eq(Z3_context ctx, Z3_ast key, Z3_ast d1, Z3_ast d2)
+Z3_ast mk_hash_eq(RSSKS_cfg_t rsssks_cfg, Z3_context ctx, Z3_ast key, Z3_ast d1, Z3_ast d2)
 {
     Z3_ast k[HASH_OUTPUT_SIZE_BITS];
     Z3_ast d1_and_k[HASH_OUTPUT_SIZE_BITS];
@@ -268,14 +268,14 @@ Z3_ast mk_hash_eq(Z3_context ctx, Z3_ast key, Z3_ast d1, Z3_ast d2)
     for (int bit = 0; bit < HASH_OUTPUT_SIZE_BITS; bit++)
     {
         k_high            = (KEY_SIZE_BITS - 1) - bit;
-        k_low             = (KEY_SIZE_BITS - 1) - (bit + HASH_INPUT_SIZE_BITS - 1);
+        k_low             = (KEY_SIZE_BITS - 1) - (bit + rsssks_cfg.in_sz - 1);
         k[bit]            = Z3_mk_extract(ctx, k_high, k_low, key);
 
         d1_and_k[bit]     = Z3_mk_bvand(ctx, k[bit], d1);
         d2_and_k[bit]     = Z3_mk_bvand(ctx, k[bit], d2);
 
-        d1_and_k_xor[bit] = mk_bvxor(ctx, d1_and_k[bit], HASH_INPUT_SIZE_BITS);
-        d2_and_k_xor[bit] = mk_bvxor(ctx, d2_and_k[bit], HASH_INPUT_SIZE_BITS);
+        d1_and_k_xor[bit] = mk_bvxor(ctx, d1_and_k[bit], rsssks_cfg.in_sz);
+        d2_and_k_xor[bit] = mk_bvxor(ctx, d2_and_k[bit], rsssks_cfg.in_sz);
 
         args[bit]         = Z3_mk_eq(ctx, d1_and_k_xor[bit], d2_and_k_xor[bit]);
     }
@@ -283,53 +283,53 @@ Z3_ast mk_hash_eq(Z3_context ctx, Z3_ast key, Z3_ast d1, Z3_ast d2)
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
 }
 
-Z3_ast mk_d_const(Z3_context ctx, Z3_ast input, RSSKS_headers_t headers)
+Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_headers_t h)
 {
-    Z3_ast src_ip, src_ip_const;
-    Z3_ast dst_ip, dst_ip_const;
-    Z3_ast src_port, src_port_const;
-    Z3_ast dst_port, dst_port_const;
-    Z3_ast protocol, protocol_const;
+    Z3_ast       *pf_x, *pf_const;
+    Z3_sort      byte_sort;
+    Z3_ast       *and_args;
+    Z3_ast       d_const;
 
-    Z3_sort ip_sort, port_sort, protocol_sort;
-    Z3_ast and_args[5];
+    RSSKS_byte_t *field;
+    RSSKS_pf_t   pf;
 
-    unsigned src_ip_offset   = packet_field_offset_le_bits(SRC_IP);
-    unsigned dst_ip_offset   = packet_field_offset_le_bits(DST_IP);
-    unsigned src_port_offset = packet_field_offset_le_bits(SRC_PORT);
-    unsigned dst_port_offset = packet_field_offset_le_bits(DST_PORT);
-    unsigned protocol_offset = packet_field_offset_le_bits(PROTOCOL);
+    unsigned offset, sz;
 
-    unsigned ip_sz    = sizeof(RSSKS_ipv4_t) * 8;
-    unsigned port_sz  = sizeof(RSSKS_port_t) * 8;
-    unsigned proto_sz = sizeof(protocol_t) * 8; 
+    pf_x       = (Z3_ast*) malloc(sizeof(Z3_ast) * (rssks_cfg.in_sz / 8));
+    pf_const   = (Z3_ast*) malloc(sizeof(Z3_ast) * (rssks_cfg.in_sz / 8));
+    and_args   = (Z3_ast*) malloc(sizeof(Z3_ast) * (rssks_cfg.in_sz / 8));
 
-    ip_sort        = Z3_mk_bv_sort(ctx, 32);
-    port_sort      = Z3_mk_bv_sort(ctx, 16);
-    protocol_sort  = Z3_mk_bv_sort(ctx, 8);
+    byte_sort  = Z3_mk_bv_sort(ctx, 8);
 
-    src_ip_const   = Z3_mk_int(ctx, headers.src_ip, ip_sort);
-    src_ip         = Z3_mk_extract(ctx, src_ip_offset + ip_sz - 1, src_ip_offset, input);
+    offset     = 0;
+    sz         = 0;
 
-    dst_ip_const   = Z3_mk_int(ctx, headers.dst_ip, ip_sort);
-    dst_ip         = Z3_mk_extract(ctx, dst_ip_offset + ip_sz - 1, dst_ip_offset, input);
+    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    {
+        pf = (RSSKS_pf_t) ipf;
 
-    src_port_const = Z3_mk_int(ctx, headers.src_port, port_sort);
-    src_port       = Z3_mk_extract(ctx, src_port_offset + port_sz - 1, src_port_offset, input);
-    
-    dst_port_const = Z3_mk_int(ctx, headers.dst_port, port_sort);
-    dst_port       = Z3_mk_extract(ctx, dst_port_offset + port_sz - 1, dst_port_offset, input);
+        if (!RSSKS_cfg_check_pf(rssks_cfg, pf)) continue;
 
-    protocol_const = Z3_mk_int(ctx, headers.protocol, protocol_sort);
-    protocol       = Z3_mk_extract(ctx, protocol_offset + proto_sz - 1, protocol_offset, input);
+        field = field_from_headers(&h, pf);
+        sz    = pf_sz_bits(pf) / 8;
 
-    and_args[0]    = Z3_mk_eq(ctx, src_ip_const, src_ip);
-    and_args[1]    = Z3_mk_eq(ctx, dst_ip_const, dst_ip);
-    and_args[2]    = Z3_mk_eq(ctx, src_port_const, src_port);
-    and_args[3]    = Z3_mk_eq(ctx, dst_port_const, dst_port);
-    and_args[4]    = Z3_mk_eq(ctx, protocol_const, protocol);
+        for (unsigned byte = 0; byte < sz; byte++, field++)
+        {
+            pf_const[offset + byte] = Z3_mk_int(ctx, *field, byte_sort);
+            pf_x[offset + byte]     = Z3_mk_extract(ctx, offset * 8 + sz * 8 - 1, offset * 8, input);
+            and_args[offset + byte] = Z3_mk_eq(ctx, pf_const[offset + byte], pf_x[offset + byte]);
+        }
+        
+        offset += sz;
+    }
 
-    return Z3_mk_and(ctx, 5, and_args);
+    d_const = Z3_mk_and(ctx, rssks_cfg.in_sz / 8, and_args);
+
+    free(pf_x);
+    free(pf_const);
+    free(and_args);
+
+    return d_const;
 }
 
 Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, RSSKS_byte_t value)
@@ -356,7 +356,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-void z3_hash(RSSKS_key_t k, RSSKS_headers_t h)
+void z3_hash(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k, RSSKS_headers_t h)
 {
     Z3_context ctx;
     Z3_solver  s;
@@ -368,18 +368,18 @@ void z3_hash(RSSKS_key_t k, RSSKS_headers_t h)
     ctx            = mk_context();
     s              = mk_solver(ctx);
      
-    d_sort         = Z3_mk_bv_sort(ctx, HASH_INPUT_SIZE_BITS);
-    o_sort         = Z3_mk_bv_sort(ctx, HASH_OUTPUT_SIZE_BITS);
+    d_sort         = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
+    o_sort         = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
     key_sort       = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
      
     d              = mk_var(ctx, "d", d_sort);
     o              = mk_var(ctx, "o", o_sort);
     key            = mk_var(ctx, "k", key_sort);
      
-    hash           = mk_hash_func(ctx, d, key, o);
+    hash           = mk_hash_func(rssks_cfg, ctx, d, key, o);
    
     key_const      = mk_key_const(ctx, key, k);
-    d_const        = mk_d_const(ctx, d, h);
+    d_const        = mk_d_const(rssks_cfg, ctx, d, h);
 
     Z3_solver_assert(ctx, s, hash);
     Z3_solver_assert(ctx, s, key_const);
@@ -391,7 +391,7 @@ void z3_hash(RSSKS_key_t k, RSSKS_headers_t h)
     Z3_del_context(ctx);
 }
 
-RSSKS_headers_t header_from_constraints(RSSKS_headers_t h)
+RSSKS_headers_t header_from_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -411,7 +411,7 @@ RSSKS_headers_t header_from_constraints(RSSKS_headers_t h)
     ctx       = mk_context();
     s         = mk_solver(ctx);
     
-    d_sort    = Z3_mk_bv_sort(ctx, HASH_INPUT_SIZE_BITS);
+    d_sort    = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
 
     d1        = mk_var(ctx, "d1", d_sort);
 
@@ -419,9 +419,9 @@ RSSKS_headers_t header_from_constraints(RSSKS_headers_t h)
     d2_decl   = Z3_mk_func_decl(ctx, d2_symbol, 0, 0, d_sort);
     d2        = Z3_mk_app(ctx, d2_decl, 0, 0);
 
-    stmt      = mk_d_constraints(ctx, d1, d2);
+    stmt      = rssks_cfg.mk_d_cnstrs(ctx, d1, d2);
 
-    Z3_solver_assert(ctx, s, mk_d_const(ctx, d1, h));
+    Z3_solver_assert(ctx, s, mk_d_const(rssks_cfg, ctx, d1, h));
     Z3_solver_assert(ctx, s, stmt);
 
     result = Z3_solver_check(ctx, s);
@@ -440,11 +440,11 @@ RSSKS_headers_t header_from_constraints(RSSKS_headers_t h)
 
     if (m) {
         d2_model = Z3_model_get_const_interp(ctx, m, d2_decl);
-        hi2      = (RSSKS_in_t) malloc(HASH_INPUT_SIZE);
+        hi2      = (RSSKS_in_t) malloc(rssks_cfg.in_sz);
 
-        d_ast_to_hash_input(ctx, d2_model, hi2);
+        d_ast_to_hash_input(rssks_cfg, ctx, d2_model, hi2);
 
-        h2 = RSSKS_in_to_header(hi2);
+        h2 = RSSKS_in_to_header(rssks_cfg, hi2);
         
         free(hi2);
         Z3_model_dec_ref(ctx, m);
@@ -469,7 +469,7 @@ Z3_ast mk_key_bit_const(Z3_context ctx, Z3_ast key, unsigned bit, unsigned value
     return Z3_mk_eq(ctx, key_slice, key_const);
 }
 
-Z3_ast mk_rss_stmt(Z3_context ctx, Z3_ast key)
+Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast key)
 {
     Z3_sort    d_sort;
     Z3_ast     d1;
@@ -481,15 +481,15 @@ Z3_ast mk_rss_stmt(Z3_context ctx, Z3_ast key)
     Z3_app     vars[2];
     Z3_ast     forall;
 
-    d_sort               = Z3_mk_bv_sort(ctx, HASH_INPUT_SIZE_BITS);
+    d_sort               = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
            
     d1                   = mk_var(ctx, "d1", d_sort);
     d2                   = mk_var(ctx, "d2", d_sort);
 
-    left_implies          = mk_d_constraints(ctx, d1, d2);
-    right_implies         = mk_hash_eq(ctx, key, d1, d2);
+    left_implies         = rssks_cfg.mk_d_cnstrs(ctx, d1, d2);
+    right_implies        = mk_hash_eq(rssks_cfg, ctx, key, d1, d2);
   
-    implies               = Z3_mk_implies(ctx, left_implies, right_implies);
+    implies              = Z3_mk_implies(ctx, left_implies, right_implies);
 
     vars[0]              = Z3_to_app(ctx, d1);
     vars[1]              = Z3_to_app(ctx, d2);
@@ -610,7 +610,7 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast key, RSSKS_key_t 
     }
 }
 
-void adjust_key_to_cnstrs(RSSKS_key_t k)
+void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -632,7 +632,7 @@ void adjust_key_to_cnstrs(RSSKS_key_t k)
     key_decl    = Z3_mk_func_decl(ctx, key_symbol, 0, 0, key_sort);
     key         = Z3_mk_app(ctx, key_decl, 0, 0);
 
-    stmt        = mk_rss_stmt(ctx, key);
+    stmt        = mk_rss_stmt(rssks_cfg, ctx, key);
 
     Z3_solver_assert(ctx, s, stmt);
 
@@ -666,7 +666,7 @@ void alarm_handler(int sig)
     exit(0);
 }
 
-void worker()
+void worker(RSSKS_cfg_t rssks_cfg)
 {
     RSSKS_key_t key;
 
@@ -676,11 +676,11 @@ void worker()
     alarm(SOLVER_TIMEOUT_SEC);
 
     rand_key(key);
-    adjust_key_to_cnstrs(key);
+    adjust_key_to_cnstrs(rssks_cfg, key);
 
     DEBUG_PLOG("testing key\n");
 
-    if (!k_test_dist(key))
+    if (!k_test_dist(rssks_cfg, key))
         zero_key(key);
 
     write(wp, key, KEY_SIZE);
@@ -690,26 +690,26 @@ void worker()
     exit(0);
 }
 
-void launch_worker(int p, comm_t comm)
+void launch_worker(RSSKS_cfg_t rssks_cfg, int p, comm_t comm)
 {
     int pid;
 
     if (!(pid = fork())) 
     {
         wp = comm.wpipe[p];
-        worker();
+        worker(rssks_cfg);
     }
 
     comm.pid[p] = pid;
 }
 
-void master(int np, comm_t comm, RSSKS_key_t key)
+void master(RSSKS_cfg_t rssks_cfg, int np, comm_t comm, RSSKS_key_t key)
 {
     int       wstatus;
     int       maxfd;
     fd_set    fds;
 
-    for (int p = 0; p < np; p++) launch_worker(p, comm);
+    for (int p = 0; p < np; p++) launch_worker(rssks_cfg, p, comm);
     
     for (;;)
     {
@@ -733,7 +733,7 @@ void master(int np, comm_t comm, RSSKS_key_t key)
 
                 if (is_zero_key(key))
                 {
-                    launch_worker(p, comm);
+                    launch_worker(rssks_cfg, p, comm);
                     break;
                 }
 
@@ -751,7 +751,7 @@ void master(int np, comm_t comm, RSSKS_key_t key)
     }
 }
 
-void find_k(RSSKS_key_t k)
+void find_k(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k)
 {
     int    nworkers;
     comm_t comm;
@@ -771,14 +771,14 @@ void find_k(RSSKS_key_t k)
         comm.wpipe[p] = pipefd[1];
     }
 
-    master(nworkers, comm, k);
+    master(rssks_cfg, nworkers, comm, k);
 
     free(comm.pid);
     free(comm.rpipe);
     free(comm.wpipe);
 }
 
-void check_d_constraints(RSSKS_headers_t h1, RSSKS_headers_t h2)
+void check_d_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h1, RSSKS_headers_t h2)
 {
     Z3_context ctx;
     Z3_solver  s;
@@ -791,15 +791,15 @@ void check_d_constraints(RSSKS_headers_t h1, RSSKS_headers_t h2)
     ctx           = mk_context();
     s             = mk_solver(ctx);
 
-    d_sort       = Z3_mk_bv_sort(ctx, HASH_INPUT_SIZE_BITS);
+    d_sort       = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
      
     d1            = mk_var(ctx, "d1", d_sort);
     d2            = mk_var(ctx, "d2", d_sort);
   
-    d1_const      = mk_d_const(ctx, d1, h1);
-    d2_const      = mk_d_const(ctx, d2, h2);
+    d1_const      = mk_d_const(rssks_cfg, ctx, d1, h1);
+    d2_const      = mk_d_const(rssks_cfg, ctx, d2, h2);
 
-    d_constr      = mk_d_constraints(ctx, d1, d2);
+    d_constr      = rssks_cfg.mk_d_cnstrs(ctx, d1, d2);
 
     Z3_solver_assert(ctx, s, d1_const);
     Z3_solver_assert(ctx, s, d2_const);

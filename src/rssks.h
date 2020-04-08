@@ -6,11 +6,9 @@
 
 #include <z3.h>
 
-#define HASH_INPUT_SIZE         13
 #define HASH_OUTPUT_SIZE        4
 #define KEY_SIZE                52
 
-#define HASH_INPUT_SIZE_BITS    (HASH_INPUT_SIZE * 8)
 #define HASH_OUTPUT_SIZE_BITS   (HASH_OUTPUT_SIZE * 8)
 #define KEY_SIZE_BITS           (KEY_SIZE * 8)
 
@@ -111,12 +109,13 @@ typedef struct {
     // TODO: missing L2 ethertype
 } RSSKS_headers_t;
 
+typedef Z3_ast (*d_cnstrs_func)(Z3_context ctx, Z3_ast d1, Z3_ast d2);
+
 typedef struct {
     RSSKS_in_cfg_t in_cfg;
-    unsigned       in_sz; 
+    unsigned       in_sz;
+    d_cnstrs_func  mk_d_cnstrs;
 } RSSKS_cfg_t;
-
-extern Z3_ast mk_d_constraints(Z3_context ctx, Z3_ast d1, Z3_ast d2);
 
 RSSKS_cfg_t RSSKS_cfg_init();
 void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
@@ -125,9 +124,10 @@ bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 
 RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h);
 
-void z3_hash(RSSKS_key_t k, RSSKS_headers_t h);
-void check_d_constraints(RSSKS_headers_t h1, RSSKS_headers_t h2);
-void find_k(RSSKS_key_t k);
+void z3_hash(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k, RSSKS_headers_t h);
+void check_d_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h1, RSSKS_headers_t h2);
+RSSKS_headers_t header_from_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h);
+void find_k(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k);
 
 // DEBUG
 void print_key(RSSKS_key_t k);

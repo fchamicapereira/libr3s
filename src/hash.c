@@ -383,8 +383,9 @@ bool k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k)
 RSSKS_cfg_t RSSKS_cfg_init()
 {
     RSSKS_cfg_t cfg = {
-        .in_cfg = 0,
-        .in_sz  = 0
+        .in_cfg      = 0,
+        .in_sz       = 0,
+        .mk_d_cnstrs = NULL
     };
 
     return cfg;
@@ -461,8 +462,8 @@ void RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
 
     // TODO: check incompatible packet fields (eg TCP + UDP)
 
-    cfg->in_cfg = cfg->in_cfg | (1 << pf);
-    cfg->in_sz  += pf_sz_bits(pf);
+    cfg->in_cfg      = cfg->in_cfg | (1 << pf);
+    cfg->in_sz      += pf_sz_bits(pf);
 }
 
 bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf)

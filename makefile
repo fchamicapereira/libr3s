@@ -1,6 +1,6 @@
 CC=g++ -Wall -fPIC
 Z3_DIR=$(VIGOR_DIR)/z3
-LIB_FLAGS=-lz3 -Wl,-rpath,$(Z3_DIR/lib) -L$(Z3_DIR)/lib -I$(Z3_DIR)/build/include
+LIB_FLAGS=-lz3 -Wl,-rpath,$(Z3_DIR)/lib -L$(Z3_DIR)/lib -I$(Z3_DIR)/build/include
 
 DIR=$(shell pwd)
 SRC=$(DIR)/src
@@ -21,15 +21,9 @@ run: main
 debug: CFLAGS += -D DEBUG
 debug: run
 
-#main: solver.o hash.o main.o util.o
-#	$(CC) -o main main.o solver.o hash.o util.o $(CFLAGS) $(LIB_FLAGS)
-
-#main.o: main.c
-#	$(CC) -c main.c $(CFLAGS) $(LIB_FLAGS)
-
-build: hash.o util.o
+build: hash.o util.o solver.o
 	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
-	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/hash.o $(BUILD)/util.o
+	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
 	@cp $(SRC)/rssks.h $(LIB_RSSKS_INCLUDE)/rssks.h
 
 examples: build
