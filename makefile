@@ -20,15 +20,15 @@ debug: build
 
 build: $(LIB_RSSKS)/librssks.so
 
-install: $(LIB_RSSKS)/librssks.so
-	cp $(LIB_RSSKS)/librssks.so /usr/lib
-	chmod 0755 /usr/lib/librssks.so
-	cp $(LIB_RSSKS_INCLUDE)/*.h /usr/include
-	ldconfig
+install: build
+	sudo cp $(LIB_RSSKS)/librssks.so /usr/lib
+	sudo chmod 0755 /usr/lib/librssks.so
+	sudo cp $(LIB_RSSKS_INCLUDE)/*.h /usr/include
+	sudo ldconfig
 
 uninstall:
-	rm /usr/lib/librssks.so
-	ldconfig
+	sudo rm /usr/lib/librssks.so
+	sudo ldconfig
 
 $(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/util.o $(BUILD)/solver.o
 	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
