@@ -20,11 +20,6 @@ debug: build
 
 build: $(LIB_RSSKS)/librssks.so
 
-$(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/util.o $(BUILD)/solver.o
-	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
-	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
-	@cp $(SRC)/rssks.h $(LIB_RSSKS_INCLUDE)/rssks.h
-
 install: $(LIB_RSSKS)/librssks.so
 	cp $(LIB_RSSKS)/librssks.so /usr/lib
 	chmod 0755 /usr/lib/librssks.so
@@ -34,6 +29,11 @@ install: $(LIB_RSSKS)/librssks.so
 uninstall:
 	rm /usr/lib/librssks.so
 	ldconfig
+
+$(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/util.o $(BUILD)/solver.o
+	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
+	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
+	@cp $(SRC)/rssks.h $(LIB_RSSKS_INCLUDE)/rssks.h
 
 examples: $(LIB_RSSKS)/librssks.so
 	$(MAKE) -C $(EX)
