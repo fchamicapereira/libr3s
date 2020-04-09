@@ -2,7 +2,6 @@
 #define __SOLVER_H__
 
 #include "rssks.h"
-#include "hash.h"
 
 #define FIND_K_AST_FILE         "./find_k.smt2"
 #define CHECK_K_AST_FILE        "./check_k.smt2"

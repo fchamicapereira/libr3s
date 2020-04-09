@@ -109,13 +109,12 @@ typedef struct {
     // TODO: missing L2 ethertype
 } RSSKS_headers_t;
 
-typedef Z3_ast (*d_cnstrs_func)(Z3_context ctx, Z3_ast d1, Z3_ast d2);
-
 typedef struct {
     RSSKS_in_cfg_t in_cfg;
     unsigned       in_sz;
-    d_cnstrs_func  mk_d_cnstrs;
 } RSSKS_cfg_t;
+
+typedef Z3_ast (*d_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
 
 RSSKS_cfg_t RSSKS_cfg_init();
 void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
@@ -125,9 +124,10 @@ bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h);
 
 void z3_hash(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k, RSSKS_headers_t h);
-void check_d_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h1, RSSKS_headers_t h2);
-RSSKS_headers_t header_from_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h);
-void find_k(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k);
+void check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
+RSSKS_headers_t header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h);
+Z3_ast extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf);
+void find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k);
 
 // DEBUG
 void print_key(RSSKS_key_t k);

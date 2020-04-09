@@ -18,7 +18,7 @@ all: build
 debug: CC += -D DEBUG
 debug: build
 
-build:
+build: $(LIB_RSSKS)/librssks.so
 $(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/util.o $(BUILD)/solver.o
 	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
 	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
@@ -27,17 +27,17 @@ $(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/util.o $(BUILD)/solver.o
 examples: $(LIB_RSSKS)/librssks.so
 	$(MAKE) -C $(EX)
 
-solver:
+solver: $(BUILD)/solver.o
 $(BUILD)/solver.o: $(SRC)/solver.c $(SRC)/solver.h $(SRC)/util.h $(SRC)/hash.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/solver.c -o $(BUILD)/solver.o $(LIB_FLAGS)
 
-hash:
+hash: $(BUILD)/hash.o
 $(BUILD)/hash.o: $(SRC)/hash.c $(SRC)/hash.h $(SRC)/util.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/hash.c -o $(BUILD)/hash.o $(LIB_FLAGS)
 
-util:
+util: $(BUILD)/util.o
 $(BUILD)/util.o: $(SRC)/util.c
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/util.c -o $(BUILD)/util.o

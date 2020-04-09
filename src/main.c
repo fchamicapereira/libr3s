@@ -53,7 +53,7 @@ void check_k(RSSKS_key_t k)
         printf("Test %3d / %3d\n", i, 100);
 
         h1 = rand_headers();
-        h2 = header_from_constraints(h1);
+        h2 = header_from_cnstrs(h1);
 
         printf("  "); print_headers(h1, true);
         printf("  "); print_headers(h2, true);

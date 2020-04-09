@@ -11,6 +11,7 @@
 
 #include "solver.h"
 #include "util.h"
+#include "hash.h"
 
 void exitf(const char *message)
 {
@@ -339,6 +340,40 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
     return d_const;
 }
 
+Z3_ast extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf)
+{
+    RSSKS_pf_t   current_pf;
+
+    unsigned offset;
+    unsigned input_sz, sz;
+    unsigned high, low;
+
+    input_sz = rssks_cfg.in_sz;
+    offset   = 0;
+    sz       = 0;
+
+    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    {
+        current_pf = (RSSKS_pf_t) ipf;
+
+        if (!RSSKS_cfg_check_pf(rssks_cfg, current_pf)) continue;
+
+        sz = pf_sz_bits(current_pf);
+
+        if (current_pf == pf)
+        {
+            high = input_sz - offset - 1;
+            low  = high - sz + 1;
+            return Z3_mk_extract(ctx, high, low, d);
+        }
+        
+        offset += sz;
+    }
+
+    printf("ERROR: pf not found in d\n");
+    exit(1);
+}
+
 Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, RSSKS_byte_t value)
 {
     Z3_ast  value_const;
@@ -398,7 +433,7 @@ void z3_hash(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k, RSSKS_headers_t h)
     Z3_del_context(ctx);
 }
 
-RSSKS_headers_t header_from_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h)
+RSSKS_headers_t header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -426,7 +461,7 @@ RSSKS_headers_t header_from_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h
     d2_decl   = Z3_mk_func_decl(ctx, d2_symbol, 0, 0, d_sort);
     d2        = Z3_mk_app(ctx, d2_decl, 0, 0);
 
-    stmt      = rssks_cfg.mk_d_cnstrs(ctx, d1, d2);
+    stmt      = mk_d_cnstrs(rssks_cfg, ctx, d1, d2);
 
     Z3_solver_assert(ctx, s, mk_d_const(rssks_cfg, ctx, d1, h));
     Z3_solver_assert(ctx, s, stmt);
@@ -476,7 +511,7 @@ Z3_ast mk_key_bit_const(Z3_context ctx, Z3_ast key, unsigned bit, unsigned value
     return Z3_mk_eq(ctx, key_slice, key_const);
 }
 
-Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast key)
+Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, d_cnstrs_func  mk_d_cnstrs, Z3_ast key)
 {
     Z3_sort    d_sort;
     Z3_ast     d1;
@@ -493,7 +528,7 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast key)
     d1                   = mk_var(ctx, "d1", d_sort);
     d2                   = mk_var(ctx, "d2", d_sort);
 
-    left_implies         = rssks_cfg.mk_d_cnstrs(ctx, d1, d2);
+    left_implies         = mk_d_cnstrs(rssks_cfg, ctx, d1, d2);
     right_implies        = mk_hash_eq(rssks_cfg, ctx, key, d1, d2);
   
     implies              = Z3_mk_implies(ctx, left_implies, right_implies);
@@ -617,7 +652,7 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast key, RSSKS_key_t 
     }
 }
 
-void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k)
+void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -639,7 +674,7 @@ void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k)
     key_decl    = Z3_mk_func_decl(ctx, key_symbol, 0, 0, key_sort);
     key         = Z3_mk_app(ctx, key_decl, 0, 0);
 
-    stmt        = mk_rss_stmt(rssks_cfg, ctx, key);
+    stmt        = mk_rss_stmt(rssks_cfg, ctx, mk_d_cnstrs, key);
 
     Z3_solver_assert(ctx, s, stmt);
 
@@ -673,7 +708,7 @@ void alarm_handler(int sig)
     exit(0);
 }
 
-void worker(RSSKS_cfg_t rssks_cfg)
+void worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs)
 {
     RSSKS_key_t key;
 
@@ -683,7 +718,7 @@ void worker(RSSKS_cfg_t rssks_cfg)
     alarm(SOLVER_TIMEOUT_SEC);
 
     rand_key(key);
-    adjust_key_to_cnstrs(rssks_cfg, key);
+    adjust_key_to_cnstrs(rssks_cfg, mk_d_cnstrs, key);
 
     DEBUG_PLOG("testing key\n");
 
@@ -697,26 +732,26 @@ void worker(RSSKS_cfg_t rssks_cfg)
     exit(0);
 }
 
-void launch_worker(RSSKS_cfg_t rssks_cfg, int p, comm_t comm)
+void launch_worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int p, comm_t comm)
 {
     int pid;
 
     if (!(pid = fork())) 
     {
         wp = comm.wpipe[p];
-        worker(rssks_cfg);
+        worker(rssks_cfg, mk_d_cnstrs);
     }
 
     comm.pid[p] = pid;
 }
 
-void master(RSSKS_cfg_t rssks_cfg, int np, comm_t comm, RSSKS_key_t key)
+void master(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int np, comm_t comm, RSSKS_key_t key)
 {
     int       wstatus;
     int       maxfd;
     fd_set    fds;
 
-    for (int p = 0; p < np; p++) launch_worker(rssks_cfg, p, comm);
+    for (int p = 0; p < np; p++) launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
     
     for (;;)
     {
@@ -740,7 +775,7 @@ void master(RSSKS_cfg_t rssks_cfg, int np, comm_t comm, RSSKS_key_t key)
 
                 if (is_zero_key(key))
                 {
-                    launch_worker(rssks_cfg, p, comm);
+                    launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
                     break;
                 }
 
@@ -758,12 +793,16 @@ void master(RSSKS_cfg_t rssks_cfg, int np, comm_t comm, RSSKS_key_t key)
     }
 }
 
-void find_k(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k)
+void find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
 {
     int    nworkers;
     comm_t comm;
 
     nworkers = get_nprocs();
+
+    #if DEBUG
+        nworkers = 1;
+    #endif
 
     comm.pid   = (int*) malloc(sizeof(int) * nworkers);
     comm.rpipe = (int*) malloc(sizeof(int) * nworkers);
@@ -778,14 +817,14 @@ void find_k(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k)
         comm.wpipe[p] = pipefd[1];
     }
 
-    master(rssks_cfg, nworkers, comm, k);
+    master(rssks_cfg,  mk_d_cnstrs, nworkers, comm, k);
 
     free(comm.pid);
     free(comm.rpipe);
     free(comm.wpipe);
 }
 
-void check_d_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h1, RSSKS_headers_t h2)
+void check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)
 {
     Z3_context ctx;
     Z3_solver  s;
@@ -806,7 +845,7 @@ void check_d_constraints(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h1, RSSKS_header
     d1_const      = mk_d_const(rssks_cfg, ctx, d1, h1);
     d2_const      = mk_d_const(rssks_cfg, ctx, d2, h2);
 
-    d_constr      = rssks_cfg.mk_d_cnstrs(ctx, d1, d2);
+    d_constr      = mk_d_cnstrs(rssks_cfg, ctx, d1, d2);
 
     Z3_solver_assert(ctx, s, d1_const);
     Z3_solver_assert(ctx, s, d2_const);

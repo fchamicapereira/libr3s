@@ -3,6 +3,7 @@ Z3_DIR=$(VIGOR_DIR)/z3
 
 DIR=$(shell pwd)
 BUILD=$(DIR)/../build
+BIN=$(DIR)/../bin
 
 LIB_FLAGS=-lz3 -Wl,-rpath,$(Z3_DIR)/lib -L$(Z3_DIR)/lib -I$(Z3_DIR)/build/include
 
@@ -16,8 +17,9 @@ EXEC=$(patsubst %.c,%,$(SRCS))
 all: $(EXEC)
 
 $(EXEC): %: %.c
-	$(CC) -o $@ $< $(LIB_FLAGS) $(LIB_RSSKS_FLAGS)
+	@mkdir -p $(BIN)
+	$(CC) -o $(BIN)/$@ $< $(LIB_FLAGS) $(LIB_RSSKS_FLAGS)
 
 .PHONY: clean
 clean:
-	rm -f $(EXEC)
+	rm -rf $(BIN) $(EXEC)
