@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <rssks.h>
 
 void ipv4_1()

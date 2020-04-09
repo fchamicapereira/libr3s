@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <rssks.h>
 
 Z3_ast mk_d_cnstrs(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d1, Z3_ast d2)
