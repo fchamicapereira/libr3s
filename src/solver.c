@@ -538,6 +538,7 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func  *mk
     unsigned n_key_pairs;
     unsigned n_cnstrs;
     unsigned cnstr;
+    unsigned n_implies;
 
     d_sort = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
            
@@ -546,6 +547,7 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func  *mk
 
     n_key_pairs   = combinations(rssks_cfg.n_keys, 2);
     n_cnstrs      = rssks_cfg.n_keys + n_key_pairs;
+    n_implies     = 0;
 
     left_implies  = (Z3_ast*) malloc(sizeof(Z3_ast) * n_cnstrs);
     right_implies = (Z3_ast*) malloc(sizeof(Z3_ast) * n_cnstrs);
@@ -553,9 +555,14 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func  *mk
 
     for (cnstr = 0; cnstr < rssks_cfg.n_keys; cnstr++)
     {
-        left_implies[cnstr]  = mk_d_cnstrs[cnstr](rssks_cfg, ctx, d1, d2);
-        right_implies[cnstr] = mk_hash_eq(rssks_cfg, ctx, keys[cnstr], d1, d2);
-        implies[cnstr]       = Z3_mk_implies(ctx, left_implies[cnstr], right_implies[cnstr]);
+        if (mk_d_cnstrs[cnstr] == NULL)
+            continue;
+
+        left_implies[n_implies]  = mk_d_cnstrs[cnstr](rssks_cfg, ctx, d1, d2);
+        right_implies[n_implies] = mk_hash_eq(rssks_cfg, ctx, keys[cnstr], d1, d2);
+        implies[n_implies]       = Z3_mk_implies(ctx, left_implies[n_implies], right_implies[n_implies]);
+
+        n_implies++;
     }
 
     // make combinations
@@ -563,18 +570,21 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func  *mk
     {
         for (unsigned k2 = k1 + 1; k2 < rssks_cfg.n_keys; k2++)
         {
-            left_implies[cnstr]  = mk_d_cnstrs[cnstr](rssks_cfg, ctx, d1, d2);
-            right_implies[cnstr] = mk_hash_eq_two_keys(rssks_cfg, ctx, keys[k1], d1, keys[k2], d2);
-            implies[cnstr]       = Z3_mk_implies(ctx, left_implies[cnstr], right_implies[cnstr]);
-            
-            cnstr++;
-
-            // TODO: remove this
             assert(cnstr < n_cnstrs);
+
+            if (mk_d_cnstrs[cnstr] == NULL) { cnstr++; continue; }
+
+            left_implies[n_implies]  = mk_d_cnstrs[cnstr](rssks_cfg, ctx, d1, d2);
+            right_implies[n_implies] = mk_hash_eq_two_keys(rssks_cfg, ctx, keys[k1], d1, keys[k2], d2);
+            implies[n_implies]       = Z3_mk_implies(ctx, left_implies[n_implies], right_implies[n_implies]);
+            
+
+            cnstr++;
+            n_implies++;
         }
     }
 
-    and_implies = Z3_mk_and(ctx, n_cnstrs, implies);
+    and_implies = Z3_mk_and(ctx, n_implies, implies);
 
     vars[0]     = Z3_to_app(ctx, d1);
     vars[1]     = Z3_to_app(ctx, d2);
@@ -829,6 +839,7 @@ void master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, int np, comm
 {
     int       wstatus;
     int       maxfd;
+    bool      success;
     fd_set    fds;
 
     for (int p = 0; p < np; p++) launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
@@ -854,14 +865,18 @@ void master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, int np, comm
                 waitpid(comm.pid[p], &wstatus, 0);
                 comm.pid[p] = -1;
 
+                success = true;
                 for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
                 {
                     if (is_zero_key(keys[ikey]))
                     {
+                        success = false;
                         launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
                         break;
                     }
                 }
+
+                if (!success) break;
 
                 for (p = 0; p < np; p++)
                 {

@@ -19,8 +19,8 @@ Z3_ast mk_d_cnstrs(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d1, Z3_ast d2)
 }
 
 int main () {
-    RSSKS_cfg_t cfg;
-    RSSKS_key_t k;
+    RSSKS_cfg_t       cfg;
+    RSSKS_key_t       k;
     RSSKS_cnstrs_func cnstrs[1];
 
     RSSKS_cfg_init(&cfg);
