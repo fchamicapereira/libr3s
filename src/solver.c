@@ -570,15 +570,12 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func  *mk
     {
         for (unsigned k2 = k1 + 1; k2 < rssks_cfg.n_keys; k2++)
         {
-            assert(cnstr < n_cnstrs);
-
             if (mk_d_cnstrs[cnstr] == NULL) { cnstr++; continue; }
 
             left_implies[n_implies]  = mk_d_cnstrs[cnstr](rssks_cfg, ctx, d1, d2);
             right_implies[n_implies] = mk_hash_eq_two_keys(rssks_cfg, ctx, keys[k1], d1, keys[k2], d2);
             implies[n_implies]       = Z3_mk_implies(ctx, left_implies[n_implies], right_implies[n_implies]);
             
-
             cnstr++;
             n_implies++;
         }
