@@ -175,7 +175,7 @@ void lshift(RSSKS_key_t k)
     k[KEY_SIZE - 1] |= msb;
 }
 
-RSSKS_out_t hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
+RSSKS_out_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
 {
     RSSKS_out_t output;
     RSSKS_key_t k_copy;
@@ -212,7 +212,7 @@ float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
 
     for (unsigned counter = 0; counter < STATS; counter++) {
         h = rand_headers(cfg);
-        o = hash(cfg, k, h);
+        o = RSSKS_hash(cfg, k, h);
 
         core_dist[HASH_TO_CORE(o)] += 1;
     }
@@ -242,7 +242,7 @@ bool k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k)
         : (goal_mean - observed_mean) * 100.0 / CORES;
 
     #if DEBUG
-        print_key(k);
+        RSSKS_print_key(k);
     #endif
     DEBUG_LOG("observed mean %lf\n", observed_mean);
     DEBUG_LOG("dm %lf\n", dm);

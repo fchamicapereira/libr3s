@@ -35,11 +35,11 @@ void ipv4_1()
     h.tcp_src[0]  = (2794 >> 8) & 0xff;
     h.tcp_src[1]  = (2794 >> 0) & 0xff;
 
-    print_headers(cfg, h);
+    RSSKS_print_headers(cfg, h);
 
-    o = hash(cfg, k, h);
+    o = RSSKS_hash(cfg, k, h);
 
-    print_hash_output(o);
+    RSSKS_print_hash_output(o);
     puts("");
 }
 
@@ -78,11 +78,11 @@ void ipv4_2()
     h.tcp_src[0]  = (14230 >> 8) & 0xff;
     h.tcp_src[1]  = (14230 >> 0) & 0xff;
 
-    print_headers(cfg, h);
+    RSSKS_print_headers(cfg, h);
 
-    o = hash(cfg, k, h);
+    o = RSSKS_hash(cfg, k, h);
 
-    print_hash_output(o);
+    RSSKS_print_hash_output(o);
     puts("");
 }
 
@@ -121,11 +121,11 @@ void ipv4_tcp_1()
     h.tcp_src[0]  = (2794 >> 8) & 0xff;
     h.tcp_src[1]  = (2794 >> 0) & 0xff;
 
-    print_headers(cfg, h);
+    RSSKS_print_headers(cfg, h);
 
-    o = hash(cfg, k, h);
+    o = RSSKS_hash(cfg, k, h);
 
-    print_hash_output(o);
+    RSSKS_print_hash_output(o);
     puts("");
 }
 
@@ -194,11 +194,11 @@ void ipv6_tcp_1()
     h.tcp_src[0]   = (2794 >> 8) & 0xff;
     h.tcp_src[1]   = (2794 >> 0) & 0xff;
 
-    print_headers(cfg, h);
+    RSSKS_print_headers(cfg, h);
 
-    o = hash(cfg, k, h);
+    o = RSSKS_hash(cfg, k, h);
 
-    print_hash_output(o);
+    RSSKS_print_hash_output(o);
     puts("");
 }
 

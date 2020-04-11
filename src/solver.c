@@ -340,7 +340,7 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
     return d_const;
 }
 
-Z3_ast extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf)
+Z3_ast RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf)
 {
     RSSKS_pf_t   current_pf;
 
@@ -398,42 +398,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-void z3_hash(RSSKS_cfg_t rssks_cfg, RSSKS_key_t k, RSSKS_headers_t h)
-{
-    Z3_context ctx;
-    Z3_solver  s;
-    Z3_sort    d_sort, o_sort, key_sort;
-    Z3_ast     d, o, key;
-    Z3_ast     hash;
-    Z3_ast     d_const, key_const;
-
-    ctx            = mk_context();
-    s              = mk_solver(ctx);
-     
-    d_sort         = Z3_mk_bv_sort(ctx, rssks_cfg.in_sz);
-    o_sort         = Z3_mk_bv_sort(ctx, HASH_OUTPUT_SIZE_BITS);
-    key_sort       = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
-        
-    d              = mk_var(ctx, "d", d_sort);
-    o              = mk_var(ctx, "o", o_sort);
-    key            = mk_var(ctx, "k", key_sort);
-     
-    hash           = mk_hash_func(rssks_cfg, ctx, d, key, o);
-    
-    key_const      = mk_key_const(ctx, key, k);
-    d_const        = mk_d_const(rssks_cfg, ctx, d, h);
-
-    Z3_solver_assert(ctx, s, hash);
-    Z3_solver_assert(ctx, s, key_const);
-    Z3_solver_assert(ctx, s, d_const);
-
-    check(ctx, s);
-
-    del_solver(ctx, s);
-    Z3_del_context(ctx);
-}
-
-RSSKS_headers_t header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
+RSSKS_headers_t RSSKS_header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -721,7 +686,7 @@ void worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs)
     adjust_key_to_cnstrs(rssks_cfg, mk_d_cnstrs, key);
 
     #if DEBUG
-        print_key(key);
+        RSSKS_print_key(key);
     #endif
 
     DEBUG_PLOG("testing key\n");
@@ -797,7 +762,7 @@ void master(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int np, comm_t co
     }
 }
 
-void find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
+void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
 {
     int    nworkers;
     comm_t comm;
@@ -824,7 +789,7 @@ void find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
     free(comm.wpipe);
 }
 
-void check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)
+void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)
 {
     Z3_context ctx;
     Z3_solver  s;

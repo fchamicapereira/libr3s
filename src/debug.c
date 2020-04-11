@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-void print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
+void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
 {
     if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_OUTER))
         printf("udp outer : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.udp_outer));
@@ -53,7 +53,7 @@ void print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
         printf("sctp v tag: %u\n", _4_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_v_tag));
 }
 
-void print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi)
+void RSSKS_print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi)
 {
     printf("input     ");
     for (unsigned i = 0; i < cfg.in_sz / 8; i++)
@@ -61,7 +61,7 @@ void print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi)
     puts("");
 }
 
-void print_key(RSSKS_key_t k)
+void RSSKS_print_key(RSSKS_key_t k)
 {
     for (int i = 0; i < KEY_SIZE; i++) {
         printf("%02x ", k[i] & 0xff);
@@ -70,7 +70,7 @@ void print_key(RSSKS_key_t k)
     puts("");
 }
 
-void print_hash_output(RSSKS_out_t output)
+void RSSKS_print_hash_output(RSSKS_out_t output)
 {
     printf("output    %02x %02x %02x %02x\n",
         (output >> 24) & 0xff,
