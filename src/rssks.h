@@ -139,6 +139,14 @@ typedef struct {
      * If cores <= 0, then find_k will use *all* cores.
     */
     int            n_cores;
+
+    /*
+     * Number of keys to generate.
+     * This is useful when there are constraints needed to be
+     * considered between multiple NICs/ports in NICs.
+    */
+    unsigned       n_keys;
+
 } RSSKS_cfg_t;
 
 typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
@@ -154,7 +162,50 @@ RSSKS_status_t  RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h, ou
 void            RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
 RSSKS_status_t  RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t *output);
 RSSKS_status_t  RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *output);
-void            RSSKS_find_k(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_key_t k);
+
+/*
+ * Find keys that fit the given constraints, and insert them
+ * in the parameter array RSSKS_key_t *keys.
+ * 
+ * The array *keys must be allocated beforehand, and its size
+ * is specified in the RSSKS_cfg_t rssks_cfg input parameter, using
+ * its n_keys field.
+ * 
+ * The constraints are represented using a function with the definition
+ * RSSKS_cnstrs_func (check its documentation).
+ * 
+ * The first N = rssks_cfg.n_keys elements of mk_d_cnstrs relate to
+ * constraints on each key independently, i.e.:
+ * 
+ *   mk_d_cnstrs[0]    => constraints on k[0],
+ *   mk_d_cnstrs[1]    => constraints on k[1],
+ *   ...
+ *   mk_d_cnstrs[N-1]  => constraints on k[N-1]
+ * 
+ * Next, we have the constraints related to combinations of keys:
+ * 
+ *   mk_d_cnstrs[N]    => constraints between k[0] and k[1]
+ *   mk_d_cnstrs[N+1]  => constraints between k[0] and k[2]
+ *   ...
+ *   mk_d_cnstrs[2N-1] => constraints between k[0] and k[N-1]
+ *   mk_d_cnstrs[2N]   => constraints between k[1] and k[2]
+ *   mk_d_cnstrs[2N+1] => constraints between k[1] and k[3]
+ *   etc.
+ * 
+ * Considering C(N,M) as combinations of N, M by M, the size of
+ * mk_d_cnstrs must be at least N + C(N,2). This condition is
+ * checked within this function, and it fails if it isn't met.
+ * 
+ * For example, using cssks_cfg.n_keys = 3:
+ *   mk_d_cnstrs[0]    => constraints on k[0]
+ *   mk_d_cnstrs[1]    => constraints on k[1]
+ *   mk_d_cnstrs[2]    => constraints on k[2]
+ *   mk_d_cnstrs[3]    => constraints between k[0] and k[1]
+ *   mk_d_cnstrs[4]    => constraints between k[0] and k[2]
+ *   mk_d_cnstrs[5]    => constraints between k[1] and k[2]
+ *  
+*/
+void            RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
 
 void            RSSKS_print_key(RSSKS_key_t k);
 void            RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);

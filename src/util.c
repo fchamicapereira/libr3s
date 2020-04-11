@@ -51,3 +51,25 @@ void init_rand()
 
     srand(seed);
 }
+
+unsigned factorial(unsigned n)
+{
+    unsigned f = 1;
+    while (n > 1) f *= n--;
+    return f;
+}
+
+unsigned combinations(unsigned n, unsigned r)
+{
+    unsigned f_n;
+    unsigned f_r;
+    unsigned f_d;
+
+    if (r > n) return 0;
+
+    f_n = factorial(n);
+    f_r = factorial(r);
+    f_d = factorial(n - r);
+
+    return f_n / (f_r * f_d);
+}

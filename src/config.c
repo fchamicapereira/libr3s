@@ -14,6 +14,7 @@ void RSSKS_cfg_init(RSSKS_cfg_t *cfg)
     cfg->in_cfg  = 0;
     cfg->in_sz   = 0;
     cfg->n_cores = 0;
+    cfg->n_keys  = 1;
 }
 
 RSSKS_status_t RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
