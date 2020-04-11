@@ -682,7 +682,7 @@ void worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs)
     signal(SIGALRM, alarm_handler);
     alarm(SOLVER_TIMEOUT_SEC);
 
-    rand_key(key);
+    rand_key(rssks_cfg, key);
     adjust_key_to_cnstrs(rssks_cfg, mk_d_cnstrs, key);
 
     #if DEBUG
