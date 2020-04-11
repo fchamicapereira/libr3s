@@ -665,16 +665,16 @@ void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSS
 
     Z3_ast       stmt;
 
-    ctx         = mk_context();
-    s           = mk_solver(ctx);
+    ctx          = mk_context();
+    s            = mk_solver(ctx);
 
-    key_sort    = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
+    key_sort     = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
 
-    key_symbol  = Z3_mk_string_symbol(ctx, "k"); 
-    key_decl    = Z3_mk_func_decl(ctx, key_symbol, 0, 0, key_sort);
-    key         = Z3_mk_app(ctx, key_decl, 0, 0);
+    key_symbol   = Z3_mk_string_symbol(ctx, "k"); 
+    key_decl     = Z3_mk_func_decl(ctx, key_symbol, 0, 0, key_sort);
+    key          = Z3_mk_app(ctx, key_decl, 0, 0);
 
-    stmt        = mk_rss_stmt(rssks_cfg, ctx, mk_d_cnstrs, key);
+    stmt         = mk_rss_stmt(rssks_cfg, ctx, mk_d_cnstrs, key);
 
     Z3_solver_assert(ctx, s, stmt);
 
@@ -719,6 +719,10 @@ void worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs)
 
     rand_key(key);
     adjust_key_to_cnstrs(rssks_cfg, mk_d_cnstrs, key);
+
+    #if DEBUG
+        print_key(key);
+    #endif
 
     DEBUG_PLOG("testing key\n");
 
@@ -799,10 +803,6 @@ void find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
     comm_t comm;
 
     nworkers = get_nprocs();
-
-    #if DEBUG
-        nworkers = 1;
-    #endif
 
     comm.pid   = (int*) malloc(sizeof(int) * nworkers);
     comm.rpipe = (int*) malloc(sizeof(int) * nworkers);
