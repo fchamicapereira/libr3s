@@ -24,7 +24,7 @@ int main () {
 
     cfg = RSSKS_cfg_init();
     
-    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4_TCP);
+    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
 
     find_k(cfg, &mk_d_cnstrs, k);
     print_key(k);
