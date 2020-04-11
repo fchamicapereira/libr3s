@@ -30,9 +30,9 @@ uninstall:
 	sudo rm /usr/lib/librssks.so
 	sudo ldconfig
 
-$(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/util.o $(BUILD)/solver.o
+$(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/config.o $(BUILD)/util.o $(BUILD)/solver.o
 	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
-	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
+	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/config.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
 	@cp $(SRC)/rssks.h $(LIB_RSSKS_INCLUDE)/rssks.h
 
 examples: $(LIB_RSSKS)/librssks.so
@@ -47,6 +47,11 @@ hash: $(BUILD)/hash.o
 $(BUILD)/hash.o: $(SRC)/hash.c $(SRC)/hash.h $(SRC)/util.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/hash.c -o $(BUILD)/hash.o $(LIB_FLAGS)
+
+config: $(BUILD)/config.o
+$(BUILD)/config.o: $(SRC)/config.c $(SRC)/util.h $(SRC)/rssks.h
+	@mkdir -p $(BUILD)
+	$(CC) -c $(SRC)/config.c -o $(BUILD)/config.o $(LIB_FLAGS)
 
 util: $(BUILD)/util.o
 $(BUILD)/util.o: $(SRC)/util.c

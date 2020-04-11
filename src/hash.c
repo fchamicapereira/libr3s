@@ -57,53 +57,6 @@ RSSKS_bytes_t field_from_headers(RSSKS_headers_t *h, RSSKS_pf_t pf)
     assert(false);
 }
 
-unsigned packet_field_offset_le_bits(RSSKS_cfg_t cfg, RSSKS_pf_t pf)
-{
-    unsigned offset = cfg.in_sz;
-
-    // TODO: check the order
-    // TODO: missing RSSKS_PF_L2_TYPE
-
-    switch(pf)
-    {
-        case RSSKS_PF_UDP_OUTER:
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_OUTER)  ? pf_sz_bits(RSSKS_PF_UDP_OUTER) : 0;
-        case RSSKS_PF_VNI:        
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_VNI)        ? pf_sz_bits(RSSKS_PF_VNI) : 0;
-        case RSSKS_PF_TCP_DST:    
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_TCP_DST)    ? pf_sz_bits(RSSKS_PF_TCP_DST) : 0;
-        case RSSKS_PF_TCP_SRC:    
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_TCP_SRC)    ? pf_sz_bits(RSSKS_PF_TCP_SRC) : 0;
-        case RSSKS_PF_UDP_DST:    
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_DST)    ? pf_sz_bits(RSSKS_PF_UDP_DST) : 0;
-        case RSSKS_PF_UDP_SRC:    
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_SRC)    ? pf_sz_bits(RSSKS_PF_UDP_SRC) : 0;
-        case RSSKS_PF_SCTP_DST:   
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_DST)   ? pf_sz_bits(RSSKS_PF_SCTP_DST) : 0;
-        case RSSKS_PF_SCTP_SRC:   
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_SRC)   ? pf_sz_bits(RSSKS_PF_SCTP_SRC) : 0;
-        case RSSKS_PF_IPV4_DST:   
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV4_DST)   ? pf_sz_bits(RSSKS_PF_IPV4_DST) : 0;
-        case RSSKS_PF_IPV4_SRC:
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV4_SRC)   ? pf_sz_bits(RSSKS_PF_IPV4_SRC) : 0;
-        case RSSKS_PF_IPV6_DST:
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_DST)   ? pf_sz_bits(RSSKS_PF_IPV6_DST) : 0;
-        case RSSKS_PF_IPV6_SRC:
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_SRC)   ? pf_sz_bits(RSSKS_PF_IPV6_SRC) : 0;
-        case RSSKS_PF_SCTP_V_TAG:
-            offset -= RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_V_TAG) ? pf_sz_bits(RSSKS_PF_SCTP_V_TAG) : 0;
-    
-        // TODO: fix this
-            break;
-        case RSSKS_PF_L2_TYPE:
-            puts("[field_from_headers] l2 not implemented");
-            exit(1);
-    }
-
-    assert(offset < cfg.in_sz);
-    return offset;
-}
-
 void print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
 {
     if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_OUTER))
@@ -182,33 +135,27 @@ void print_hash_output(RSSKS_out_t output)
     printf("core      %d\n\n", HASH_TO_CORE(output));
 }
 
-void rand_header(RSSKS_headers_t *h, RSSKS_pf_t pf)
-{
-    RSSKS_byte_t *field = field_from_headers(h, pf);
-    
-    for (unsigned byte = 0; byte < pf_sz_bits(pf) / 8; byte++)
-        field[byte] = (RSSKS_byte_t) rand();
-}
-
-RSSKS_headers_t rand_headers()
+RSSKS_headers_t rand_headers(RSSKS_cfg_t cfg)
 {
     RSSKS_headers_t h;
+    RSSKS_pf_t      pf;
+    RSSKS_byte_t    *field;
+    unsigned        sz;
     
     init_rand();
 
-    rand_header(&h, RSSKS_PF_UDP_OUTER);
-    rand_header(&h, RSSKS_PF_VNI);
-    rand_header(&h, RSSKS_PF_IPV4_SRC);
-    rand_header(&h, RSSKS_PF_IPV4_DST);
-    rand_header(&h, RSSKS_PF_IPV6_SRC);
-    rand_header(&h, RSSKS_PF_IPV6_DST);
-    rand_header(&h, RSSKS_PF_TCP_SRC);
-    rand_header(&h, RSSKS_PF_TCP_DST);
-    rand_header(&h, RSSKS_PF_UDP_SRC);
-    rand_header(&h, RSSKS_PF_UDP_DST);
-    rand_header(&h, RSSKS_PF_SCTP_SRC);
-    rand_header(&h, RSSKS_PF_SCTP_DST);
-    rand_header(&h, RSSKS_PF_SCTP_V_TAG);
+    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    {   
+        pf = (RSSKS_pf_t) ipf;
+
+        if (!RSSKS_cfg_check_pf(cfg, pf)) continue;
+
+        field = field_from_headers(&h, pf);
+        sz    = pf_sz_bits(pf) / 8;
+
+        for (unsigned byte = 0; byte < sz; byte++)
+            field[byte] = (RSSKS_byte_t) rand();
+    }
 
     return h;
 }
@@ -341,7 +288,7 @@ float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
     for (int core = 0; core < CORES; core++) core_dist[core] = 0;
 
     for (unsigned counter = 0; counter < STATS; counter++) {
-        h = rand_headers();
+        h = rand_headers(cfg);
         o = hash(cfg, k, h);
 
         core_dist[HASH_TO_CORE(o)] += 1;
@@ -378,95 +325,4 @@ bool k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k)
     DEBUG_LOG("dm %lf\n", dm);
     
     return dm <= DIST_THRESHOLD;
-}
-
-RSSKS_cfg_t RSSKS_cfg_init()
-{
-    RSSKS_cfg_t cfg = {
-        .in_cfg      = 0,
-        .in_sz       = 0,
-        .cores       = 0
-    };
-
-    return cfg;
-}
-
-void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
-{
-    switch (in_opt)
-    {
-        case RSSKS_IN_OPT_GENEVE_OAM:
-        case RSSKS_IN_OPT_VXLAN_GPE_OAM:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_UDP_OUTER);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_VNI);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV4_UDP:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_UDP_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_UDP_DST);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV4_TCP:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_TCP_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_TCP_DST);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV4_SCTP:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_SCTP_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_SCTP_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_SCTP_V_TAG);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV4:
-        case RSSKS_IN_OPT_FRAG_IPV4:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV4_DST);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV6_UDP:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_UDP_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_UDP_DST);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV6_TCP:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_TCP_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_TCP_DST);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV6_SCTP:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_SCTP_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_SCTP_DST);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_SCTP_V_TAG);
-            break;
-        case RSSKS_IN_OPT_NON_FRAG_IPV6:
-        case RSSKS_IN_OPT_FRAG_IPV6:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_SRC);
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_IPV6_DST);
-            break;
-        case RSSKS_IN_OPT_L2_TYPE:
-            RSSKS_cfg_load_pf(cfg, RSSKS_PF_L2_TYPE);
-        default:
-            DEBUG_LOG("Input option unknown: %d\n", in_opt);
-            assert(false);
-    }
-}
-
-void RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
-{
-    if (RSSKS_cfg_check_pf(*cfg, pf)) return;
-
-    // TODO: check incompatible packet fields (eg TCP + UDP)
-
-    cfg->in_cfg      = cfg->in_cfg | (1 << pf);
-    cfg->in_sz      += pf_sz_bits(pf);
-}
-
-bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf)
-{
-    return (cfg.in_cfg >> pf) & 1;
 }
