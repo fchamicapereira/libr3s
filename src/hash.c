@@ -384,7 +384,8 @@ RSSKS_cfg_t RSSKS_cfg_init()
 {
     RSSKS_cfg_t cfg = {
         .in_cfg      = 0,
-        .in_sz       = 0
+        .in_sz       = 0,
+        .cores       = 0
     };
 
     return cfg;

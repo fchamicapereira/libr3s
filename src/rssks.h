@@ -112,6 +112,12 @@ typedef struct {
 typedef struct {
     RSSKS_in_cfg_t in_cfg;
     unsigned       in_sz;
+
+    /*
+     * Use #cores in find_k.
+     * If cores <= 0, then find_k will use *all* cores.
+    */
+    int            cores;
 } RSSKS_cfg_t;
 
 typedef Z3_ast (*d_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
