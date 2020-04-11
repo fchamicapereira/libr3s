@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h> 
-
 #include <sys/select.h>
 #include <sys/sysinfo.h>
 #include <unistd.h>
@@ -12,6 +11,7 @@
 #include "solver.h"
 #include "util.h"
 #include "hash.h"
+#include "debug.h"
 
 void exitf(const char *message)
 {

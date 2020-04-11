@@ -3,6 +3,7 @@
 #include "rssks.h"
 #include "util.h"
 #include "hash.h"
+#include "debug.h"
 
 RSSKS_cfg_t RSSKS_cfg_init()
 {

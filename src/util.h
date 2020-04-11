@@ -1,21 +1,7 @@
 #ifndef __SOLVER_HASH_H__
 #define __SOLVER_HASH_H__
 
-#include <stdlib.h>
-
-#ifndef DEBUG
-    #define DEBUG false
-#endif
-
-#if DEBUG
-    #define DEBUG_LOG(f_, ...)      !DEBUG || printf((f_), ##__VA_ARGS__)
-    #define DEBUG_PLOG(f_, ...)      !DEBUG || \
-        ( printf("[%d] ", getpid()) && \
-          printf((f_), ##__VA_ARGS__) )
-#else
-    #define DEBUG_LOG(f_, ...)
-    #define DEBUG_PLOG(f_, ...)
-#endif
+#include <stdint.h>
 
 #define _32_LSB(bytes) ( \
     ( (((uint32_t) bytes[0]) << 24) & 0xff000000 ) + \
