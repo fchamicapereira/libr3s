@@ -55,7 +55,7 @@ int main () {
     RSSKS_key_t       keys[2];
     RSSKS_cnstrs_func cnstrs[1];
 
-    cfg        = RSSKS_cfg_init();
+    RSSKS_cfg_init(&cfg);
     cfg.n_keys = 2;
     
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
