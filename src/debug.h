@@ -35,4 +35,6 @@
 #define _2_RSSKS_BYTE_T_TO_UINT32_T(v) ((uint16_t) (\
     ((BYTE_FROM_BYTES((v), 0)) <<  8) + ((BYTE_FROM_BYTES((v), 1)) <<  0) ))
 
+void RSSKS_print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi);
+
 #endif

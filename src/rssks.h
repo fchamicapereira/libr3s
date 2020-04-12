@@ -129,22 +129,21 @@ typedef struct {
 
 typedef Z3_ast (*d_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
 
-RSSKS_cfg_t RSSKS_cfg_init();
-void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
-void RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
-bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
+RSSKS_cfg_t     RSSKS_cfg_init();
+void            RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
+void            RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
+bool            RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 
-RSSKS_out_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h);
+RSSKS_headers_t rand_headers(RSSKS_cfg_t cfg);
+RSSKS_out_t     RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h);
 
-void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
+void            RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
 RSSKS_headers_t RSSKS_RSSKS_header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h);
-Z3_ast RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf);
-void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, out RSSKS_key_t k);
+Z3_ast          RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf);
+void            RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, out RSSKS_key_t k);
 
-// DEBUG
-void RSSKS_print_key(RSSKS_key_t k);
-void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
-void RSSKS_print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi);
-void RSSKS_print_hash_output(RSSKS_out_t output);
+void            RSSKS_print_key(RSSKS_key_t k);
+void            RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
+void            RSSKS_print_hash_output(RSSKS_out_t output);
 
 #endif
