@@ -71,7 +71,8 @@ RSSKS_headers_t RSSKS_rand_headers(RSSKS_cfg_t cfg)
     {   
         pf = (RSSKS_pf_t) ipf;
 
-        if (!RSSKS_cfg_check_pf(cfg, pf)) continue;
+        if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+            continue;
 
         field = field_from_headers(&h, pf);
         sz    = pf_sz_bits(pf) / 8;
@@ -122,7 +123,8 @@ RSSKS_in_t header_to_hash_input(RSSKS_cfg_t cfg, RSSKS_headers_t h)
     {   
         pf = (RSSKS_pf_t) ipf;
 
-        if (!RSSKS_cfg_check_pf(cfg, pf)) continue;
+        if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+            continue;
 
         field = field_from_headers(&h, pf);
         sz    = pf_sz_bits(pf) / 8;
@@ -150,7 +152,8 @@ RSSKS_headers_t RSSKS_in_to_header(RSSKS_cfg_t cfg, RSSKS_in_t hi)
     {   
         pf = (RSSKS_pf_t) ipf;
 
-        if (!RSSKS_cfg_check_pf(cfg, pf)) continue;
+        if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+            continue;
 
         field = field_from_headers(&h, pf);
         sz    = pf_sz_bits(pf) / 8;

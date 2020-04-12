@@ -89,15 +89,21 @@ bool is_valid_pf(RSSKS_pf_t pf)
 
 RSSKS_status_t RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
 {
-    if (RSSKS_cfg_check_pf(*cfg, pf)) return RSSKS_STATUS_PF_ALREADY_LOADED;
-    if (!is_valid_pf(pf))             return RSSKS_STATUS_PF_UNKNOWN;
+    RSSKS_status_t status;
+
+    status = RSSKS_cfg_check_pf(*cfg, pf);
 
     // TODO: check incompatible packet fields (eg TCP + UDP)
 
-    cfg->in_cfg |= (1 << pf);
-    cfg->in_sz  += pf_sz_bits(pf);
+    if (status == RSSKS_STATUS_PF_NOT_LOADED)
+    {
+        cfg->in_cfg |= (1 << pf);
+        cfg->in_sz  += pf_sz_bits(pf);
 
-    return RSSKS_STATUS_SUCCESS;
+        return RSSKS_STATUS_SUCCESS;
+    }
+
+    return status;
 }
 
 RSSKS_status_t RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf)

@@ -313,7 +313,8 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
     {
         pf = (RSSKS_pf_t) ipf;
 
-        if (!RSSKS_cfg_check_pf(rssks_cfg, pf)) continue;
+        if (RSSKS_cfg_check_pf(rssks_cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+            continue;
 
         field = field_from_headers(&h, pf);
         sz    = pf_sz_bits(pf) / 8;
@@ -356,7 +357,8 @@ Z3_ast RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, 
     {
         current_pf = (RSSKS_pf_t) ipf;
 
-        if (!RSSKS_cfg_check_pf(rssks_cfg, current_pf)) continue;
+        if (RSSKS_cfg_check_pf(rssks_cfg, current_pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+            continue;
 
         sz = pf_sz_bits(current_pf);
 

@@ -5,19 +5,19 @@
 
 void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
 {
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_OUTER))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_OUTER) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("udp outer : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.udp_outer));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_VNI))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_VNI) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("vni       : %u\n", _3_RSSKS_BYTE_T_TO_UINT32_T(h.vni));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV4_SRC))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV4_SRC) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("ipv4 src  : %u.%u.%u.%u\n",
             BYTE_FROM_BYTES(h.ipv4_src,  0), BYTE_FROM_BYTES(h.ipv4_src,  1),
             BYTE_FROM_BYTES(h.ipv4_src,  2), BYTE_FROM_BYTES(h.ipv4_src,  3));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV4_DST))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV4_DST) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("ipv4 dst  : %u.%u.%u.%u\n",
             BYTE_FROM_BYTES(h.ipv4_dst,  0), BYTE_FROM_BYTES(h.ipv4_dst,  1),
             BYTE_FROM_BYTES(h.ipv4_dst,  2), BYTE_FROM_BYTES(h.ipv4_dst,  3));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_SRC))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_SRC) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("ipv6 src  : %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x\n",
             BYTE_FROM_BYTES(h.ipv6_src,  0), BYTE_FROM_BYTES(h.ipv6_src,  1),
             BYTE_FROM_BYTES(h.ipv6_src,  2), BYTE_FROM_BYTES(h.ipv6_src,  3),
@@ -27,7 +27,7 @@ void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
             BYTE_FROM_BYTES(h.ipv6_src, 10), BYTE_FROM_BYTES(h.ipv6_src, 11),
             BYTE_FROM_BYTES(h.ipv6_src, 12), BYTE_FROM_BYTES(h.ipv6_src, 13),
             BYTE_FROM_BYTES(h.ipv6_src, 14), BYTE_FROM_BYTES(h.ipv6_src, 15));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_DST))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_IPV6_DST) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("ipv6 src  : %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x\n",
             BYTE_FROM_BYTES(h.ipv6_dst,  0), BYTE_FROM_BYTES(h.ipv6_dst,  1),
             BYTE_FROM_BYTES(h.ipv6_dst,  2), BYTE_FROM_BYTES(h.ipv6_dst,  3),
@@ -37,19 +37,19 @@ void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t h)
             BYTE_FROM_BYTES(h.ipv6_dst, 10), BYTE_FROM_BYTES(h.ipv6_dst, 11),
             BYTE_FROM_BYTES(h.ipv6_dst, 12), BYTE_FROM_BYTES(h.ipv6_dst, 13),
             BYTE_FROM_BYTES(h.ipv6_dst, 14), BYTE_FROM_BYTES(h.ipv6_dst, 15));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_TCP_SRC))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_TCP_SRC) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("tcp src   : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.tcp_src));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_TCP_DST))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_TCP_DST) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("tcp dst   : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.tcp_dst));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_SRC))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_SRC) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("udp src   : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.udp_src));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_DST))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_UDP_DST) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("udp dst   : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.udp_dst));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_SRC))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_SRC) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("sctp src  : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_src));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_DST))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_DST) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("sctp dst  : %u\n", _2_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_dst));
-    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_V_TAG))
+    if (RSSKS_cfg_check_pf(cfg, RSSKS_PF_SCTP_V_TAG) == RSSKS_STATUS_PF_ALREADY_LOADED)
         printf("sctp v tag: %u\n", _4_RSSKS_BYTE_T_TO_UINT32_T(h.sctp_v_tag));
 }
 
