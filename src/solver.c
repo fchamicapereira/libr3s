@@ -398,7 +398,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
+RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -476,7 +476,7 @@ Z3_ast mk_key_bit_const(Z3_context ctx, Z3_ast key, unsigned bit, unsigned value
     return Z3_mk_eq(ctx, key_slice, key_const);
 }
 
-Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, d_cnstrs_func  mk_d_cnstrs, Z3_ast key)
+Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func  mk_d_cnstrs, Z3_ast key)
 {
     Z3_sort    d_sort;
     Z3_ast     d1;
@@ -617,7 +617,7 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast key, RSSKS_key_t 
     }
 }
 
-void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
+void adjust_key_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -673,7 +673,7 @@ void alarm_handler(int sig)
     exit(0);
 }
 
-void worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs)
+void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs)
 {
     RSSKS_key_t key;
 
@@ -701,7 +701,7 @@ void worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs)
     exit(0);
 }
 
-void launch_worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int p, comm_t comm)
+void launch_worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, int p, comm_t comm)
 {
     int pid;
 
@@ -714,7 +714,7 @@ void launch_worker(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int p, com
     comm.pid[p] = pid;
 }
 
-void master(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int np, comm_t comm, RSSKS_key_t key)
+void master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, int np, comm_t comm, RSSKS_key_t key)
 {
     int       wstatus;
     int       maxfd;
@@ -762,7 +762,7 @@ void master(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, int np, comm_t co
     }
 }
 
-void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
+void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k)
 {
     int    nworkers;
     comm_t comm;
@@ -789,7 +789,7 @@ void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t
     free(comm.wpipe);
 }
 
-void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)
+void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)
 {
     Z3_context ctx;
     Z3_solver  s;
