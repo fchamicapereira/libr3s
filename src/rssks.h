@@ -104,7 +104,7 @@ typedef enum {
     RSSKS_STATUS_OPT_UNKNOWN,
     
     RSSKS_STATUS_FAILURE
-} RSSKS_status;
+} RSSKS_status_t;
 
 typedef struct {
     RSSKS_port_t  udp_outer;
@@ -143,8 +143,8 @@ typedef struct {
 typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
 
 void            RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
-RSSKS_status    RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
-void            RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
+RSSKS_status_t  RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
+RSSKS_status_t  RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
 bool            RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 
 RSSKS_headers_t RSSKS_rand_headers(RSSKS_cfg_t cfg);
