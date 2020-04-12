@@ -58,9 +58,8 @@ RSSKS_bytes_t field_from_headers(RSSKS_headers_t *h, RSSKS_pf_t pf)
     assert(false);
 }
 
-RSSKS_headers_t RSSKS_rand_headers(RSSKS_cfg_t cfg)
+RSSKS_status_t RSSKS_rand_headers(RSSKS_cfg_t cfg, out RSSKS_headers_t *h)
 {
-    RSSKS_headers_t h;
     RSSKS_pf_t      pf;
     RSSKS_byte_t    *field;
     unsigned        sz;
@@ -74,14 +73,14 @@ RSSKS_headers_t RSSKS_rand_headers(RSSKS_cfg_t cfg)
         if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
             continue;
 
-        field = field_from_headers(&h, pf);
+        field = field_from_headers(h, pf);
         sz    = pf_sz_bits(pf) / 8;
 
         for (unsigned byte = 0; byte < sz; byte++)
             field[byte] = (RSSKS_byte_t) rand();
     }
 
-    return h;
+    return RSSKS_STATUS_SUCCESS;
 }
 
 void rand_key(RSSKS_cfg_t cfg, RSSKS_key_t key)
@@ -217,7 +216,7 @@ float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
     for (int core = 0; core < CORES; core++) core_dist[core] = 0;
 
     for (unsigned counter = 0; counter < STATS; counter++) {
-        h = RSSKS_rand_headers(cfg);
+        RSSKS_rand_headers(cfg, &h);
         o = RSSKS_hash(cfg, k, h);
 
         core_dist[HASH_TO_CORE(o)] += 1;
