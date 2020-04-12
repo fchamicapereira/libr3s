@@ -205,10 +205,10 @@ RSSKS_status_t  RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z
  *   mk_d_cnstrs[5]    => constraints between k[1] and k[2]
  *  
 */
-void            RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
+void RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
 
-void            RSSKS_print_key(RSSKS_key_t k);
-void            RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
-void            RSSKS_print_hash_output(RSSKS_out_t output);
+void RSSKS_print_key(RSSKS_key_t k);
+void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
+void RSSKS_print_hash_output(RSSKS_out_t output);
 
 #endif
