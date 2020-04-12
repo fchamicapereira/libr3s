@@ -6,6 +6,13 @@
 
 #include <z3.h>
 
+/*
+ * Used for documentation. It's an explicit indication
+ * that the parameter prefixed with this keyword is
+ * going to be used as an output parameter.
+*/
+#define out
+
 #define HASH_OUTPUT_SIZE        4
 #define KEY_SIZE                52
 
@@ -132,7 +139,7 @@ RSSKS_out_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h);
 void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
 RSSKS_headers_t RSSKS_RSSKS_header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h);
 Z3_ast RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf);
-void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t k);
+void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, out RSSKS_key_t k);
 
 // DEBUG
 void RSSKS_print_key(RSSKS_key_t k);
