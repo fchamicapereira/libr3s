@@ -12,7 +12,7 @@ void RSSKS_cfg_init(RSSKS_cfg_t *cfg)
     cfg->n_cores = 0;
 }
 
-void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
+RSSKS_status RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
 {
     switch (in_opt)
     {
@@ -72,9 +72,10 @@ void RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
         case RSSKS_IN_OPT_L2_TYPE:
             RSSKS_cfg_load_pf(cfg, RSSKS_PF_L2_TYPE);
         default:
-            DEBUG_LOG("Input option unknown: %d\n", in_opt);
-            assert(false);
+            return RSSKS_STATUS_OPT_UNKNOWN;
     }
+
+    return RSSKS_STATUS_SUCCESS;
 }
 
 void RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
