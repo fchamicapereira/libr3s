@@ -100,7 +100,11 @@ RSSKS_status_t RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
     return RSSKS_STATUS_SUCCESS;
 }
 
-bool RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf)
+RSSKS_status_t RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf)
 {
-    return (cfg.in_cfg >> pf) & 1;
+    if (!is_valid_pf(pf)) return RSSKS_STATUS_PF_UNKNOWN;
+
+    return ((cfg.in_cfg >> pf) & 1)
+        ? RSSKS_STATUS_PF_ALREADY_LOADED
+        : RSSKS_STATUS_PF_NOT_LOADED;
 }
