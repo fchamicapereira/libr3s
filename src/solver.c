@@ -767,7 +767,7 @@ void RSSKS_find_k(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_key_t
     int    nworkers;
     comm_t comm;
 
-    nworkers   = rssks_cfg.cores <= 0 ? get_nprocs() : rssks_cfg.cores;
+    nworkers   = rssks_cfg.n_cores <= 0 ? get_nprocs() : rssks_cfg.n_cores;
 
     comm.pid   = (int*) malloc(sizeof(int) * nworkers);
     comm.rpipe = (int*) malloc(sizeof(int) * nworkers);
