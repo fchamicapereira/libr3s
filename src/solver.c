@@ -398,7 +398,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-RSSKS_headers_t RSSKS_header_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
+RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, d_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
 {
     Z3_context   ctx;
     Z3_solver    s;
