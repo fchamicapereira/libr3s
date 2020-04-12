@@ -58,7 +58,7 @@ RSSKS_bytes_t field_from_headers(RSSKS_headers_t *h, RSSKS_pf_t pf)
     assert(false);
 }
 
-RSSKS_headers_t rand_headers(RSSKS_cfg_t cfg)
+RSSKS_headers_t RSSKS_rand_headers(RSSKS_cfg_t cfg)
 {
     RSSKS_headers_t h;
     RSSKS_pf_t      pf;
@@ -214,7 +214,7 @@ float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
     for (int core = 0; core < CORES; core++) core_dist[core] = 0;
 
     for (unsigned counter = 0; counter < STATS; counter++) {
-        h = rand_headers(cfg);
+        h = RSSKS_rand_headers(cfg);
         o = RSSKS_hash(cfg, k, h);
 
         core_dist[HASH_TO_CORE(o)] += 1;
