@@ -142,7 +142,7 @@ typedef struct {
 
 typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
 
-RSSKS_cfg_t     RSSKS_cfg_init();
+void            RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
 void            RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
 void            RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
 bool            RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);

@@ -15,7 +15,7 @@ void ipv4_1()
         0x00, 0x00, 0x00, 0x00
     };
 
-    cfg = RSSKS_cfg_init();
+    RSSKS_cfg_init(&cfg);
     
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
 
@@ -58,7 +58,7 @@ void ipv4_2()
         0x00, 0x00, 0x00, 0x00
     };
 
-    cfg = RSSKS_cfg_init();
+    RSSKS_cfg_init(&cfg);
     
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
 
@@ -101,7 +101,7 @@ void ipv4_tcp_1()
         0x00, 0x00, 0x00, 0x00
     };
 
-    cfg = RSSKS_cfg_init();
+    RSSKS_cfg_init(&cfg);
     
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4_TCP);
 
@@ -144,7 +144,7 @@ void ipv6_tcp_1()
         0x00, 0x00, 0x00, 0x00
     };
 
-    cfg = RSSKS_cfg_init();
+    RSSKS_cfg_init(&cfg);
     
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV6_TCP);
 
