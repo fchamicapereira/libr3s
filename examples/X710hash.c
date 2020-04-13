@@ -37,7 +37,7 @@ void ipv4_1()
 
     RSSKS_print_headers(cfg, h);
 
-    o = RSSKS_hash(cfg, k, h);
+    RSSKS_hash(cfg, k, h, &o);
 
     RSSKS_print_hash_output(o);
     puts("");
@@ -80,7 +80,7 @@ void ipv4_2()
 
     RSSKS_print_headers(cfg, h);
 
-    o = RSSKS_hash(cfg, k, h);
+    RSSKS_hash(cfg, k, h, &o);
 
     RSSKS_print_hash_output(o);
     puts("");
@@ -123,7 +123,7 @@ void ipv4_tcp_1()
 
     RSSKS_print_headers(cfg, h);
 
-    o = RSSKS_hash(cfg, k, h);
+    RSSKS_hash(cfg, k, h, &o);
 
     RSSKS_print_hash_output(o);
     puts("");
@@ -196,7 +196,7 @@ void ipv6_tcp_1()
 
     RSSKS_print_headers(cfg, h);
 
-    o = RSSKS_hash(cfg, k, h);
+    RSSKS_hash(cfg, k, h, &o);
 
     RSSKS_print_hash_output(o);
     puts("");

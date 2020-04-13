@@ -180,14 +180,13 @@ void lshift(RSSKS_key_t k)
     k[KEY_SIZE - 1] |= msb;
 }
 
-RSSKS_out_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
+RSSKS_status_t  RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h, out RSSKS_out_t *output)
 {
-    RSSKS_out_t output;
     RSSKS_key_t k_copy;
     RSSKS_in_t  hi; 
 
-    output = 0;
-    hi     = header_to_hash_input(cfg, h);
+    *output = 0;
+    hi      = header_to_hash_input(cfg, h);
     
     memcpy(k_copy, k, sizeof(RSSKS_byte_t) * KEY_SIZE);
 
@@ -196,14 +195,14 @@ RSSKS_out_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h)
         // iterate every bit
         for (int shift = 7; shift >= 0; shift--)
         {
-            if ((hi[i] >> shift) & 1) output ^= _32_LSB(k_copy);
+            if ((hi[i] >> shift) & 1) *output ^= _32_LSB(k_copy);
             lshift(k_copy);
         }
     }
 
     free(hi);
 
-    return output;
+    return RSSKS_STATUS_SUCCESS;
 }
 
 float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
@@ -217,7 +216,7 @@ float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
 
     for (unsigned counter = 0; counter < STATS; counter++) {
         RSSKS_rand_headers(cfg, &h);
-        o = RSSKS_hash(cfg, k, h);
+        RSSKS_hash(cfg, k, h, &o);
 
         core_dist[HASH_TO_CORE(o)] += 1;
     }
