@@ -39,6 +39,5 @@ int main () {
     cnstrs[0] = &mk_d_cnstrs;
     RSSKS_find_keys(cfg, cnstrs, &k);
 
-    printf("result:\n");
-    RSSKS_print_key(k);
+    printf("result:\n%s\n", RSSKS_key_to_string(k).key);
 }

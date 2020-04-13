@@ -31,7 +31,6 @@ typedef RSSKS_byte_t   RSSKS_ipv4_t[4];
 typedef RSSKS_byte_t   RSSKS_v_tag_t[4];  // verification tag (SCTP)
 typedef RSSKS_byte_t   RSSKS_vni_t[3];    // unique identifier for the individual VXLAN segment
 typedef RSSKS_byte_t   RSSKS_port_t[2];
-
 typedef unsigned       RSSKS_in_cfg_t;
 
 typedef enum {
@@ -150,6 +149,12 @@ typedef struct {
 
 } RSSKS_cfg_t;
 
+typedef union {
+    char key[KEY_SIZE * 3];
+    char headers[700];
+    char output[12];
+} RSSKS_string_t;
+
 typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
 
 void            RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
@@ -208,8 +213,8 @@ RSSKS_status_t  RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z
 */
 RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
 
-void RSSKS_print_key(RSSKS_key_t k);
-void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
-void RSSKS_print_hash_output(RSSKS_out_t output);
+RSSKS_string_t RSSKS_key_to_string(RSSKS_key_t k);
+RSSKS_string_t RSSKS_headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
+RSSKS_string_t RSSKS_hash_output_to_string(RSSKS_out_t output);
 
 #endif

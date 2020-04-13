@@ -860,10 +860,7 @@ void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
 
     #if DEBUG
         for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
-        {
-            DEBUG_PLOG("key %u\n", ikey);
-            RSSKS_print_key(keys[ikey]);
-        }
+            DEBUG_PLOG("key %u\n%s\n", ikey, RSSKS_key_to_string(keys[ikey]).key);
     #endif
 
     DEBUG_PLOG("testing key\n");

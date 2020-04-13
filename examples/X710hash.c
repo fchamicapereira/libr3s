@@ -35,12 +35,11 @@ void ipv4_1()
     h.tcp_src[0]  = (2794 >> 8) & 0xff;
     h.tcp_src[1]  = (2794 >> 0) & 0xff;
 
-    RSSKS_print_headers(cfg, h);
+    printf("%s\n", RSSKS_headers_to_string(cfg, h).headers);
 
     RSSKS_hash(cfg, k, h, &o);
 
-    RSSKS_print_hash_output(o);
-    puts("");
+    printf("%s\n", RSSKS_hash_output_to_string(o).output);
 }
 
 void ipv4_2()
@@ -78,12 +77,11 @@ void ipv4_2()
     h.tcp_src[0]  = (14230 >> 8) & 0xff;
     h.tcp_src[1]  = (14230 >> 0) & 0xff;
 
-    RSSKS_print_headers(cfg, h);
+    printf("%s\n", RSSKS_headers_to_string(cfg, h).headers);
 
     RSSKS_hash(cfg, k, h, &o);
 
-    RSSKS_print_hash_output(o);
-    puts("");
+    printf("%s\n", RSSKS_hash_output_to_string(o).output);
 }
 
 void ipv4_tcp_1()
@@ -121,12 +119,11 @@ void ipv4_tcp_1()
     h.tcp_src[0]  = (2794 >> 8) & 0xff;
     h.tcp_src[1]  = (2794 >> 0) & 0xff;
 
-    RSSKS_print_headers(cfg, h);
+    printf("%s\n", RSSKS_headers_to_string(cfg, h).headers);
 
     RSSKS_hash(cfg, k, h, &o);
 
-    RSSKS_print_hash_output(o);
-    puts("");
+    printf("%s\n", RSSKS_hash_output_to_string(o).output);
 }
 
 void ipv6_tcp_1()
@@ -194,12 +191,11 @@ void ipv6_tcp_1()
     h.tcp_src[0]   = (2794 >> 8) & 0xff;
     h.tcp_src[1]   = (2794 >> 0) & 0xff;
 
-    RSSKS_print_headers(cfg, h);
+    printf("%s\n", RSSKS_headers_to_string(cfg, h).headers);
 
     RSSKS_hash(cfg, k, h, &o);
 
-    RSSKS_print_hash_output(o);
-    puts("");
+    printf("%s\n", RSSKS_hash_output_to_string(o).output);
 }
 
 int main () {
