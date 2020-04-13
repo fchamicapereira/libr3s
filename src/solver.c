@@ -638,13 +638,10 @@ void check_unsat_core(Z3_context ctx, Z3_solver s, unsigned num_soft_cnstrs, Z3_
     Z3_lbool is_sat = Z3_solver_check_assumptions(ctx, s, num_soft_cnstrs, assumptions);
 
     if (is_sat != Z3_L_FALSE) {
-        DEBUG_PLOG("SAT!!!\n");
         free(assumptions);
         free(aux_vars);
         return;
     }
-
-    DEBUG_PLOG("UNSAT\n");
 
     Z3_ast_vector core = Z3_solver_get_unsat_core(ctx, s);
     Z3_ast_vector_inc_ref(ctx, core);
