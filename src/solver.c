@@ -638,10 +638,13 @@ void check_unsat_core(Z3_context ctx, Z3_solver s, unsigned num_soft_cnstrs, Z3_
     Z3_lbool is_sat = Z3_solver_check_assumptions(ctx, s, num_soft_cnstrs, assumptions);
 
     if (is_sat != Z3_L_FALSE) {
+        DEBUG_PLOG("SAT!!!\n");
         free(assumptions);
         free(aux_vars);
         return;
     }
+
+    DEBUG_PLOG("UNSAT\n");
 
     Z3_ast_vector core = Z3_solver_get_unsat_core(ctx, s);
     Z3_ast_vector_inc_ref(ctx, core);
@@ -706,7 +709,38 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast *keys, RSSKS_key_
     }
 }
 
-void adjust_keys_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, RSSKS_key_t *keys_seeds)
+Z3_ast key_not_zero_cnstr(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast key)
+{
+    Z3_ast   *const_key_slices;
+    Z3_ast   zero_key_bytes;
+    Z3_ast   not_zero_key_bytes;
+    
+    unsigned useful_bytes;
+    unsigned last_bits;
+    unsigned byte;
+
+    useful_bytes     = rssks_cfg.in_sz / 8 + 4;
+    const_key_slices = (Z3_ast*) malloc(sizeof(Z3_ast) * (useful_bytes + 7));
+
+    for (byte = 0; byte < useful_bytes - 1; byte++)
+        const_key_slices[byte] = mk_key_byte_const(ctx, key, KEY_SIZE - byte - 1, 0);
+    
+    last_bits = 0;
+    for (unsigned bit = byte * 8; bit < useful_bytes * 8 - 1; bit++)
+    {
+        const_key_slices[byte + last_bits] = mk_key_bit_const(ctx, key, KEY_SIZE_BITS - bit - 1, 0);
+        last_bits++;
+    }
+    
+    zero_key_bytes     = Z3_mk_and(ctx, useful_bytes - 1 + last_bits, const_key_slices);
+    not_zero_key_bytes = Z3_mk_not(ctx, zero_key_bytes);
+
+    free(const_key_slices);
+    
+    return not_zero_key_bytes;
+}
+
+RSSKS_status_t adjust_keys_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, RSSKS_key_t *keys_seeds)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -716,29 +750,53 @@ void adjust_keys_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstr
     Z3_symbol    *keys_symbol;
     Z3_func_decl *keys_decl;
     Z3_ast       *keys;
+    Z3_ast       *not_zero_keys;
     Z3_ast       key_model;
 
     Z3_ast       stmt;
 
-    keys_symbol  = (Z3_symbol*)    malloc(sizeof(Z3_symbol)    * rssks_cfg.n_keys);
-    keys_decl    = (Z3_func_decl*) malloc(sizeof(Z3_func_decl) * rssks_cfg.n_keys);
-    keys         = (Z3_ast*)       malloc(sizeof(Z3_ast)       * rssks_cfg.n_keys);
+    keys_symbol   = (Z3_symbol*)    malloc(sizeof(Z3_symbol)    * rssks_cfg.n_keys);
+    keys_decl     = (Z3_func_decl*) malloc(sizeof(Z3_func_decl) * rssks_cfg.n_keys);
+    keys          = (Z3_ast*)       malloc(sizeof(Z3_ast)       * rssks_cfg.n_keys);
+    not_zero_keys = (Z3_ast*)       malloc(sizeof(Z3_ast)       * rssks_cfg.n_keys);
 
-    ctx          = mk_context();
-    s            = mk_solver(ctx);
+    ctx           = mk_context();
+    s             = mk_solver(ctx);
 
-    key_sort     = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
+    key_sort      = Z3_mk_bv_sort(ctx, KEY_SIZE_BITS);
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
     {
-        keys_symbol[ikey] = Z3_mk_int_symbol(ctx, ikey); 
-        keys_decl[ikey]   = Z3_mk_func_decl(ctx, keys_symbol[ikey], 0, 0, key_sort);
-        keys[ikey]        = Z3_mk_app(ctx, keys_decl[ikey], 0, 0);
+        keys_symbol[ikey]   = Z3_mk_int_symbol(ctx, ikey); 
+        keys_decl[ikey]     = Z3_mk_func_decl(ctx, keys_symbol[ikey], 0, 0, key_sort);
+        keys[ikey]          = Z3_mk_app(ctx, keys_decl[ikey], 0, 0);
+
+        not_zero_keys[ikey] = key_not_zero_cnstr(rssks_cfg, ctx, keys[ikey]);
+        Z3_solver_assert(ctx, s, not_zero_keys[ikey]);
     }
 
     stmt = mk_rss_stmt(rssks_cfg, ctx, mk_d_cnstrs, keys);
 
     Z3_solver_assert(ctx, s, stmt);
+
+    // TODO: this should be done on the master
+    DEBUG_PLOG("checking hard constraints\n");
+
+    if (Z3_solver_check(ctx, s) == Z3_L_FALSE) {
+        /*
+         * It is not possible to make the formula satisfiable
+         * even when ignoring all soft constraints.
+        */
+        del_solver(ctx, s);
+
+        free(keys_symbol);
+        free(keys_decl);
+        free(keys);
+        free(not_zero_keys);
+        
+        return RSSKS_STATUS_NO_SOLUTION;
+    }
+    
     pseudo_partial_maxsat(ctx, s, keys, keys_seeds);
 
     m = Z3_solver_get_model(ctx, s);
@@ -754,6 +812,9 @@ void adjust_keys_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstr
     free(keys_symbol);
     free(keys_decl);
     free(keys);
+    free(not_zero_keys);
+
+    return RSSKS_STATUS_SUCCESS;
 }
 
 typedef struct {
@@ -778,7 +839,10 @@ void alarm_handler(int sig)
 
 void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
 {
-    RSSKS_key_t *keys = (RSSKS_key_t*) malloc(sizeof(RSSKS_key_t) * rssks_cfg.n_keys);
+    RSSKS_status_t status;
+    RSSKS_key_t    *keys;
+    
+    keys = (RSSKS_key_t*) malloc(sizeof(RSSKS_key_t) * rssks_cfg.n_keys);
 
     DEBUG_PLOG("started\n");
 
@@ -788,7 +852,14 @@ void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
         rand_key(rssks_cfg, keys[ikey]);
 
-    adjust_keys_to_cnstrs(rssks_cfg, mk_d_cnstrs, keys);
+    status = adjust_keys_to_cnstrs(rssks_cfg, mk_d_cnstrs, keys);
+
+    if (status == RSSKS_STATUS_NO_SOLUTION)
+    {
+        write(wp, &status, sizeof(RSSKS_status_t));
+        free(keys);
+        exit(0);
+    }
 
     #if DEBUG
         for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
@@ -804,10 +875,15 @@ void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
     {
         if (!k_test_dist(rssks_cfg, keys[ikey]))
         {
-            zero_key(keys[ikey]);
-            break;
+            status = RSSKS_STATUS_BAD_SOLUTION;
+            write(wp, &status, sizeof(RSSKS_status_t));
+            free(keys);
+            exit(0);
         }
     }
+
+    status = RSSKS_STATUS_SUCCESS;
+    write(wp, &status, sizeof(RSSKS_status_t));
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
         write(wp, keys[ikey], KEY_SIZE);
@@ -815,7 +891,6 @@ void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
     DEBUG_PLOG("terminated\n");
 
     free(keys);
-
     exit(0);
 }
 
@@ -832,12 +907,12 @@ void launch_worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, int p
     comm.pid[p] = pid;
 }
 
-void master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, int np, comm_t comm, RSSKS_key_t *keys)
+RSSKS_status_t master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, int np, comm_t comm, RSSKS_key_t *keys)
 {
-    int       wstatus;
-    int       maxfd;
-    bool      success;
-    fd_set    fds;
+    RSSKS_status_t status;
+    int            wstatus;
+    int            maxfd;
+    fd_set         fds;
 
     for (int p = 0; p < np; p++) launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
     
@@ -854,45 +929,50 @@ void master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs, int np, comm
 
         for (int p = 0; p < np; p++)
         {
-            if (FD_ISSET(comm.rpipe[p], &fds))
+            if (!FD_ISSET(comm.rpipe[p], &fds)) continue;
+            
+            read(comm.rpipe[p], &status, sizeof(RSSKS_status_t));
+
+            switch (status)
             {
-                for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
-                    read(comm.rpipe[p], keys[ikey], KEY_SIZE);
+                case RSSKS_STATUS_NO_SOLUTION:
+                    DEBUG_PLOG("unsat\n");
+                    return status;
 
-                waitpid(comm.pid[p], &wstatus, 0);
-                comm.pid[p] = -1;
+                case RSSKS_STATUS_BAD_SOLUTION:
+                    for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
+                        read(comm.rpipe[p], keys[ikey], KEY_SIZE);
 
-                success = true;
-                for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
-                {
-                    if (is_zero_key(keys[ikey]))
+                    waitpid(comm.pid[p], &wstatus, 0);
+                    comm.pid[p] = -1;
+                    launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
+
+                    break;
+
+                case RSSKS_STATUS_SUCCESS:
+                    for (p = 0; p < np; p++)
                     {
-                        success = false;
-                        launch_worker(rssks_cfg, mk_d_cnstrs, p, comm);
-                        break;
+                        if (comm.pid[p] == -1) continue;
+                        
+                        kill(comm.pid[p], SIGTERM);
+                        wait(&wstatus);
                     }
-                }
 
-                if (!success) break;
+                    return status;
 
-                for (p = 0; p < np; p++)
-                {
-                    if (comm.pid[p] == -1) continue;
-                    
-                    kill(comm.pid[p], SIGTERM);
-                    wait(&wstatus);
-                }
-
-                return;
+                default: break; // will never get here
             }
+
+            break;
         }
     }
 }
 
-void RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys)
+RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys)
 {
-    int    nworkers;
-    comm_t comm;
+    int            nworkers;
+    comm_t         comm;
+    RSSKS_status_t status;
 
     nworkers   = rssks_cfg.n_cores <= 0 ? get_nprocs() : rssks_cfg.n_cores;
 
@@ -909,11 +989,13 @@ void RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out 
         comm.wpipe[p] = pipefd[1];
     }
 
-    master(rssks_cfg,  mk_d_cnstrs, nworkers, comm, keys);
+    status = master(rssks_cfg,  mk_d_cnstrs, nworkers, comm, keys);
 
     free(comm.pid);
     free(comm.rpipe);
     free(comm.wpipe);
+
+    return status;
 }
 
 void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)

@@ -96,6 +96,7 @@ typedef enum {
 typedef enum {
     RSSKS_STATUS_SUCCESS,
     RSSKS_STATUS_NO_SOLUTION,
+    RSSKS_STATUS_BAD_SOLUTION,
     
     RSSKS_STATUS_PF_UNKNOWN,
     RSSKS_STATUS_PF_ALREADY_LOADED,
@@ -205,7 +206,7 @@ RSSKS_status_t  RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z
  *   mk_d_cnstrs[5]    => constraints between k[1] and k[2]
  *  
 */
-void RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
+RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
 
 void RSSKS_print_key(RSSKS_key_t k);
 void RSSKS_print_headers(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
