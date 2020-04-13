@@ -400,7 +400,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t output)
+RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t *output)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -458,7 +458,7 @@ RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t 
 
     d_ast_to_hash_input(rssks_cfg, ctx, d2_model, hi2);
 
-    output   = RSSKS_in_to_header(rssks_cfg, hi2);
+    *output  = RSSKS_in_to_header(rssks_cfg, hi2);
     
     free(hi2);
     Z3_model_dec_ref(ctx, m);
