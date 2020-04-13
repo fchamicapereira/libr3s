@@ -394,7 +394,7 @@ RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3
 
     status   = RSSKS_cfg_check_pf(rssks_cfg, pf);
 
-    if (status != RSSKS_STATUS_PF_NOT_LOADED)
+    if (status != RSSKS_STATUS_PF_ALREADY_LOADED)
     {
         DEBUG_PLOG("ERROR %u\n", status);
         return status;
@@ -801,6 +801,8 @@ RSSKS_status_t adjust_keys_to_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *
         
         return RSSKS_STATUS_NO_SOLUTION;
     }
+
+    DEBUG_PLOG("is satisfiable\n");
     
     pseudo_partial_maxsat(ctx, s, keys, keys_seeds);
 
@@ -866,11 +868,6 @@ void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
         exit(0);
     }
 
-    #if DEBUG
-        for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
-            DEBUG_PLOG("key %u\n%s\n", ikey, RSSKS_key_to_string(keys[ikey]).key);
-    #endif
-
     DEBUG_PLOG("testing key\n");
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
@@ -886,6 +883,11 @@ void worker(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  *mk_d_cnstrs)
 
     status = RSSKS_STATUS_SUCCESS;
     write(wp, &status, sizeof(RSSKS_status_t));
+
+    #if DEBUG
+        for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
+            DEBUG_PLOG("sending key %u\n%s\n", ikey, RSSKS_key_to_string(keys[ikey]).key);
+    #endif
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
         write(wp, keys[ikey], KEY_SIZE);
