@@ -152,7 +152,7 @@ RSSKS_status_t  RSSKS_rand_headers(RSSKS_cfg_t cfg, out RSSKS_headers_t *h);
 RSSKS_status_t  RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h, out RSSKS_out_t *output);
 
 void            RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
-RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h);
+RSSKS_status_t  RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t output);
 Z3_ast          RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf);
 void            RSSKS_find_k(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_key_t k);
 

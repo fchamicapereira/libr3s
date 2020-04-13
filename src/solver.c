@@ -400,7 +400,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h)
+RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t output)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -412,10 +412,11 @@ RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_fu
 
     Z3_sort      d_sort;
     Z3_ast       d1, d2, d2_model;
+    
+    Z3_ast       d_const;
     Z3_ast       stmt;
 
-    RSSKS_headers_t    h2;
-    RSSKS_in_t hi2;
+    RSSKS_in_t   hi2;
 
     ctx       = mk_context();
     s         = mk_solver(ctx);
@@ -428,40 +429,42 @@ RSSKS_headers_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_fu
     d2_decl   = Z3_mk_func_decl(ctx, d2_symbol, 0, 0, d_sort);
     d2        = Z3_mk_app(ctx, d2_decl, 0, 0);
 
+    d_const   = mk_d_const(rssks_cfg, ctx, d1, h);
     stmt      = mk_d_cnstrs(rssks_cfg, ctx, d1, d2);
 
-    Z3_solver_assert(ctx, s, mk_d_const(rssks_cfg, ctx, d1, h));
+    Z3_solver_assert(ctx, s, d_const);
     Z3_solver_assert(ctx, s, stmt);
 
-    result = Z3_solver_check(ctx, s);
+    result    = Z3_solver_check(ctx, s);
 
     switch (result)
     {
-        case Z3_L_FALSE: break;
-        case Z3_L_UNDEF:
-            printf("unknown: %s\n", Z3_solver_get_reason_unknown(ctx, s));
-            break;
+        case Z3_L_FALSE:
+        case Z3_L_UNDEF: return RSSKS_STATUS_NO_SOLUTION;
         case Z3_L_TRUE:
             m = Z3_solver_get_model(ctx, s);
-            if (m) Z3_model_inc_ref(ctx, m);
-            break;
+            
+            if (!m)
+            {
+                del_solver(ctx, s);
+                return RSSKS_STATUS_FAILURE;
+            }
     }
 
-    if (m) {
-        d2_model = Z3_model_get_const_interp(ctx, m, d2_decl);
-        hi2      = (RSSKS_in_t) malloc(rssks_cfg.in_sz);
+    Z3_model_inc_ref(ctx, m);
 
-        d_ast_to_hash_input(rssks_cfg, ctx, d2_model, hi2);
+    d2_model = Z3_model_get_const_interp(ctx, m, d2_decl);
+    hi2      = (RSSKS_in_t) malloc(rssks_cfg.in_sz);
 
-        h2 = RSSKS_in_to_header(rssks_cfg, hi2);
-        
-        free(hi2);
-        Z3_model_dec_ref(ctx, m);
-    }
+    d_ast_to_hash_input(rssks_cfg, ctx, d2_model, hi2);
+
+    output   = RSSKS_in_to_header(rssks_cfg, hi2);
     
+    free(hi2);
+    Z3_model_dec_ref(ctx, m);
     del_solver(ctx, s);
 
-    return h2;
+    return RSSKS_STATUS_SUCCESS;
 }
 
 Z3_ast mk_key_bit_const(Z3_context ctx, Z3_ast key, unsigned bit, unsigned value)
