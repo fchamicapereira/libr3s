@@ -27,8 +27,8 @@ int validate(RSSKS_cfg_t cfg, RSSKS_key_t k1, RSSKS_key_t k2)
     {
         RSSKS_rand_headers(cfg, &h1);
         h2 = RSSKS_headers_from_cnstrs(cfg, &mk_d_cnstrs, h1);
-        o1 = RSSKS_hash(cfg, k1, h1);
-        o2 = RSSKS_hash(cfg, k2, h2);
+        RSSKS_hash(cfg, k1, h1, &o1);
+        RSSKS_hash(cfg, k2, h2, &o2);
 
         printf("\n===== iteration %d =====\n", i);
 
