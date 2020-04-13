@@ -392,6 +392,14 @@ RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3
     offset   = 0;
     sz       = 0;
 
+    status   = RSSKS_cfg_check_pf(rssks_cfg, pf);
+
+    if (status != RSSKS_STATUS_PF_NOT_LOADED)
+    {
+        DEBUG_PLOG("ERROR %u\n", status);
+        return status;
+    }
+
     for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
     {
         current_pf = (RSSKS_pf_t) ipf;
