@@ -341,10 +341,11 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
     return d_const;
 }
 
-Z3_ast RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf)
+RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *output)
 {
-    RSSKS_pf_t   current_pf;
-
+    RSSKS_pf_t     current_pf;
+    RSSKS_status_t status;
+    
     unsigned offset;
     unsigned input_sz, sz;
     unsigned high, low;
@@ -356,24 +357,26 @@ Z3_ast RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, 
     for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
     {
         current_pf = (RSSKS_pf_t) ipf;
+        status     = RSSKS_cfg_check_pf(rssks_cfg, current_pf);
 
-        if (RSSKS_cfg_check_pf(rssks_cfg, current_pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
-            continue;
+        if (status == RSSKS_STATUS_PF_UNKNOWN)        return status;
+        if (status != RSSKS_STATUS_PF_ALREADY_LOADED) continue;
 
         sz = pf_sz_bits(current_pf);
 
         if (current_pf == pf)
         {
-            high = input_sz - offset - 1;
-            low  = high - sz + 1;
-            return Z3_mk_extract(ctx, high, low, d);
+            high    = input_sz - offset - 1;
+            low     = high - sz + 1;
+            *output = Z3_mk_extract(ctx, high, low, d);
+
+            return RSSKS_STATUS_SUCCESS;
         }
         
         offset += sz;
     }
 
-    printf("ERROR: pf not found in d\n");
-    exit(1);
+    return RSSKS_STATUS_PF_NOT_LOADED;
 }
 
 Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, RSSKS_byte_t value)
