@@ -85,13 +85,10 @@ RSSKS_status_t RSSKS_rand_headers(RSSKS_cfg_t cfg, out RSSKS_headers_t *h)
 
 void rand_key(RSSKS_cfg_t cfg, RSSKS_key_t key)
 {
-    unsigned used_bytes;
-
-    used_bytes = cfg.in_sz / 8 + 4;
     init_rand();
 
     for (unsigned byte = 0; byte < KEY_SIZE; byte++)
-        key[byte] = byte < used_bytes ? rand() & 0xff : 0;
+        key[byte] = rand() & 0xff;
 }
 
 void zero_key(RSSKS_key_t key)

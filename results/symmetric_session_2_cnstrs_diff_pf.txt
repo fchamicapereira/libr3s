@@ -1,0 +1,1041 @@
+[6628] started (sat checker)
+[6628] checking hard constraints
+[6628] has solution
+[6632] started
+[6632] testing key
+[6632] key:            
+        00 00 00 01 00 00 00 01 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 
+                    
+        mean       : 3.500    
+        dm         : 0.006 % 
+        threshold  : 0.100 % 
+[6632] key:            
+        00 00 00 01 00 00 00 01 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 
+                    
+        mean       : 3.500    
+        dm         : 0.004 % 
+        threshold  : 0.100 % 
+[6632] sending key 0
+00 00 00 01 00 00 00 01 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 
+
+[6632] sending key 1
+00 00 00 01 00 00 00 01 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 
+
+[6632] terminated
+
+===== iteration 0 =====
+
+*** port 1 
+
+ipv4 src  : 149.31.117.210
+ipv4 dst  : 26.157.243.10
+tcp src   : 52994
+tcp dst   : 8912
+
+output    1b 61 41 f1
+
+ipv4 src  : 26.157.243.10
+ipv4 dst  : 149.31.117.210
+tcp src   : 8912
+tcp dst   : 52994
+
+output    1b 61 41 f1
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 48.29.165.51
+ipv4 dst  : 53.246.214.234
+tcp src   : 49209
+tcp dst   : 65238
+
+output    9b ce d7 a0
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 53.246.214.234
+ipv4 dst  : 48.29.165.51
+tcp src   : 65238
+tcp dst   : 49209
+
+output    9b ce d7 a0
+
+
+===== iteration 1 =====
+
+*** port 1 
+
+ipv4 src  : 88.205.58.236
+ipv4 dst  : 27.13.28.241
+tcp src   : 19357
+tcp dst   : 3088
+
+output    b8 64 03 c2
+
+ipv4 src  : 27.13.28.241
+ipv4 dst  : 88.205.58.236
+tcp src   : 3088
+tcp dst   : 19357
+
+output    b8 64 03 c2
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 83.47.39.78
+ipv4 dst  : 60.41.53.80
+tcp src   : 59321
+tcp dst   : 289
+
+output    78 48 60 f6
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 60.41.53.80
+ipv4 dst  : 83.47.39.78
+tcp src   : 289
+tcp dst   : 59321
+
+output    78 48 60 f6
+
+
+===== iteration 2 =====
+
+*** port 1 
+
+ipv4 src  : 215.80.0.13
+ipv4 dst  : 161.207.103.32
+tcp src   : 15116
+tcp dst   : 65260
+
+output    b4 e6 f9 6e
+
+ipv4 src  : 161.207.103.32
+ipv4 dst  : 215.80.0.13
+tcp src   : 65260
+tcp dst   : 15116
+
+output    b4 e6 f9 6e
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 225.126.37.110
+ipv4 dst  : 71.142.234.98
+tcp src   : 57655
+tcp dst   : 5314
+
+output    30 f3 0f 65
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 71.142.234.98
+ipv4 dst  : 225.126.37.110
+tcp src   : 5314
+tcp dst   : 57655
+
+output    30 f3 0f 65
+
+
+===== iteration 3 =====
+
+*** port 1 
+
+ipv4 src  : 169.104.41.0
+ipv4 dst  : 168.43.155.221
+tcp src   : 52679
+tcp dst   : 39405
+
+output    bb 4d c2 80
+
+ipv4 src  : 168.43.155.221
+ipv4 dst  : 169.104.41.0
+tcp src   : 39405
+tcp dst   : 52679
+
+output    bb 4d c2 80
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 194.43.217.156
+ipv4 dst  : 210.55.210.244
+tcp src   : 19004
+tcp dst   : 56127
+
+output    16 d0 38 08
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 210.55.210.244
+ipv4 dst  : 194.43.217.156
+tcp src   : 56127
+tcp dst   : 19004
+
+output    16 d0 38 08
+
+
+===== iteration 4 =====
+
+*** port 1 
+
+ipv4 src  : 18.200.30.132
+ipv4 dst  : 150.42.98.181
+tcp src   : 49347
+tcp dst   : 60474
+
+output    8c 3e 47 21
+
+ipv4 src  : 150.42.98.181
+ipv4 dst  : 18.200.30.132
+tcp src   : 60474
+tcp dst   : 49347
+
+output    8c 3e 47 21
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 36.175.59.63
+ipv4 dst  : 205.41.93.136
+tcp src   : 3290
+tcp dst   : 16739
+
+output    ed 66 61 97
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 205.41.93.136
+ipv4 dst  : 36.175.59.63
+tcp src   : 16739
+tcp dst   : 3290
+
+output    ed 66 61 97
+
+
+===== iteration 5 =====
+
+*** port 1 
+
+ipv4 src  : 99.251.74.158
+ipv4 dst  : 86.213.30.129
+tcp src   : 55411
+tcp dst   : 872
+
+output    f8 2a 74 ac
+
+ipv4 src  : 86.213.30.129
+ipv4 dst  : 99.251.74.158
+tcp src   : 872
+tcp dst   : 55411
+
+output    f8 2a 74 ac
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 45.77.63.6
+ipv4 dst  : 228.107.19.82
+tcp src   : 44261
+tcp dst   : 299
+
+output    2a 34 64 93
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 228.107.19.82
+ipv4 dst  : 45.77.63.6
+tcp src   : 299
+tcp dst   : 44261
+
+output    2a 34 64 93
+
+
+===== iteration 6 =====
+
+*** port 1 
+
+ipv4 src  : 248.194.205.201
+ipv4 dst  : 181.93.77.123
+tcp src   : 4563
+tcp dst   : 48758
+
+output    4d 01 f9 b2
+
+ipv4 src  : 181.93.77.123
+ipv4 dst  : 248.194.205.201
+tcp src   : 48758
+tcp dst   : 4563
+
+output    4d 01 f9 b2
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 15.103.182.225
+ipv4 dst  : 177.106.204.132
+tcp src   : 40116
+tcp dst   : 7301
+
+output    a6 5e b0 7d
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 177.106.204.132
+ipv4 dst  : 15.103.182.225
+tcp src   : 7301
+tcp dst   : 40116
+
+output    a6 5e b0 7d
+
+
+===== iteration 7 =====
+
+*** port 1 
+
+ipv4 src  : 186.203.118.102
+ipv4 dst  : 48.146.34.53
+tcp src   : 3508
+tcp dst   : 56370
+
+output    ca 2a 9a 51
+
+ipv4 src  : 48.146.34.53
+ipv4 dst  : 186.203.118.102
+tcp src   : 56370
+tcp dst   : 3508
+
+output    ca 2a 9a 51
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 161.119.193.72
+ipv4 dst  : 124.30.233.73
+tcp src   : 53587
+tcp dst   : 20629
+
+output    80 14 96 bb
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 124.30.233.73
+ipv4 dst  : 161.119.193.72
+tcp src   : 20629
+tcp dst   : 53587
+
+output    80 14 96 bb
+
+
+===== iteration 8 =====
+
+*** port 1 
+
+ipv4 src  : 31.107.223.210
+ipv4 dst  : 47.184.49.112
+tcp src   : 50750
+tcp dst   : 50718
+
+output    45 77 cb 0c
+
+ipv4 src  : 47.184.49.112
+ipv4 dst  : 31.107.223.210
+tcp src   : 50718
+tcp dst   : 50750
+
+output    45 77 cb 0c
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 172.9.144.33
+ipv4 dst  : 160.73.103.122
+tcp src   : 11511
+tcp dst   : 10388
+
+output    da ef 02 30
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 160.73.103.122
+ipv4 dst  : 172.9.144.33
+tcp src   : 10388
+tcp dst   : 11511
+
+output    da ef 02 30
+
+
+===== iteration 9 =====
+
+*** port 1 
+
+ipv4 src  : 14.15.91.173
+ipv4 dst  : 186.45.111.60
+tcp src   : 3538
+tcp dst   : 42978
+
+output    89 2c 44 2d
+
+ipv4 src  : 186.45.111.60
+ipv4 dst  : 14.15.91.173
+tcp src   : 42978
+tcp dst   : 3538
+
+output    89 2c 44 2d
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 157.83.32.43
+ipv4 dst  : 59.20.197.120
+tcp src   : 46980
+tcp dst   : 51364
+
+output    ca a7 e2 65
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 59.20.197.120
+ipv4 dst  : 157.83.32.43
+tcp src   : 51364
+tcp dst   : 46980
+
+output    ca a7 e2 65
+
+
+===== iteration 10 =====
+
+*** port 1 
+
+ipv4 src  : 224.204.162.234
+ipv4 dst  : 51.105.237.121
+tcp src   : 59580
+tcp dst   : 32874
+
+output    c9 f2 a5 cb
+
+ipv4 src  : 51.105.237.121
+ipv4 dst  : 224.204.162.234
+tcp src   : 32874
+tcp dst   : 59580
+
+output    c9 f2 a5 cb
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 143.104.69.206
+ipv4 dst  : 55.17.250.183
+tcp src   : 21400
+tcp dst   : 64086
+
+output    9e fd 9e 1d
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 55.17.250.183
+ipv4 dst  : 143.104.69.206
+tcp src   : 64086
+tcp dst   : 21400
+
+output    9e fd 9e 1d
+
+
+===== iteration 11 =====
+
+*** port 1 
+
+ipv4 src  : 41.35.179.111
+ipv4 dst  : 195.61.75.101
+tcp src   : 6887
+tcp dst   : 50070
+
+output    50 1f 78 57
+
+ipv4 src  : 195.61.75.101
+ipv4 dst  : 41.35.179.111
+tcp src   : 50070
+tcp dst   : 6887
+
+output    50 1f 78 57
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 50.35.227.96
+ipv4 dst  : 240.197.105.147
+tcp src   : 4462
+tcp dst   : 24806
+
+output    cf 51 67 43
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 240.197.105.147
+ipv4 dst  : 50.35.227.96
+tcp src   : 24806
+tcp dst   : 4462
+
+output    cf 51 67 43
+
+
+===== iteration 12 =====
+
+*** port 1 
+
+ipv4 src  : 83.32.83.38
+ipv4 dst  : 241.53.182.30
+tcp src   : 11023
+tcp dst   : 27787
+
+output    1c a7 a8 45
+
+ipv4 src  : 241.53.182.30
+ipv4 dst  : 83.32.83.38
+tcp src   : 27787
+tcp dst   : 11023
+
+output    1c a7 a8 45
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 3.129.195.73
+ipv4 dst  : 67.5.132.173
+tcp src   : 42714
+tcp dst   : 25046
+
+output    27 e2 21 02
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 67.5.132.173
+ipv4 dst  : 3.129.195.73
+tcp src   : 25046
+tcp dst   : 42714
+
+output    27 e2 21 02
+
+
+===== iteration 13 =====
+
+*** port 1 
+
+ipv4 src  : 70.109.168.195
+ipv4 dst  : 47.152.13.34
+tcp src   : 46482
+tcp dst   : 23444
+
+output    87 a5 af 96
+
+ipv4 src  : 47.152.13.34
+ipv4 dst  : 70.109.168.195
+tcp src   : 23444
+tcp dst   : 46482
+
+output    87 a5 af 96
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 97.107.249.137
+ipv4 dst  : 48.211.185.9
+tcp src   : 26756
+tcp dst   : 20243
+
+output    01 02 1d 8a
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 48.211.185.9
+ipv4 dst  : 97.107.249.137
+tcp src   : 20243
+tcp dst   : 26756
+
+output    01 02 1d 8a
+
+
+===== iteration 14 =====
+
+*** port 1 
+
+ipv4 src  : 52.229.225.14
+ipv4 dst  : 44.74.104.128
+tcp src   : 34425
+tcp dst   : 40240
+
+output    71 91 f5 18
+
+ipv4 src  : 44.74.104.128
+ipv4 dst  : 52.229.225.14
+tcp src   : 40240
+tcp dst   : 34425
+
+output    71 91 f5 18
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 78.80.24.142
+ipv4 dst  : 221.237.141.143
+tcp src   : 6192
+tcp dst   : 10633
+
+output    80 a9 bd c9
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 221.237.141.143
+ipv4 dst  : 78.80.24.142
+tcp src   : 10633
+tcp dst   : 6192
+
+output    80 a9 bd c9
+
+
+===== iteration 15 =====
+
+*** port 1 
+
+ipv4 src  : 173.94.22.71
+ipv4 dst  : 250.19.159.8
+tcp src   : 13816
+tcp dst   : 43671
+
+output    f2 91 b2 ea
+
+ipv4 src  : 250.19.159.8
+ipv4 dst  : 173.94.22.71
+tcp src   : 43671
+tcp dst   : 13816
+
+output    f2 91 b2 ea
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 45.169.213.23
+ipv4 dst  : 247.112.92.155
+tcp src   : 39947
+tcp dst   : 59065
+
+output    31 91 9b 5b
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 247.112.92.155
+ipv4 dst  : 45.169.213.23
+tcp src   : 59065
+tcp dst   : 39947
+
+output    31 91 9b 5b
+
+
+===== iteration 16 =====
+
+*** port 1 
+
+ipv4 src  : 193.50.222.226
+ipv4 dst  : 7.240.216.10
+tcp src   : 53290
+tcp dst   : 10000
+
+output    17 60 43 63
+
+ipv4 src  : 7.240.216.10
+ipv4 dst  : 193.50.222.226
+tcp src   : 10000
+tcp dst   : 53290
+
+output    17 60 43 63
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 78.253.140.210
+ipv4 dst  : 54.32.191.72
+tcp src   : 41915
+tcp dst   : 49565
+
+output    59 cc bb 1e
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 54.32.191.72
+ipv4 dst  : 78.253.140.210
+tcp src   : 49565
+tcp dst   : 41915
+
+output    59 cc bb 1e
+
+
+===== iteration 17 =====
+
+*** port 1 
+
+ipv4 src  : 38.110.192.214
+ipv4 dst  : 20.219.70.205
+tcp src   : 40266
+tcp dst   : 45762
+
+output    d8 61 ad 4c
+
+ipv4 src  : 20.219.70.205
+ipv4 dst  : 38.110.192.214
+tcp src   : 45762
+tcp dst   : 40266
+
+output    d8 61 ad 4c
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 53.227.205.190
+ipv4 dst  : 176.233.166.137
+tcp src   : 2690
+tcp dst   : 62697
+
+output    ec d6 50 a1
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 176.233.166.137
+ipv4 dst  : 53.227.205.190
+tcp src   : 62697
+tcp dst   : 2690
+
+output    ec d6 50 a1
+
+
+===== iteration 18 =====
+
+*** port 1 
+
+ipv4 src  : 213.176.214.91
+ipv4 dst  : 67.241.135.131
+tcp src   : 41272
+tcp dst   : 61342
+
+output    1b 8a 82 69
+
+ipv4 src  : 67.241.135.131
+ipv4 dst  : 213.176.214.91
+tcp src   : 61342
+tcp dst   : 41272
+
+output    1b 8a 82 69
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 175.207.249.87
+ipv4 dst  : 23.141.251.34
+tcp src   : 46810
+tcp dst   : 10814
+
+output    ae 40 42 1d
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 23.141.251.34
+ipv4 dst  : 175.207.249.87
+tcp src   : 10814
+tcp dst   : 46810
+
+output    ae 40 42 1d
+
+
+===== iteration 19 =====
+
+*** port 1 
+
+ipv4 src  : 204.202.199.135
+ipv4 dst  : 20.146.75.247
+tcp src   : 4355
+tcp dst   : 45279
+
+output    0e 31 1a 1b
+
+ipv4 src  : 20.146.75.247
+ipv4 dst  : 204.202.199.135
+tcp src   : 45279
+tcp dst   : 4355
+
+output    0e 31 1a 1b
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 202.51.131.213
+ipv4 dst  : 214.49.36.60
+tcp src   : 17697
+tcp dst   : 12169
+
+output    97 e5 40 38
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 214.49.36.60
+ipv4 dst  : 202.51.131.213
+tcp src   : 12169
+tcp dst   : 17697
+
+output    97 e5 40 38
+
+
+===== iteration 20 =====
+
+*** port 1 
+
+ipv4 src  : 234.254.217.3
+ipv4 dst  : 174.43.152.48
+tcp src   : 36381
+tcp dst   : 62541
+
+output    cc 82 ab 22
+
+ipv4 src  : 174.43.152.48
+ipv4 dst  : 234.254.217.3
+tcp src   : 62541
+tcp dst   : 36381
+
+output    cc 82 ab 22
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 179.220.95.111
+ipv4 dst  : 18.252.81.201
+tcp src   : 60686
+tcp dst   : 30278
+
+output    65 70 04 85
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 18.252.81.201
+ipv4 dst  : 179.220.95.111
+tcp src   : 30278
+tcp dst   : 60686
+
+output    65 70 04 85
+
+
+===== iteration 21 =====
+
+*** port 1 
+
+ipv4 src  : 16.123.197.23
+ipv4 dst  : 255.211.20.139
+tcp src   : 27535
+tcp dst   : 56480
+
+output    39 8b 15 f7
+
+ipv4 src  : 255.211.20.139
+ipv4 dst  : 16.123.197.23
+tcp src   : 56480
+tcp dst   : 27535
+
+output    39 8b 15 f7
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 210.126.96.99
+ipv4 dst  : 54.249.68.244
+tcp src   : 2680
+tcp dst   : 9333
+
+output    e9 24 e1 27
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 54.249.68.244
+ipv4 dst  : 210.126.96.99
+tcp src   : 9333
+tcp dst   : 2680
+
+output    e9 24 e1 27
+
+
+===== iteration 22 =====
+
+*** port 1 
+
+ipv4 src  : 21.194.72.184
+ipv4 dst  : 230.160.196.203
+tcp src   : 42254
+tcp dst   : 23327
+
+output    ce 31 46 cf
+
+ipv4 src  : 230.160.196.203
+ipv4 dst  : 21.194.72.184
+tcp src   : 23327
+tcp dst   : 42254
+
+output    ce 31 46 cf
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 166.119.76.252
+ipv4 dst  : 52.21.251.56
+tcp src   : 54915
+tcp dst   : 49091
+
+output    23 ed 46 49
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 52.21.251.56
+ipv4 dst  : 166.119.76.252
+tcp src   : 49091
+tcp dst   : 54915
+
+output    23 ed 46 49
+
+
+===== iteration 23 =====
+
+*** port 1 
+
+ipv4 src  : 137.101.152.9
+ipv4 dst  : 21.197.223.203
+tcp src   : 28460
+tcp dst   : 29759
+
+output    43 e2 05 39
+
+ipv4 src  : 21.197.223.203
+ipv4 dst  : 137.101.152.9
+tcp src   : 29759
+tcp dst   : 28460
+
+output    43 e2 05 39
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 166.27.161.127
+ipv4 dst  : 42.239.149.157
+tcp src   : 23827
+tcp dst   : 10548
+
+output    47 2c 2f 31
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 42.239.149.157
+ipv4 dst  : 166.27.161.127
+tcp src   : 10548
+tcp dst   : 23827
+
+output    47 2c 2f 31
+
+
+===== iteration 24 =====
+
+*** port 1 
+
+ipv4 src  : 164.129.114.96
+ipv4 dst  : 210.59.214.217
+tcp src   : 3419
+tcp dst   : 43076
+
+output    9d 25 5d 6e
+
+ipv4 src  : 210.59.214.217
+ipv4 dst  : 164.129.114.96
+tcp src   : 43076
+tcp dst   : 3419
+
+output    9d 25 5d 6e
+
+
+*** port 1 (~ port 2)
+
+ipv4 src  : 115.241.240.205
+ipv4 dst  : 78.36.85.229
+tcp src   : 3166
+tcp dst   : 3007
+
+output    14 a5 ab bc
+
+
+*** port 2 (~ port 1)
+
+ipv4 src  : 78.36.85.229
+ipv4 dst  : 115.241.240.205
+tcp src   : 3007
+tcp dst   : 3166
+
+output    14 a5 ab bc
+
+k1:
+00 00 00 01 00 00 00 01 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 
+
+k2:
+00 00 00 01 00 00 00 01 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 00 00 
+00 00 00 00 
+
