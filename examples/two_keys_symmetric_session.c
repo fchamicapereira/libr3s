@@ -64,6 +64,7 @@ int main () {
     RSSKS_cfg_t       cfg;
     RSSKS_key_t       keys[2];
     RSSKS_cnstrs_func cnstrs[1];
+    RSSKS_status_t    status;
 
     RSSKS_cfg_init(&cfg);
     cfg.n_keys = 2;
@@ -74,10 +75,18 @@ int main () {
     cnstrs[1] = NULL;
     cnstrs[2] = &mk_d_cnstrs;
 
-    RSSKS_find_keys(cfg, cnstrs, keys);
-    
+    status = RSSKS_find_keys(cfg, cnstrs, keys);
+
+    if (status != RSSKS_STATUS_SUCCESS)
+    {
+        printf("Failed: %s\n", RSSKS_status_to_string(status));
+        return 1;
+    }
+
+    validate(cfg, keys[0], keys[1]);
+
     printf("k1:\n%s\n", RSSKS_key_to_string(keys[0]));
     printf("k2:\n%s\n", RSSKS_key_to_string(keys[1]));
 
-    validate(cfg, keys[0], keys[1]);
+    return 0;
 }
