@@ -20,7 +20,7 @@
         strcat((dst), (buffer));                   \
     }
 
-RSSKS_string_t RSSKS_headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t h)
+RSSKS_string_t __headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t h)
 {
     RSSKS_string_t result;
     char buffer[100];
@@ -88,15 +88,7 @@ RSSKS_string_t RSSKS_headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t h)
     return result;
 }
 
-void RSSKS_print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi)
-{
-    printf("input     ");
-    for (unsigned i = 0; i < cfg.in_sz / 8; i++)
-        printf("%02x ", hi[i] & 0xff);
-    puts("");
-}
-
-RSSKS_string_t RSSKS_key_to_string(RSSKS_key_t k)
+RSSKS_string_t __key_to_string(RSSKS_key_t k)
 {
     RSSKS_string_t result;
     char            *ptr;
@@ -115,7 +107,7 @@ RSSKS_string_t RSSKS_key_to_string(RSSKS_key_t k)
     return result;
 }
 
-RSSKS_string_t RSSKS_hash_output_to_string(RSSKS_out_t output)
+RSSKS_string_t __hash_output_to_string(RSSKS_out_t output)
 {
     RSSKS_string_t result;
     

@@ -130,6 +130,12 @@ typedef struct {
     // TODO: missing L2 ethertype
 } RSSKS_headers_t;
 
+typedef union {
+    char key[KEY_SIZE * 3];
+    char headers[700];
+    char output[12];
+} RSSKS_string_t;
+
 typedef struct {
     RSSKS_in_cfg_t in_cfg;
     unsigned       in_sz;
@@ -149,13 +155,15 @@ typedef struct {
 
 } RSSKS_cfg_t;
 
-typedef union {
-    char key[KEY_SIZE * 3];
-    char headers[700];
-    char output[12];
-} RSSKS_string_t;
-
 typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
+
+RSSKS_string_t __key_to_string(RSSKS_key_t k);
+RSSKS_string_t __headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
+RSSKS_string_t __hash_output_to_string(RSSKS_out_t output);
+
+#define RSSKS_key_to_string(k)          __key_to_string((k)).key
+#define RSSKS_headers_to_string(cfg, h) __headers_to_string((cfg), (h)).headers
+#define RSSKS_hash_output_to_string(o)  __hash_output_to_string((o)).output
 
 void            RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
 RSSKS_status_t  RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
@@ -212,9 +220,5 @@ RSSKS_status_t  RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z
  *  
 */
 RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
-
-RSSKS_string_t RSSKS_key_to_string(RSSKS_key_t k);
-RSSKS_string_t RSSKS_headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
-RSSKS_string_t RSSKS_hash_output_to_string(RSSKS_out_t output);
 
 #endif

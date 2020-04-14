@@ -43,12 +43,12 @@ int validate(RSSKS_cfg_t cfg, RSSKS_key_t k1, RSSKS_key_t k2)
         printf("\n===== iteration %d =====\n", i);
 
         printf("\n*** port 1\n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h1).headers);
-        printf("%s\n", RSSKS_hash_output_to_string(o1).output);
+        printf("%s\n", RSSKS_headers_to_string(cfg, h1));
+        printf("%s\n", RSSKS_hash_output_to_string(o1));
 
         printf("\n*** port 2\n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h2).headers);
-        printf("%s\n", RSSKS_hash_output_to_string(o2).output);
+        printf("%s\n", RSSKS_headers_to_string(cfg, h2));
+        printf("%s\n", RSSKS_hash_output_to_string(o2));
 
         if (o1 != o2)
         {
@@ -76,8 +76,8 @@ int main () {
 
     RSSKS_find_keys(cfg, cnstrs, keys);
     
-    printf("k1:\n%s\n", RSSKS_key_to_string(keys[0]).key);
-    printf("k2:\n%s\n", RSSKS_key_to_string(keys[1]).key);
+    printf("k1:\n%s\n", RSSKS_key_to_string(keys[0]));
+    printf("k2:\n%s\n", RSSKS_key_to_string(keys[1]));
 
     validate(cfg, keys[0], keys[1]);
 }

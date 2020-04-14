@@ -27,5 +27,5 @@ int main () {
 
     RSSKS_find_keys(cfg, cnstrs, &k);
     
-    printf("result:\n%s\n", RSSKS_key_to_string(k).key);
+    printf("result:\n%s\n", RSSKS_key_to_string(k));
 }

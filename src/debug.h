@@ -26,6 +26,4 @@
 #define BIT_FROM_BYTE(b, i)     (((b) >> (i)) & 1)
 #define BIT_FROM_KEY(b, k)      (BIT_FROM_BYTE(k[(b) / 8], 7 - ((b) % 8)))
 
-void RSSKS_print_hash_input(RSSKS_cfg_t cfg, RSSKS_in_t hi);
-
 #endif

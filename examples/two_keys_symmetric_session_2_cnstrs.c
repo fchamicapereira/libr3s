@@ -66,11 +66,11 @@ int validate(RSSKS_cfg_t cfg, RSSKS_key_t k1, RSSKS_key_t k2)
         printf("\n===== iteration %d =====\n", i);
 
         printf("\n*** port 1 \n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h1_1).headers);
-        printf("%s\n", RSSKS_hash_output_to_string(o1_1).output);
+        printf("%s\n", RSSKS_headers_to_string(cfg, h1_1));
+        printf("%s\n", RSSKS_hash_output_to_string(o1_1));
 
-        printf("%s\n", RSSKS_headers_to_string(cfg, h1_2).headers);
-        printf("%s\n", RSSKS_hash_output_to_string(o1_2).output);;
+        printf("%s\n", RSSKS_headers_to_string(cfg, h1_2));
+        printf("%s\n", RSSKS_hash_output_to_string(o1_2));;
 
         if (o1_1 != o1_2)
         {
@@ -79,12 +79,12 @@ int validate(RSSKS_cfg_t cfg, RSSKS_key_t k1, RSSKS_key_t k2)
         }
 
         printf("\n*** port 1 (~ port 2)\n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h12_1).headers);
-        printf("%s\n", RSSKS_hash_output_to_string(o12_1).output);
+        printf("%s\n", RSSKS_headers_to_string(cfg, h12_1));
+        printf("%s\n", RSSKS_hash_output_to_string(o12_1));
 
         printf("\n*** port 2 (~ port 1)\n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h12_2).headers);
-        printf("%s\n", RSSKS_hash_output_to_string(o12_2).output);
+        printf("%s\n", RSSKS_headers_to_string(cfg, h12_2));
+        printf("%s\n", RSSKS_hash_output_to_string(o12_2));
 
         if (o12_1 != o12_2)
         {
@@ -114,6 +114,6 @@ int main () {
 
     validate(cfg, keys[0], keys[1]);
     
-    printf("k1:\n%s\n", RSSKS_key_to_string(keys[0]).key);
-    printf("k2:\n%s\n", RSSKS_key_to_string(keys[1]).key);
+    printf("k1:\n%s\n", RSSKS_key_to_string(keys[0]));
+    printf("k2:\n%s\n", RSSKS_key_to_string(keys[1]));
 }
