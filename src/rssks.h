@@ -96,6 +96,7 @@ typedef enum {
     RSSKS_STATUS_SUCCESS,
     RSSKS_STATUS_NO_SOLUTION,
     RSSKS_STATUS_BAD_SOLUTION,
+    RSSKS_STATUS_HAS_SOLUTION,
     
     RSSKS_STATUS_PF_UNKNOWN,
     RSSKS_STATUS_PF_ALREADY_LOADED,
@@ -155,15 +156,18 @@ typedef union {
     char key[KEY_SIZE * 3];
     char headers[700];
     char output[12];
+    char status[40];
 } RSSKS_string_t;
+
+#define RSSKS_status_to_string(s)       __status_to_string((s)).status
+#define RSSKS_key_to_string(k)          __key_to_string((k)).key
+#define RSSKS_headers_to_string(cfg, h) __headers_to_string((cfg), (h)).headers
+#define RSSKS_hash_output_to_string(o)  __hash_output_to_string((o)).output
 
 RSSKS_string_t __key_to_string(RSSKS_key_t k);
 RSSKS_string_t __headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
 RSSKS_string_t __hash_output_to_string(RSSKS_out_t output);
-
-#define RSSKS_key_to_string(k)          __key_to_string((k)).key
-#define RSSKS_headers_to_string(cfg, h) __headers_to_string((cfg), (h)).headers
-#define RSSKS_hash_output_to_string(o)  __hash_output_to_string((o)).output
+RSSKS_string_t __status_to_string(RSSKS_status_t status);
 
 void           RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
 RSSKS_status_t RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
@@ -171,11 +175,11 @@ RSSKS_status_t RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
 RSSKS_status_t RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 
 RSSKS_status_t RSSKS_rand_headers(RSSKS_cfg_t cfg, out RSSKS_headers_t *h);
-RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h, out RSSKS_out_t *output);
+RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h, out RSSKS_out_t *result);
 
-void           RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func  mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
-RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t *output);
-RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *output);
+void           RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
+RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func mk_d_cnstrs, out RSSKS_headers_t *result);
+RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *result);
 
 /*
  * Find keys that fit the given constraints, and insert them

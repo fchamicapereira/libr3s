@@ -245,9 +245,15 @@ bool k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k)
         ? (observed_mean - goal_mean) * 100.0 / CORES
         : (goal_mean - observed_mean) * 100.0 / CORES;
 
-    DEBUG_PLOG("key:\n%s\n", RSSKS_key_to_string(k));
-    DEBUG_PLOG("observed mean %lf\n", observed_mean);
-    DEBUG_PLOG("dm %lf\n", dm);
+    DEBUG_PLOG("key:            \n\
+        \r%s                    \n\
+        \rmean       : %.3lf    \n\
+        \rdm         : %.3lf %% \n\
+        \rthreshold  : %.3lf %% \n",
+        RSSKS_key_to_string(k),
+        observed_mean,
+        dm,
+        DIST_THRESHOLD);
     
     return dm <= DIST_THRESHOLD;
 }

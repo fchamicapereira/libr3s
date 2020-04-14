@@ -27,7 +27,5 @@ int main () {
 
     status = RSSKS_find_keys(cfg, cnstrs, &k);
 
-    assert(status == RSSKS_STATUS_NO_SOLUTION);
-    
-    printf("No solution\n");
+    printf("%s\n", RSSKS_status_to_string(status));
 }

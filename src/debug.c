@@ -122,3 +122,36 @@ RSSKS_string_t __hash_output_to_string(RSSKS_out_t output)
     
     return result;
 }
+
+RSSKS_string_t __status_to_string(RSSKS_status_t status)
+{
+    RSSKS_string_t result;
+    
+    result.status[0] = '\0';
+
+    switch (status)
+    {
+        case RSSKS_STATUS_SUCCESS:
+            sprintf(result.status, "success"); break;
+        case RSSKS_STATUS_NO_SOLUTION:
+            sprintf(result.status, "no solution"); break;
+        case RSSKS_STATUS_BAD_SOLUTION:
+            sprintf(result.status, "bad solution"); break;
+        case RSSKS_STATUS_HAS_SOLUTION:
+            sprintf(result.status, "has solution"); break;
+        case RSSKS_STATUS_PF_UNKNOWN:
+            sprintf(result.status, "unknown packet field"); break;
+        case RSSKS_STATUS_PF_ALREADY_LOADED:
+            sprintf(result.status, "packet field already loaded"); break;
+        case RSSKS_STATUS_PF_NOT_LOADED:
+            sprintf(result.status, "packet field not loaded"); break;
+        case RSSKS_STATUS_PF_INCOMPATIBLE:
+            sprintf(result.status, "incompatible packet field"); break;
+        case RSSKS_STATUS_OPT_UNKNOWN:
+            sprintf(result.status, "unknown option"); break;
+        case RSSKS_STATUS_FAILURE:
+            sprintf(result.status, "failure"); break;
+    }
+
+    return result;
+}
