@@ -12,7 +12,8 @@
 #include "solver.h"
 #include "util.h"
 #include "hash.h"
-#include "debug.h"
+#include "string.h"
+#include "packet.h"
 
 void exitf(const char *message)
 {
@@ -322,7 +323,7 @@ Z3_ast mk_hash_eq_two_keys(RSSKS_cfg_t rsssks_cfg, Z3_context ctx, Z3_ast key1, 
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
 }
 
-Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_headers_t h)
+Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_packet_t h)
 {
     Z3_ast       *pf_x, *pf_const;
     Z3_sort      byte_sort;
@@ -354,8 +355,8 @@ Z3_ast mk_d_const(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast input, RSSKS_hea
         if (RSSKS_cfg_check_pf(rssks_cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
             continue;
 
-        field = field_from_headers(&h, pf);
-        sz    = pf_sz_bits(pf) / 8;
+        field = RSSKS_field_from_packet(&h, pf);
+        sz    = RSSKS_pf_sz(pf);
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
         {
@@ -408,7 +409,7 @@ RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3
         if (status == RSSKS_STATUS_PF_UNKNOWN)        return status;
         if (status != RSSKS_STATUS_PF_ALREADY_LOADED) continue;
 
-        sz = pf_sz_bits(current_pf);
+        sz = RSSKS_pf_sz_bits(current_pf);
 
         if (current_pf == pf)
         {
@@ -449,7 +450,7 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, RSSKS_key_t k)
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
 }
 
-RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_headers_t *output)
+RSSKS_status_t RSSKS_packet_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_packet_t p_in, RSSKS_cnstrs_func  mk_d_cnstrs, out RSSKS_packet_t *p_out)
 {
     Z3_context   ctx;
     Z3_solver    s;
@@ -478,7 +479,7 @@ RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t 
     d2_decl   = Z3_mk_func_decl(ctx, d2_symbol, 0, 0, d_sort);
     d2        = Z3_mk_app(ctx, d2_decl, 0, 0);
 
-    d_const   = mk_d_const(rssks_cfg, ctx, d1, h);
+    d_const   = mk_d_const(rssks_cfg, ctx, d1, p_in);
     stmt      = mk_d_cnstrs(rssks_cfg, ctx, d1, d2);
 
     Z3_solver_assert(ctx, s, d_const);
@@ -507,7 +508,7 @@ RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t 
 
     d_ast_to_hash_input(rssks_cfg, ctx, d2_model, hi2);
 
-    *output  = RSSKS_in_to_header(rssks_cfg, hi2);
+    *p_out   = RSSKS_in_to_packet(rssks_cfg, hi2, p_in.cfg);
     
     free(hi2);
     Z3_model_dec_ref(ctx, m);
@@ -844,7 +845,7 @@ void alarm_handler(int sig)
 {
     RSSKS_key_t key;
 
-    zero_key(key);
+    RSSKS_zero_key(key);
     write(wp, key, KEY_SIZE);
 
     DEBUG_PLOG("terminated (timeout)\n");
@@ -865,7 +866,7 @@ void worker_key_adjuster(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs)
     alarm(SOLVER_TIMEOUT_SEC);
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
-        rand_key(rssks_cfg, keys[ikey]);
+        RSSKS_rand_key(rssks_cfg, keys[ikey]);
 
     status = adjust_keys_to_cnstrs(rssks_cfg, mk_d_cnstrs, keys);
 
@@ -880,7 +881,7 @@ void worker_key_adjuster(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs)
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
     {
-        if (!k_test_dist(rssks_cfg, keys[ikey]))
+        if (!RSSKS_k_test_dist(rssks_cfg, keys[ikey]))
         {
             status = RSSKS_STATUS_BAD_SOLUTION;
             write(wp, &status, sizeof(RSSKS_status_t));
@@ -1028,7 +1029,7 @@ RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cn
     return status;
 }
 
-void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2)
+void RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_d_cnstrs, RSSKS_packet_t h1, RSSKS_packet_t h2)
 {
     Z3_context ctx;
     Z3_solver  s;

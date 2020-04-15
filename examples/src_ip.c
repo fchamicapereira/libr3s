@@ -22,7 +22,7 @@ int main () {
 
     RSSKS_cfg_init(&cfg);
     
-    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4_TCP);
+    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
 
     cnstrs[0] = &mk_d_cnstrs;
 

@@ -73,3 +73,22 @@ unsigned combinations(unsigned n, unsigned r)
 
     return f_n / (f_r * f_d);
 }
+
+// Durstenfeld's algorithm
+void shuffle(int *arr, int n)
+{
+    int tmp, chosen;
+
+    init_rand();
+
+    for (int i = 0; i < n; i++)
+    {
+        // chose one in [0, n[
+        chosen         = rand() % (n - i);
+
+        // swap with the last element
+        tmp            = arr[chosen];
+        arr[chosen]    = arr[n - i - 1];
+        arr[n - i - 1] = tmp;
+    }
+}

@@ -1,5 +1,5 @@
-#ifndef __DEBUG_H__
-#define __DEBUG_H__
+#ifndef __STRING_H__
+#define __STRING_H__
 
 #include <sys/types.h>
 #include <unistd.h>

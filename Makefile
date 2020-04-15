@@ -30,36 +30,41 @@ uninstall:
 	sudo rm /usr/lib/librssks.so
 	sudo ldconfig
 
-$(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/config.o $(BUILD)/debug.o $(BUILD)/util.o $(BUILD)/solver.o
+$(LIB_RSSKS)/librssks.so: $(BUILD)/hash.o $(BUILD)/config.o $(BUILD)/packet.o $(BUILD)/string.o $(BUILD)/util.o $(BUILD)/solver.o
 	@mkdir -p $(BUILD) $(LIB_RSSKS) $(LIB_RSSKS_INCLUDE)
-	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/debug.o $(BUILD)/config.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
+	$(CC) -shared -o $(LIB_RSSKS)/librssks.so $(BUILD)/solver.o $(BUILD)/string.o $(BUILD)/config.o $(BUILD)/packet.o $(BUILD)/hash.o $(BUILD)/util.o $(LIB_FLAGS)
 	@cp $(SRC)/rssks.h $(LIB_RSSKS_INCLUDE)/rssks.h
 
 examples: $(LIB_RSSKS)/librssks.so
 	$(MAKE) -C $(EX)
 
 solver: $(BUILD)/solver.o
-$(BUILD)/solver.o: $(SRC)/solver.c $(SRC)/solver.h $(SRC)/debug.h $(SRC)/util.h $(SRC)/hash.h $(SRC)/rssks.h
+$(BUILD)/solver.o: $(SRC)/solver.c $(SRC)/solver.h $(SRC)/string.h $(SRC)/util.h $(SRC)/hash.h $(SRC)/packet.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/solver.c -o $(BUILD)/solver.o $(LIB_FLAGS)
 
 hash: $(BUILD)/hash.o
-$(BUILD)/hash.o: $(SRC)/hash.c $(SRC)/hash.h $(SRC)/util.h $(SRC)/debug.h $(SRC)/rssks.h
+$(BUILD)/hash.o: $(SRC)/hash.c $(SRC)/hash.h $(SRC)/util.h $(SRC)/string.h $(SRC)/packet.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/hash.c -o $(BUILD)/hash.o $(LIB_FLAGS)
 
-debug: $(BUILD)/debug.o
-$(BUILD)/debug.o: $(SRC)/debug.c $(SRC)/debug.h $(SRC)/rssks.h
+string: $(BUILD)/string.o
+$(BUILD)/string.o: $(SRC)/string.c $(SRC)/string.h $(SRC)/packet.h $(SRC)/rssks.h
 	@mkdir -p $(BUILD)
-	$(CC) -c $(SRC)/debug.c -o $(BUILD)/debug.o $(LIB_FLAGS)
+	$(CC) -c $(SRC)/string.c -o $(BUILD)/string.o $(LIB_FLAGS)
+
+packet: $(BUILD)/packet.o
+$(BUILD)/packet.o: $(SRC)/packet.c $(SRC)/packet.h $(SRC)/util.h $(SRC)/rssks.h
+	@mkdir -p $(BUILD)
+	$(CC) -c $(SRC)/packet.c -o $(BUILD)/packet.o $(LIB_FLAGS)
 
 config: $(BUILD)/config.o
-$(BUILD)/config.o: $(SRC)/config.c $(SRC)/util.h $(SRC)/rssks.h $(SRC)/debug.h
+$(BUILD)/config.o: $(SRC)/config.c $(SRC)/util.h $(SRC)/rssks.h $(SRC)/string.h $(SRC)/packet.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/config.c -o $(BUILD)/config.o $(LIB_FLAGS)
 
 util: $(BUILD)/util.o
-$(BUILD)/util.o: $(SRC)/util.c $(SRC)/debug.h
+$(BUILD)/util.o: $(SRC)/util.c $(SRC)/string.h $(SRC)/util.h
 	@mkdir -p $(BUILD)
 	$(CC) -c $(SRC)/util.c -o $(BUILD)/util.o
 

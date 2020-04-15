@@ -1,11 +1,12 @@
 #include "rssks.h"
 #include "util.h"
 #include "hash.h"
-#include "debug.h"
+#include "string.h"
+#include "packet.h"
 
 #define LOAD_PF_OR_RETURN(cfg, pf) ({                           \
             RSSKS_status_t s = RSSKS_cfg_load_pf((cfg), (pf));  \
-            if (s != RSSKS_STATUS_SUCCESS)                      \
+            if (s == RSSKS_STATUS_PF_UNKNOWN)                   \
                 return s;                                       \
             })
 
@@ -23,8 +24,8 @@ RSSKS_status_t RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
     {
         case RSSKS_IN_OPT_GENEVE_OAM:
         case RSSKS_IN_OPT_VXLAN_GPE_OAM:
-            LOAD_PF_OR_RETURN(cfg, RSSKS_PF_UDP_OUTER);
-            LOAD_PF_OR_RETURN(cfg, RSSKS_PF_VNI);
+            LOAD_PF_OR_RETURN(cfg, RSSKS_PF_VXLAN_UDP_OUTER);
+            LOAD_PF_OR_RETURN(cfg, RSSKS_PF_VXLAN_VNI);
             break;
         case RSSKS_IN_OPT_NON_FRAG_IPV4_UDP:
             LOAD_PF_OR_RETURN(cfg, RSSKS_PF_IPV4_SRC);
@@ -74,8 +75,8 @@ RSSKS_status_t RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt)
             LOAD_PF_OR_RETURN(cfg, RSSKS_PF_IPV6_SRC);
             LOAD_PF_OR_RETURN(cfg, RSSKS_PF_IPV6_DST);
             break;
-        case RSSKS_IN_OPT_L2_TYPE:
-            LOAD_PF_OR_RETURN(cfg, RSSKS_PF_L2_TYPE);
+        case RSSKS_IN_OPT_ETHERTYPE:
+            LOAD_PF_OR_RETURN(cfg, RSSKS_PF_ETHERTYPE);
         default:
             return RSSKS_STATUS_OPT_UNKNOWN;
     }
@@ -94,12 +95,10 @@ RSSKS_status_t RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf)
 
     status = RSSKS_cfg_check_pf(*cfg, pf);
 
-    // TODO: check incompatible packet fields (eg TCP + UDP)
-
     if (status == RSSKS_STATUS_PF_NOT_LOADED)
     {
         cfg->in_cfg |= (1 << pf);
-        cfg->in_sz  += pf_sz_bits(pf);
+        cfg->in_sz  += RSSKS_pf_sz_bits(pf);
 
         return RSSKS_STATUS_SUCCESS;
     }

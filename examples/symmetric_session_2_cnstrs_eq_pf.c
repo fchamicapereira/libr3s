@@ -28,29 +28,29 @@ Z3_ast symmetric_session(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d1, Z3_as
 
 int validate(RSSKS_cfg_t cfg, RSSKS_key_t k1, RSSKS_key_t k2)
 {
-    RSSKS_headers_t h1_1, h1_2, h12_1, h12_2;
-    RSSKS_out_t     o1_1, o1_2, o12_1, o12_2;
+    RSSKS_packet_t p1_1, p1_2, p12_1, p12_2;
+    RSSKS_out_t    o1_1, o1_2, o12_1, o12_2;
 
     for (int i = 0; i < 25; i++)
     {
-        RSSKS_rand_headers(cfg, &h1_1);
-        RSSKS_rand_headers(cfg, &h12_1);
+        RSSKS_rand_packet(cfg, &p1_1);
+        RSSKS_rand_packet(cfg, &p12_1);
         
-        RSSKS_headers_from_cnstrs(cfg, h1_1,  &symmetric_session, &h1_2);
-        RSSKS_headers_from_cnstrs(cfg, h12_1, &symmetric_session, &h12_2);
+        RSSKS_packet_from_cnstrs(cfg, p1_1,  &symmetric_session, &p1_2);
+        RSSKS_packet_from_cnstrs(cfg, p12_1, &symmetric_session, &p12_2);
 
-        RSSKS_hash(cfg, k1, h1_1, &o1_1);
-        RSSKS_hash(cfg, k2, h1_2, &o1_2);
-        RSSKS_hash(cfg, k1, h12_1, &o12_1);
-        RSSKS_hash(cfg, k2, h12_2, &o12_2);
+        RSSKS_hash(cfg, k1, p1_1, &o1_1);
+        RSSKS_hash(cfg, k2, p1_2, &o1_2);
+        RSSKS_hash(cfg, k1, p12_1, &o12_1);
+        RSSKS_hash(cfg, k2, p12_2, &o12_2);
 
         printf("\n===== iteration %d =====\n", i);
 
         printf("\n*** port 1 \n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h1_1));
+        printf("%s\n", RSSKS_packet_to_string(p1_1));
         printf("%s\n", RSSKS_hash_output_to_string(o1_1));
 
-        printf("%s\n", RSSKS_headers_to_string(cfg, h1_2));
+        printf("%s\n", RSSKS_packet_to_string(p1_2));
         printf("%s\n", RSSKS_hash_output_to_string(o1_2));;
 
         if (o1_1 != o1_2)
@@ -60,11 +60,11 @@ int validate(RSSKS_cfg_t cfg, RSSKS_key_t k1, RSSKS_key_t k2)
         }
 
         printf("\n*** port 1 (~ port 2)\n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h12_1));
+        printf("%s\n", RSSKS_packet_to_string(p12_1));
         printf("%s\n", RSSKS_hash_output_to_string(o12_1));
 
         printf("\n*** port 2 (~ port 1)\n\n");
-        printf("%s\n", RSSKS_headers_to_string(cfg, h12_2));
+        printf("%s\n", RSSKS_packet_to_string(p12_2));
         printf("%s\n", RSSKS_hash_output_to_string(o12_2));
 
         if (o12_1 != o12_2)

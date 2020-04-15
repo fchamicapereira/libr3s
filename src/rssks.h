@@ -31,6 +31,8 @@ typedef RSSKS_byte_t   RSSKS_ipv4_t[4];
 typedef RSSKS_byte_t   RSSKS_v_tag_t[4];  // verification tag (SCTP)
 typedef RSSKS_byte_t   RSSKS_vni_t[3];    // unique identifier for the individual VXLAN segment
 typedef RSSKS_byte_t   RSSKS_port_t[2];
+typedef RSSKS_byte_t   RSSKS_ethertype_t[1];
+
 typedef unsigned       RSSKS_in_cfg_t;
 
 typedef enum {
@@ -50,7 +52,7 @@ typedef enum {
     RSSKS_IN_OPT_NON_FRAG_IPV6,
     RSSKS_IN_OPT_FRAG_IPV6,
 
-    RSSKS_IN_OPT_L2_TYPE,
+    RSSKS_IN_OPT_ETHERTYPE,
 
 } RSSKS_in_opt_t;
 
@@ -65,14 +67,14 @@ typedef enum {
  */
 typedef enum {
 
+    RSSKS_PF_VXLAN_UDP_OUTER,
+    RSSKS_PF_VXLAN_VNI,
+
     RSSKS_PF_IPV6_SRC,
     RSSKS_PF_IPV6_DST,
 
     RSSKS_PF_IPV4_SRC,
     RSSKS_PF_IPV4_DST,
-
-    RSSKS_PF_UDP_OUTER,
-    RSSKS_PF_VNI,
 
     RSSKS_PF_TCP_SRC,
     RSSKS_PF_TCP_DST,
@@ -84,13 +86,13 @@ typedef enum {
     RSSKS_PF_SCTP_DST,
     RSSKS_PF_SCTP_V_TAG,
 
-    RSSKS_PF_L2_TYPE,
+    RSSKS_PF_ETHERTYPE,
 
 } RSSKS_pf_t;
 
 // This is used for RSSKS_pf_t iteration
-#define RSSKS_FIRST_PF RSSKS_PF_IPV6_SRC
-#define RSSKS_LAST_PF  RSSKS_PF_L2_TYPE
+#define RSSKS_FIRST_PF RSSKS_PF_VXLAN_UDP_OUTER
+#define RSSKS_LAST_PF  RSSKS_PF_ETHERTYPE
 
 typedef enum {
     RSSKS_STATUS_SUCCESS,
@@ -108,28 +110,62 @@ typedef enum {
     RSSKS_STATUS_FAILURE
 } RSSKS_status_t;
 
+typedef unsigned RSSKS_packet_cfg_t;
+
 typedef struct {
-    RSSKS_port_t  udp_outer;
-    RSSKS_vni_t   vni;
+    RSSKS_ipv4_t src;
+    RSSKS_ipv4_t dst;
+} RSSKS_h_ipv4_t;
 
-    RSSKS_ipv4_t  ipv4_src;
-    RSSKS_ipv4_t  ipv4_dst;
+typedef struct {
+    RSSKS_ipv6_t src;
+    RSSKS_ipv6_t dst;
+} RSSKS_h_ipv6_t;
 
-    RSSKS_ipv6_t  ipv6_src;
-    RSSKS_ipv6_t  ipv6_dst;
+typedef struct {
+    RSSKS_port_t src;
+    RSSKS_port_t dst;
+} RSSKS_h_tcp_t;
 
-    RSSKS_port_t  tcp_src;
-    RSSKS_port_t  tcp_dst;
+typedef struct {
+    RSSKS_port_t src;
+    RSSKS_port_t dst;
+} RSSKS_h_udp_t;
 
-    RSSKS_port_t  udp_src;
-    RSSKS_port_t  udp_dst;
+typedef struct {
+    RSSKS_port_t  src;
+    RSSKS_port_t  dst;
+    RSSKS_v_tag_t tag;
+} RSSKS_h_sctp_t;
 
-    RSSKS_port_t  sctp_src;
-    RSSKS_port_t  sctp_dst;
-    RSSKS_v_tag_t sctp_v_tag; // sctp verification tag
+typedef struct {
+    RSSKS_port_t outer;
+    RSSKS_vni_t  vni;
+} RSSKS_h_vxlan_t;
 
-    // TODO: missing L2 ethertype
-} RSSKS_headers_t;
+typedef struct {
+    RSSKS_packet_cfg_t cfg;
+
+    union {
+        RSSKS_ethertype_t ethertype;
+    };
+
+    union {
+        RSSKS_h_ipv4_t ipv4;
+        RSSKS_h_ipv6_t ipv6;
+    };
+
+    union {
+        RSSKS_h_tcp_t  tcp;
+        RSSKS_h_udp_t  udp;
+        RSSKS_h_sctp_t sctp;
+    };
+
+    union {
+        RSSKS_h_vxlan_t vxlan;
+    };
+
+} RSSKS_packet_t;
 
 typedef struct {
     RSSKS_in_cfg_t in_cfg;
@@ -154,31 +190,41 @@ typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
 
 typedef union {
     char key[KEY_SIZE * 3];
-    char headers[700];
+    char packet[700];
     char output[12];
     char status[40];
 } RSSKS_string_t;
 
 #define RSSKS_status_to_string(s)       __status_to_string((s)).status
 #define RSSKS_key_to_string(k)          __key_to_string((k)).key
-#define RSSKS_headers_to_string(cfg, h) __headers_to_string((cfg), (h)).headers
+#define RSSKS_packet_to_string(p)       __packet_to_string((p)).packet
 #define RSSKS_hash_output_to_string(o)  __hash_output_to_string((o)).output
 
 RSSKS_string_t __key_to_string(RSSKS_key_t k);
-RSSKS_string_t __headers_to_string(RSSKS_cfg_t cfg, RSSKS_headers_t headers);
-RSSKS_string_t __hash_output_to_string(RSSKS_out_t output);
-RSSKS_string_t __status_to_string(RSSKS_status_t status);
+RSSKS_string_t __packet_to_string(RSSKS_packet_t p);
+RSSKS_string_t __hash_output_to_string(RSSKS_out_t o);
+RSSKS_string_t __status_to_string(RSSKS_status_t s);
+
+void           RSSKS_packet_init(RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_pf(RSSKS_pf_t pf, RSSKS_bytes_t v, RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_ethertype(RSSKS_ethertype_t ethertype, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_ipv4(RSSKS_ipv4_t src, RSSKS_ipv4_t dst, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_ipv6(RSSKS_ipv6_t src, RSSKS_ipv6_t dst, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_tcp(RSSKS_port_t src, RSSKS_port_t dst, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_udp(RSSKS_port_t src, RSSKS_port_t dst, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_sctp(RSSKS_port_t src, RSSKS_port_t dst, RSSKS_v_tag_t tag, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_packet_set_vxlan(RSSKS_port_t outer, RSSKS_vni_t vni, out RSSKS_packet_t *p);
 
 void           RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
 RSSKS_status_t RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
 RSSKS_status_t RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
 RSSKS_status_t RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
 
-RSSKS_status_t RSSKS_rand_headers(RSSKS_cfg_t cfg, out RSSKS_headers_t *h);
-RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_headers_t h, out RSSKS_out_t *result);
+RSSKS_status_t RSSKS_rand_packet(RSSKS_cfg_t cfg, out RSSKS_packet_t *p);
+RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_packet_t h, out RSSKS_out_t *result);
 
-void           RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_d_cnstrs, RSSKS_headers_t h1, RSSKS_headers_t h2);
-RSSKS_status_t RSSKS_headers_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_headers_t h, RSSKS_cnstrs_func mk_d_cnstrs, out RSSKS_headers_t *result);
+void           RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_d_cnstrs, RSSKS_packet_t h1, RSSKS_packet_t h2);
+RSSKS_status_t RSSKS_packet_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_packet_t h, RSSKS_cnstrs_func mk_d_cnstrs, out RSSKS_packet_t *result);
 RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *result);
 
 /*
