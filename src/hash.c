@@ -9,6 +9,7 @@
 #include "hash.h"
 #include "string.h"
 #include "packet.h"
+#include "config.h"
 
 void RSSKS_rand_key(RSSKS_cfg_t cfg, RSSKS_key_t key)
 {
@@ -31,14 +32,14 @@ bool RSSKS_is_zero_key(RSSKS_key_t key)
     return true;
 }
 
-RSSKS_in_t RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, RSSKS_packet_t p)
+RSSKS_in_t RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_packet_t p)
 {
     RSSKS_in_t   hi;
     unsigned     sz, offset;
     RSSKS_byte_t *field;
     RSSKS_pf_t   pf;
 
-    hi     = (RSSKS_in_t) malloc(sizeof(RSSKS_byte_t) * (cfg.in_sz / 8));
+    hi     = (RSSKS_in_t) malloc(sizeof(RSSKS_byte_t) * (cfg.loaded_opts[iopt].sz / 8));
     offset = 0;
     sz     = 0;
 
@@ -46,7 +47,7 @@ RSSKS_in_t RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, RSSKS_packet_t p)
     {   
         pf = (RSSKS_pf_t) ipf;
 
-        if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+        if (RSSKS_cfg_check_pf(cfg, iopt, pf) != RSSKS_STATUS_PF_LOADED)
             continue;
         
         if (!RSSKS_packet_has_pf(p, pf)) continue;
@@ -63,7 +64,7 @@ RSSKS_in_t RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, RSSKS_packet_t p)
     return hi;
 }
 
-RSSKS_packet_t RSSKS_in_to_packet(RSSKS_cfg_t cfg, RSSKS_in_t hi, RSSKS_packet_cfg_t p_cfg)
+RSSKS_packet_t RSSKS_in_to_packet(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_in_t hi, RSSKS_packet_cfg_t p_cfg)
 {
     RSSKS_packet_t p;
     unsigned       sz, offset;
@@ -78,7 +79,7 @@ RSSKS_packet_t RSSKS_in_to_packet(RSSKS_cfg_t cfg, RSSKS_in_t hi, RSSKS_packet_c
     {   
         pf = (RSSKS_pf_t) ipf;
 
-        if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+        if (RSSKS_cfg_check_pf(cfg, iopt, pf) != RSSKS_STATUS_PF_LOADED)
             continue;
         
         if (!RSSKS_packet_has_pf(p, pf)) continue;
@@ -111,15 +112,21 @@ void lshift(RSSKS_key_t k)
 
 RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_packet_t p, out RSSKS_out_t *o)
 {
-    RSSKS_key_t k_copy;
-    RSSKS_in_t  hi; 
+    RSSKS_key_t    k_copy;
+    RSSKS_in_t     hi;
+    RSSKS_status_t status;
+    unsigned       ipot;
+
+    status = RSSKS_cfg_packet_to_in_opt(cfg, p, &ipot);
+
+    if (status != RSSKS_STATUS_SUCCESS) return status;
 
     *o = 0;
-    hi = RSSKS_packet_to_hash_input(cfg, p);
+    hi = RSSKS_packet_to_hash_input(cfg, ipot, p);
     
     memcpy(k_copy, k, sizeof(RSSKS_byte_t) * KEY_SIZE);
 
-    for (unsigned i = 0; i < cfg.in_sz / 8; i++)
+    for (unsigned i = 0; i < cfg.loaded_opts[ipot].sz / 8; i++)
     {
         // iterate every bit
         for (int shift = 7; shift >= 0; shift--)

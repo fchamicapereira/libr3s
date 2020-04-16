@@ -1,6 +1,7 @@
 #include "rssks.h"
 #include "packet.h"
 #include "util.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -68,13 +69,7 @@ RSSKS_status_t RSSKS_packet_set_pf(RSSKS_pf_t pf, RSSKS_bytes_t v, RSSKS_packet_
     switch (pf)
     {
         case RSSKS_PF_VXLAN_UDP_OUTER:
-            if (!RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (!RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            break;
-
         case RSSKS_PF_VXLAN_VNI:
-            if (!RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (!RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST)) return RSSKS_STATUS_PF_INCOMPATIBLE;
             break;
 
         case RSSKS_PF_IPV6_SRC:
@@ -249,28 +244,22 @@ RSSKS_status_t RSSKS_packet_set_vxlan(RSSKS_port_t outer, RSSKS_vni_t vni, out R
 
 RSSKS_status_t RSSKS_rand_packet(RSSKS_cfg_t cfg, out RSSKS_packet_t *p)
 {
-    RSSKS_pf_t      pf;
-    int             *pfarr;
-    RSSKS_bytes_t   v;
-    unsigned        sz, n;
+    RSSKS_pf_t    pf;
+    unsigned      chosen_opt;
+    RSSKS_bytes_t v;
+    unsigned      sz;
 
     RSSKS_packet_init(p);
-
-    pfarr = (int*) malloc(sizeof(int) * (RSSKS_LAST_PF - RSSKS_FIRST_PF + 1));
-    v     = NULL;
-    n     = 0;
-
-    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
-        pfarr[n++] = ipf;
-    
-    shuffle(pfarr, n);
     init_rand();
 
-    for (unsigned i = 0; i < n; i++)
+    v          = NULL;
+    chosen_opt = rand() % cfg.n_loaded_opts;
+
+    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
     {   
-        pf = (RSSKS_pf_t) pfarr[i];
+        pf = (RSSKS_pf_t) ipf;
         
-        if (RSSKS_cfg_check_pf(cfg, pf) != RSSKS_STATUS_PF_ALREADY_LOADED)
+        if (RSSKS_cfg_check_pf(cfg, chosen_opt, pf) != RSSKS_STATUS_PF_LOADED)
             continue;
 
         sz = RSSKS_pf_sz(pf);
@@ -282,7 +271,6 @@ RSSKS_status_t RSSKS_rand_packet(RSSKS_cfg_t cfg, out RSSKS_packet_t *p)
         RSSKS_packet_set_pf(pf, v, p);
     }
 
-    free(pfarr);
     free(v);
 
     return RSSKS_STATUS_SUCCESS;

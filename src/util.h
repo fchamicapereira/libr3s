@@ -13,6 +13,5 @@
 int      str_long_int_div(const char* n, int divisor, char* res);
 void     init_rand();
 unsigned combinations(unsigned n, unsigned r);
-void     shuffle(int *arr, int n);
 
 #endif

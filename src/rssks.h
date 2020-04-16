@@ -56,6 +56,10 @@ typedef enum {
 
 } RSSKS_in_opt_t;
 
+// This is used for RSSKS_in_opt_t iteration
+#define RSSKS_FIRST_IN_OPT RSSKS_IN_OPT_GENEVE_OAM
+#define RSSKS_LAST_IN_OPT  RSSKS_IN_OPT_ETHERTYPE
+
 /*
  * The order is important!
  * From top to bottom, if one field is enumerated first, then
@@ -101,7 +105,7 @@ typedef enum {
     RSSKS_STATUS_HAS_SOLUTION,
     
     RSSKS_STATUS_PF_UNKNOWN,
-    RSSKS_STATUS_PF_ALREADY_LOADED,
+    RSSKS_STATUS_PF_LOADED,
     RSSKS_STATUS_PF_NOT_LOADED,
     RSSKS_STATUS_PF_INCOMPATIBLE,
 
@@ -168,42 +172,57 @@ typedef struct {
 } RSSKS_packet_t;
 
 typedef struct {
-    RSSKS_in_cfg_t in_cfg;
-    unsigned       in_sz;
+    RSSKS_in_opt_t opt; /* Configuration option */
+    RSSKS_in_cfg_t pfs; /* Hash input configuration (chosen packet fields) */
+    unsigned       sz;  /* Size of the hash input */
+} RSSKS_loaded_in_opt_t;
+
+typedef struct {
+    RSSKS_loaded_in_opt_t *loaded_opts;
+    unsigned              n_loaded_opts;
 
     /*
      * Use #cores in find_k.
      * If cores <= 0, then find_k will use *all* cores.
     */
-    int            n_cores;
+    int n_cores;
 
     /*
      * Number of keys to generate.
      * This is useful when there are constraints needed to be
      * considered between multiple NICs/ports in NICs.
     */
-    unsigned       n_keys;
+    unsigned n_keys;
 
 } RSSKS_cfg_t;
 
-typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,Z3_context,Z3_ast,Z3_ast);
+typedef Z3_ast (*RSSKS_cnstrs_func)(RSSKS_cfg_t,unsigned,Z3_context,Z3_ast,Z3_ast);
 
 typedef union {
     char key[KEY_SIZE * 3];
     char packet[700];
     char output[12];
     char status[40];
+    char opt[35];
+    char pf[30];
+    char cfg[1000];
 } RSSKS_string_t;
 
 #define RSSKS_status_to_string(s)       __status_to_string((s)).status
 #define RSSKS_key_to_string(k)          __key_to_string((k)).key
 #define RSSKS_packet_to_string(p)       __packet_to_string((p)).packet
 #define RSSKS_hash_output_to_string(o)  __hash_output_to_string((o)).output
+#define RSSKS_in_opt_to_string(opt)     __in_opt_to_string((opt)).opt
+#define RSSKS_pf_to_string(pf)          __pf_to_string((pf)).pf
+#define RSSKS_cfg_to_string(cfg)        __cfg_to_string((cfg)).cfg
 
 RSSKS_string_t __key_to_string(RSSKS_key_t k);
 RSSKS_string_t __packet_to_string(RSSKS_packet_t p);
 RSSKS_string_t __hash_output_to_string(RSSKS_out_t o);
 RSSKS_string_t __status_to_string(RSSKS_status_t s);
+RSSKS_string_t __in_opt_to_string(RSSKS_in_opt_t opt);
+RSSKS_string_t __pf_to_string(RSSKS_pf_t pf);
+RSSKS_string_t __cfg_to_string(RSSKS_cfg_t cfg);
 
 void           RSSKS_packet_init(RSSKS_packet_t *p);
 RSSKS_status_t RSSKS_packet_set_pf(RSSKS_pf_t pf, RSSKS_bytes_t v, RSSKS_packet_t *p);
@@ -216,16 +235,16 @@ RSSKS_status_t RSSKS_packet_set_sctp(RSSKS_port_t src, RSSKS_port_t dst, RSSKS_v
 RSSKS_status_t RSSKS_packet_set_vxlan(RSSKS_port_t outer, RSSKS_vni_t vni, out RSSKS_packet_t *p);
 
 void           RSSKS_cfg_init(out RSSKS_cfg_t *cfg);
-RSSKS_status_t RSSKS_cfg_load_in_opt(RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
-RSSKS_status_t RSSKS_cfg_load_pf(RSSKS_cfg_t *cfg, RSSKS_pf_t pf);
-RSSKS_status_t RSSKS_cfg_check_pf(RSSKS_cfg_t cfg, RSSKS_pf_t pf);
+void           RSSKS_cfg_reset(out RSSKS_cfg_t *cfg);
+void           RSSKS_cfg_delete(out RSSKS_cfg_t *cfg);
+RSSKS_status_t RSSKS_cfg_load_in_opt(out RSSKS_cfg_t *cfg, RSSKS_in_opt_t in_opt);
 
 RSSKS_status_t RSSKS_rand_packet(RSSKS_cfg_t cfg, out RSSKS_packet_t *p);
 RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_packet_t h, out RSSKS_out_t *result);
 
-void           RSSKS_check_d_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_d_cnstrs, RSSKS_packet_t h1, RSSKS_packet_t h2);
-RSSKS_status_t RSSKS_packet_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_packet_t h, RSSKS_cnstrs_func mk_d_cnstrs, out RSSKS_packet_t *result);
-RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *result);
+//void           RSSKS_check_p_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_p_cnstrs, RSSKS_packet_t h1, RSSKS_packet_t h2);
+RSSKS_status_t RSSKS_packet_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_packet_t h, RSSKS_cnstrs_func mk_p_cnstrs, out RSSKS_packet_t *result);
+RSSKS_status_t RSSKS_extract_pf_from_p(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *result);
 
 /*
  * Find keys that fit the given constraints, and insert them
@@ -238,37 +257,41 @@ RSSKS_status_t RSSKS_extract_pf_from_d(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3
  * The constraints are represented using a function with the definition
  * RSSKS_cnstrs_func (check its documentation).
  * 
- * The first N = rssks_cfg.n_keys elements of mk_d_cnstrs relate to
+ * The first N = rssks_cfg.n_keys elements of mk_p_cnstrs relate to
  * constraints on each key independently, i.e.:
  * 
- *   mk_d_cnstrs[0]    => constraints on k[0],
- *   mk_d_cnstrs[1]    => constraints on k[1],
+ *   mk_p_cnstrs[0]    => constraints on k[0],
+ *   mk_p_cnstrs[1]    => constraints on k[1],
  *   ...
- *   mk_d_cnstrs[N-1]  => constraints on k[N-1]
+ *   mk_p_cnstrs[N-1]  => constraints on k[N-1]
  * 
  * Next, we have the constraints related to combinations of keys:
  * 
- *   mk_d_cnstrs[N]    => constraints between k[0] and k[1]
- *   mk_d_cnstrs[N+1]  => constraints between k[0] and k[2]
+ *   mk_p_cnstrs[N]    => constraints between k[0] and k[1]
+ *   mk_p_cnstrs[N+1]  => constraints between k[0] and k[2]
  *   ...
- *   mk_d_cnstrs[2N-1] => constraints between k[0] and k[N-1]
- *   mk_d_cnstrs[2N]   => constraints between k[1] and k[2]
- *   mk_d_cnstrs[2N+1] => constraints between k[1] and k[3]
+ *   mk_p_cnstrs[2N-1] => constraints between k[0] and k[N-1]
+ *   mk_p_cnstrs[2N]   => constraints between k[1] and k[2]
+ *   mk_p_cnstrs[2N+1] => constraints between k[1] and k[3]
  *   etc.
  * 
  * Considering C(N,M) as combinations of N, M by M, the size of
- * mk_d_cnstrs must be at least N + C(N,2). This condition is
+ * mk_p_cnstrs must be at least N + C(N,2). This condition is
  * checked within this function, and it fails if it isn't met.
  * 
  * For example, using cssks_cfg.n_keys = 3:
- *   mk_d_cnstrs[0]    => constraints on k[0]
- *   mk_d_cnstrs[1]    => constraints on k[1]
- *   mk_d_cnstrs[2]    => constraints on k[2]
- *   mk_d_cnstrs[3]    => constraints between k[0] and k[1]
- *   mk_d_cnstrs[4]    => constraints between k[0] and k[2]
- *   mk_d_cnstrs[5]    => constraints between k[1] and k[2]
+ *   mk_p_cnstrs[0]    => constraints on k[0]
+ *   mk_p_cnstrs[1]    => constraints on k[1]
+ *   mk_p_cnstrs[2]    => constraints on k[2]
+ *   mk_p_cnstrs[3]    => constraints between k[0] and k[1]
+ *   mk_p_cnstrs[4]    => constraints between k[0] and k[2]
+ *   mk_p_cnstrs[5]    => constraints between k[1] and k[2]
  *  
 */
-RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_d_cnstrs, out RSSKS_key_t *keys);
+RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_p_cnstrs, out RSSKS_key_t *keys);
+
+Z3_ast RSSKS_mk_symmetric_ip_cnstr(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast RSSKS_mk_symmetric_tcp_cnstr(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast RSSKS_mk_symmetric_tcp_ip_cnstr(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 
 #endif

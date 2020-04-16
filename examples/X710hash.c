@@ -24,11 +24,13 @@ void ipv4_1()
     RSSKS_ipv4_t ipv4_dst = { 161, 142, 100,  80};
     RSSKS_packet_set_ipv4(ipv4_src, ipv4_dst, &p);
 
-    printf("%s\n", RSSKS_packet_to_string(p));
-
     RSSKS_hash(cfg, k, p, &o);
 
+    printf("%s\n", RSSKS_cfg_to_string(cfg));
+    printf("%s\n", RSSKS_packet_to_string(p));
     printf("%s\n", RSSKS_hash_output_to_string(o));
+    
+    RSSKS_cfg_delete(&cfg);
 }
 
 void ipv4_2()
@@ -55,11 +57,13 @@ void ipv4_2()
     RSSKS_ipv4_t ipv4_dst = {  65,  69, 140,  83};
     RSSKS_packet_set_ipv4(ipv4_src, ipv4_dst, &p);
 
-    printf("%s\n", RSSKS_packet_to_string(p));
-
     RSSKS_hash(cfg, k, p, &o);
 
+    printf("%s\n", RSSKS_cfg_to_string(cfg));
+    printf("%s\n", RSSKS_packet_to_string(p));
     printf("%s\n", RSSKS_hash_output_to_string(o));
+    
+    RSSKS_cfg_delete(&cfg);
 }
 
 void ipv4_tcp_1()
@@ -90,11 +94,13 @@ void ipv4_tcp_1()
     RSSKS_port_t tcp_dst  = { (1766 >> 8) & 0xff, (1766 >> 0) & 0xff };
     RSSKS_packet_set_tcp(tcp_src, tcp_dst, &p);
 
-    printf("%s\n", RSSKS_packet_to_string(p));
-
     RSSKS_hash(cfg, k, p, &o);
 
+    printf("%s\n", RSSKS_cfg_to_string(cfg));
+    printf("%s\n", RSSKS_packet_to_string(p));
     printf("%s\n", RSSKS_hash_output_to_string(o));
+    
+    RSSKS_cfg_delete(&cfg);
 }
 
 void ipv6_tcp_1()
@@ -116,6 +122,7 @@ void ipv6_tcp_1()
     RSSKS_packet_init(&p);
 
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV6_TCP);
+    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
 
     RSSKS_ipv6_t ipv6_src = { 0x3f, 0xfe, 0x25, 0x01, 0x02, 0x00, 0x1f, 0xff, 0, 0, 0, 0, 0, 0, 0, 7};
     RSSKS_ipv6_t ipv6_dst = { 0x3f, 0xfe, 0x25, 0x01, 0x02, 0x00, 0x00, 0x03, 0, 0, 0, 0, 0, 0, 0, 1};
@@ -125,16 +132,21 @@ void ipv6_tcp_1()
     RSSKS_port_t tcp_dst  = { (1766 >> 8) & 0xff, (1766 >> 0) & 0xff };
     RSSKS_packet_set_tcp(tcp_src, tcp_dst, &p);
 
-    printf("%s\n", RSSKS_packet_to_string(p));
-
     RSSKS_hash(cfg, k, p, &o);
 
+    printf("%s\n", RSSKS_cfg_to_string(cfg));
+    printf("%s\n", RSSKS_packet_to_string(p));
     printf("%s\n", RSSKS_hash_output_to_string(o));
+
+    RSSKS_cfg_delete(&cfg);
 }
 
 int main () {
     ipv4_1();
+    printf("\n===============================\n");
     ipv4_2();
+    printf("\n===============================\n");
     ipv4_tcp_1();
+    printf("\n===============================\n");
     ipv6_tcp_1();
 }

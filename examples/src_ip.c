@@ -1,17 +1,21 @@
 #include <rssks.h>
 
-Z3_ast mk_d_cnstrs(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d1, Z3_ast d2)
+Z3_ast p_cnstrs(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
-    Z3_ast d1_ipv4_src;
-    Z3_ast d2_ipv4_src;
-    Z3_ast eq_src_ip;
+    RSSKS_status_t status;
+    Z3_ast         p1_ipv4_src;
+    Z3_ast         p2_ipv4_src;
+    Z3_ast         eq_src_ip;
 
-    RSSKS_extract_pf_from_d(rssks_cfg, ctx, d1, RSSKS_PF_IPV4_SRC, &d1_ipv4_src);
-    RSSKS_extract_pf_from_d(rssks_cfg, ctx, d2, RSSKS_PF_IPV4_SRC, &d2_ipv4_src);
+    status = RSSKS_extract_pf_from_p(rssks_cfg, iopt, ctx, p1, RSSKS_PF_IPV4_SRC, &p1_ipv4_src);
+    if (status != RSSKS_STATUS_SUCCESS) return NULL;
 
-    eq_src_ip = Z3_mk_eq(ctx, d1_ipv4_src, d2_ipv4_src);
+    status = RSSKS_extract_pf_from_p(rssks_cfg, iopt, ctx, p2, RSSKS_PF_IPV4_SRC, &p2_ipv4_src);
+    if (status != RSSKS_STATUS_SUCCESS) return NULL;
 
-    return Z3_mk_and(ctx, 1, &eq_src_ip);
+    eq_src_ip = Z3_mk_eq(ctx, p1_ipv4_src, p2_ipv4_src);
+
+    return eq_src_ip;
 }
 
 int main () {
@@ -21,14 +25,16 @@ int main () {
     RSSKS_status_t    status;
 
     RSSKS_cfg_init(&cfg);
-    
     RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
 
-    cnstrs[0] = &mk_d_cnstrs;
-
-    status = RSSKS_find_keys(cfg, cnstrs, &k);
+    cnstrs[0] = &p_cnstrs;
+    status    = RSSKS_find_keys(cfg, cnstrs, &k);
     
+    printf("%s\n", RSSKS_cfg_to_string(cfg));
+    printf("%s\n", RSSKS_status_to_string(status));
+
     if (status == RSSKS_STATUS_SUCCESS)
         printf("result:\n%s\n", RSSKS_key_to_string(k));
-    else printf("unsuccesseful: code %u (%s)\n", status, RSSKS_status_to_string(status));
+
+    RSSKS_cfg_delete(&cfg);
 }
