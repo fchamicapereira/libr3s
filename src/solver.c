@@ -976,10 +976,10 @@ void worker_key_adjuster(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_p_cnstrs)
         exit(0);
     }
 
-    DEBUG_PLOG("testing key\n");
-
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
     {
+        DEBUG_PLOG("testing key %u\n", ikey);
+
         if (!RSSKS_k_test_dist(rssks_cfg, keys[ikey]))
         {
             DEBUG_PLOG("test failed\n");
@@ -993,11 +993,6 @@ void worker_key_adjuster(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_p_cnstrs)
 
     status = RSSKS_STATUS_SUCCESS;
     write(wp, &status, sizeof(RSSKS_status_t));
-
-    #if DEBUG
-        for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
-            DEBUG_PLOG("sending key %u\n%s\n", ikey, RSSKS_key_to_string(keys[ikey]));
-    #endif
 
     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
         write(wp, keys[ikey], KEY_SIZE);
@@ -1080,7 +1075,10 @@ RSSKS_status_t master(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_p_cnstrs, int
 
                 case RSSKS_STATUS_SUCCESS:
                     for (unsigned ikey = 0; ikey < rssks_cfg.n_keys; ikey++)
+                    {
                         read(comm.rpipe[p], keys[ikey], KEY_SIZE);
+                        DEBUG_PLOG("received key %u\n%s\n", ikey, RSSKS_key_to_string(keys[ikey]));
+                    }
 
                     for (p = 0; p < np; p++)
                     {
