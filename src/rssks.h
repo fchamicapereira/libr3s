@@ -185,7 +185,7 @@ typedef struct {
      * Use #cores in find_k.
      * If cores <= 0, then find_k will use *all* cores.
     */
-    int n_cores;
+    int n_procs;
 
     /*
      * Number of keys to generate.

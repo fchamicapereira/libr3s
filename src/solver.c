@@ -1104,7 +1104,7 @@ RSSKS_status_t RSSKS_find_keys(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func *mk_p_cn
     comm_t         comm;
     RSSKS_status_t status;
 
-    nworkers   = rssks_cfg.n_cores <= 0 ? get_nprocs() : rssks_cfg.n_cores;
+    nworkers   = rssks_cfg.n_procs <= 0 ? get_nprocs() : rssks_cfg.n_procs;
 
     comm.pid   = (int*) malloc(sizeof(int) * nworkers);
     comm.rpipe = (int*) malloc(sizeof(int) * nworkers);

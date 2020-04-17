@@ -72,8 +72,8 @@ srcport = 32077
 dstport = 3658
 protocol = 17
 
-n_cores = 4
-load = [0] * n_cores
+n_procs = 4
+load = [0] * n_procs
 computed = 0
 
 hash1 = compute_hash(get_input(srcip, dstip, srcport, dstport, protocol))

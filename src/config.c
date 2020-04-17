@@ -20,7 +20,7 @@ void RSSKS_cfg_init(RSSKS_cfg_t *cfg)
 {
     cfg->loaded_opts   = NULL;
     cfg->n_loaded_opts = 0;
-    cfg->n_cores       = 0;
+    cfg->n_procs       = 0;
     cfg->n_keys        = 1;
 }
 

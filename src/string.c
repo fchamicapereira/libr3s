@@ -246,7 +246,7 @@ RSSKS_string_t __cfg_to_string(RSSKS_cfg_t cfg)
 
     result.cfg[0] = '\0';
 
-    APPEND(result.cfg, "cores: %d\n", cfg.n_cores);
+    APPEND(result.cfg, "cores: %d\n", cfg.n_procs);
     APPEND(result.cfg, "keys : %d\n", cfg.n_keys);
     APPEND(result.cfg, "cfgs :\n");
 
