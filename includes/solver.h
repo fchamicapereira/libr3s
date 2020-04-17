@@ -1,5 +1,5 @@
-#ifndef __SOLVER_H__
-#define __SOLVER_H__
+#ifndef __RSSKS_SOLVER_H__
+#define __RSSKS_SOLVER_H__
 
 #include "rssks.h"
 

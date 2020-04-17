@@ -1,5 +1,5 @@
-#ifndef __SOLVER_HASH_H__
-#define __SOLVER_HASH_H__
+#ifndef __RSSKS_UTIL_H__
+#define __RSSKS_UTIL_H__
 
 #include <stdint.h>
 

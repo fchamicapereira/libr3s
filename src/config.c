@@ -1,9 +1,9 @@
-#include "rssks.h"
-#include "util.h"
-#include "hash.h"
-#include "string.h"
-#include "packet.h"
-#include "config.h"
+#include "../includes/rssks.h"
+#include "../includes/util.h"
+#include "../includes/hash.h"
+#include "../includes/printer.h"
+#include "../includes/packet.h"
+#include "../includes/config.h"
 
 #include <stdlib.h>
 

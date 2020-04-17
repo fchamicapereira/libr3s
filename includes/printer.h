@@ -1,5 +1,5 @@
-#ifndef __STRING_H__
-#define __STRING_H__
+#ifndef __RSSKS_PRINTER_H__
+#define __RSSKS_PRINTER_H__
 
 #include <sys/types.h>
 #include <unistd.h>

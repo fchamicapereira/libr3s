@@ -1,11 +1,10 @@
+#include "../includes/util.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <math.h>
-
-#include "util.h"
 
 int str_long_int_div(const char* n, int divisor, char* res)
 {

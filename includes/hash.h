@@ -1,9 +1,9 @@
-#ifndef __HASH_H__
-#define __HASH_H__
+#ifndef __RSSKS_HASH_H__
+#define __RSSKS_HASH_H__
 
 #include "rssks.h"
 
-#define STATS                   1'000'000
+#define STATS                   1000000
 #define DIST_THRESHOLD          0.1
 
 typedef unsigned packet_fields_t;

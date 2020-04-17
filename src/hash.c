@@ -1,15 +1,15 @@
+#include "../includes/util.h"
+#include "../includes/hash.h"
+#include "../includes/printer.h"
+#include "../includes/packet.h"
+#include "../includes/config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
 #include <assert.h>
 #include <netinet/in.h>
-
-#include "util.h"
-#include "hash.h"
-#include "string.h"
-#include "packet.h"
-#include "config.h"
+#include <string.h>
 
 void RSSKS_rand_key(RSSKS_cfg_t cfg, RSSKS_key_t key)
 {

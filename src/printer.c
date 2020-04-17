@@ -1,7 +1,7 @@
-#include "rssks.h"
-#include "string.h"
-#include "packet.h"
-#include "config.h"
+#include "../includes/rssks.h"
+#include "../includes/printer.h"
+#include "../includes/packet.h"
+#include "../includes/config.h"
 
 #include <stdio.h>
 #include <string.h>

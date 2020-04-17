@@ -1,5 +1,5 @@
-#ifndef __PACKET_H__
-#define __PACKET_H__
+#ifndef __RSSKS_PACKET_H__
+#define __RSSKS_PACKET_H__
 
 #include "rssks.h"
 #include <stdbool.h>

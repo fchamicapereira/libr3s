@@ -1,5 +1,5 @@
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __RSSKS_CONFIG_H__
+#define __RSSKS_CONFIG_H__
 
 #include "rssks.h"
 

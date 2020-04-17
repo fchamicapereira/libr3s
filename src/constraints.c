@@ -1,4 +1,4 @@
-#include "rssks.h"
+#include "../includes/rssks.h"
 
 Z3_ast RSSKS_mk_symmetric_ip_cnstr(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
