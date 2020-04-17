@@ -156,59 +156,14 @@ void k_ast_to_rss_key(Z3_context ctx, Z3_ast k, RSSKS_key_t rssk)
     free(res);
 }
 
-void check(Z3_context ctx, Z3_solver s)
-{
-    #if DEBUG
-        Z3_ast_vector core;
-        FILE *fcore;
-    #endif
-
-    Z3_model m = 0;
-    Z3_lbool result = Z3_solver_check(ctx, s);
-
-    switch (result)
-    {
-    case Z3_L_FALSE:
-        printf("unsat\n");
-
-        #if DEBUG
-            core = Z3_solver_get_unsat_core(ctx, s);
-            
-            fcore = fopen(UNSAT_CORE_AST_FILE, "w");
-            printf("unsat core size %u\n", Z3_ast_vector_size(ctx, core));
-            for (unsigned i = 0; i < Z3_ast_vector_size(ctx, core); ++i) {
-                fprintf(fcore, "%s\n", Z3_ast_to_string(ctx, Z3_ast_vector_get(ctx, core, i)));
-                printf("%s\n", Z3_ast_to_string(ctx, Z3_ast_vector_get(ctx, core, i)));
-            }
-            fclose(fcore);            
-        #endif
-        break;
-    case Z3_L_UNDEF:
-        printf("unknown: %s\n", Z3_solver_get_reason_unknown(ctx, s));
-        m = Z3_solver_get_model(ctx, s);
-        if (m) {
-            Z3_model_inc_ref(ctx, m);
-            printf("potential model:\n%s\n", Z3_model_to_string(ctx, m));
-        }
-        break;
-    case Z3_L_TRUE:
-        m = Z3_solver_get_model(ctx, s);
-        if (m)
-            Z3_model_inc_ref(ctx, m);
-        
-        printf("sat\n%s\n", Z3_model_to_string(ctx, m));
-        break;
-    }
-
-    if (m)
-        Z3_model_dec_ref(ctx, m);
-}
-
 Z3_ast mk_bvxor(Z3_context ctx, Z3_ast bv, unsigned sz)
 {
-    Z3_ast *el    = (Z3_ast *)malloc(sizeof(Z3_ast) * sz);
-    Z3_ast *xored = (Z3_ast *)malloc(sizeof(Z3_ast) * sz);
+    Z3_ast *el;
+    Z3_ast *xored;
     Z3_ast result;
+
+    el       = (Z3_ast *)malloc(sizeof(Z3_ast) * sz);
+    xored    = (Z3_ast *)malloc(sizeof(Z3_ast) * sz);
 
     el[0]    = Z3_mk_extract(ctx, 0, 0, bv);
     xored[0] = el[0];
@@ -220,6 +175,7 @@ Z3_ast mk_bvxor(Z3_context ctx, Z3_ast bv, unsigned sz)
     }
 
     result = xored[sz - 1];
+
     free(el);
     free(xored);
 
@@ -228,10 +184,10 @@ Z3_ast mk_bvxor(Z3_context ctx, Z3_ast bv, unsigned sz)
 
 Z3_ast mk_hash_func(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, Z3_ast key, Z3_ast o)
 {
-    Z3_ast k[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p_and_k[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast o_bit[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p_and_k_xor[HASH_OUTPUT_SIZE_BITS];
+    Z3_ast k;
+    Z3_ast p_and_k;
+    Z3_ast o_bit;
+    Z3_ast p_and_k_xor;
     Z3_ast args[HASH_OUTPUT_SIZE_BITS];
     
     unsigned k_high, k_low;
@@ -244,16 +200,16 @@ Z3_ast mk_hash_func(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast
     {
         k_high           = (KEY_SIZE_BITS - 1) - bit;
         k_low            = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
-        k[bit]           = Z3_mk_extract(ctx, k_high, k_low, key);
+        k                = Z3_mk_extract(ctx, k_high, k_low, key);
 
-        p_and_k[bit]     = Z3_mk_bvand(ctx, k[bit], p);
-        p_and_k_xor[bit] = mk_bvxor(ctx, p_and_k[bit], sz);
+        p_and_k          = Z3_mk_bvand(ctx, k, p);
+        p_and_k_xor      = mk_bvxor(ctx, p_and_k, sz);
 
         o_high           = HASH_OUTPUT_SIZE_BITS - bit - 1;
         o_low            = HASH_OUTPUT_SIZE_BITS - bit - 1;
-        o_bit[bit]       = Z3_mk_extract(ctx, o_high, o_low, o);
+        o_bit            = Z3_mk_extract(ctx, o_high, o_low, o);
 
-        args[bit]        = Z3_mk_eq(ctx, p_and_k_xor[bit], o_bit[bit]);
+        args[bit]        = Z3_mk_eq(ctx, p_and_k_xor, o_bit);
     }
 
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
@@ -261,12 +217,11 @@ Z3_ast mk_hash_func(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast
 
 Z3_ast mk_hash_eq(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast key, Z3_ast p1, Z3_ast p2)
 {
-    Z3_ast k[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p1_and_k[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p2_and_k[HASH_OUTPUT_SIZE_BITS];
-    
-    Z3_ast p1_and_k_xor[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p2_and_k_xor[HASH_OUTPUT_SIZE_BITS];
+    Z3_ast k;
+    Z3_ast p1_and_k;
+    Z3_ast p2_and_k;
+    Z3_ast p1_and_k_xor;
+    Z3_ast p2_and_k_xor;
 
     Z3_ast args[HASH_OUTPUT_SIZE_BITS];
 
@@ -277,17 +232,17 @@ Z3_ast mk_hash_eq(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast k
 
     for (int bit = 0; bit < HASH_OUTPUT_SIZE_BITS; bit++)
     {
-        k_high            = (KEY_SIZE_BITS - 1) - bit;
-        k_low             = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
-        k[bit]            = Z3_mk_extract(ctx, k_high, k_low, key);
+        k_high       = (KEY_SIZE_BITS - 1) - bit;
+        k_low        = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
+        k            = Z3_mk_extract(ctx, k_high, k_low, key);
 
-        p1_and_k[bit]     = Z3_mk_bvand(ctx, k[bit], p1);
-        p2_and_k[bit]     = Z3_mk_bvand(ctx, k[bit], p2);
+        p1_and_k     = Z3_mk_bvand(ctx, k, p1);
+        p2_and_k     = Z3_mk_bvand(ctx, k, p2);
 
-        p1_and_k_xor[bit] = mk_bvxor(ctx, p1_and_k[bit], sz);
-        p2_and_k_xor[bit] = mk_bvxor(ctx, p2_and_k[bit], sz);
+        p1_and_k_xor = mk_bvxor(ctx, p1_and_k, sz);
+        p2_and_k_xor = mk_bvxor(ctx, p2_and_k, sz);
 
-        args[bit]         = Z3_mk_eq(ctx, p1_and_k_xor[bit], p2_and_k_xor[bit]);
+        args[bit]    = Z3_mk_eq(ctx, p1_and_k_xor, p2_and_k_xor);
     }
 
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
@@ -295,13 +250,12 @@ Z3_ast mk_hash_eq(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast k
 
 Z3_ast mk_hash_eq_two_keys(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast key1, Z3_ast p1, Z3_ast key2, Z3_ast p2)
 {
-    Z3_ast k1[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast k2[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p1_and_k1[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p2_and_k2[HASH_OUTPUT_SIZE_BITS];
-    
-    Z3_ast p1_and_k1_xor[HASH_OUTPUT_SIZE_BITS];
-    Z3_ast p2_and_k2_xor[HASH_OUTPUT_SIZE_BITS];
+    Z3_ast k1;
+    Z3_ast k2;
+    Z3_ast p1_and_k1;
+    Z3_ast p2_and_k2;
+    Z3_ast p1_and_k1_xor;
+    Z3_ast p2_and_k2_xor;
 
     Z3_ast args[HASH_OUTPUT_SIZE_BITS];
 
@@ -313,21 +267,21 @@ Z3_ast mk_hash_eq_two_keys(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx,
 
     for (int bit = 0; bit < HASH_OUTPUT_SIZE_BITS; bit++)
     {
-        k1_high            = (KEY_SIZE_BITS - 1) - bit;
-        k1_low             = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
-        k1[bit]            = Z3_mk_extract(ctx, k1_high, k1_low, key1);
+        k1_high       = (KEY_SIZE_BITS - 1) - bit;
+        k1_low        = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
+        k1            = Z3_mk_extract(ctx, k1_high, k1_low, key1);
 
-        k2_high            = (KEY_SIZE_BITS - 1) - bit;
-        k2_low             = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
-        k2[bit]            = Z3_mk_extract(ctx, k2_high, k2_low, key2);
+        k2_high       = (KEY_SIZE_BITS - 1) - bit;
+        k2_low        = (KEY_SIZE_BITS - 1) - (bit + sz - 1);
+        k2            = Z3_mk_extract(ctx, k2_high, k2_low, key2);
 
-        p1_and_k1[bit]     = Z3_mk_bvand(ctx, k1[bit], p1);
-        p2_and_k2[bit]     = Z3_mk_bvand(ctx, k2[bit], p2);
+        p1_and_k1     = Z3_mk_bvand(ctx, k1, p1);
+        p2_and_k2     = Z3_mk_bvand(ctx, k2, p2);
 
-        p1_and_k1_xor[bit] = mk_bvxor(ctx, p1_and_k1[bit], sz);
-        p2_and_k2_xor[bit] = mk_bvxor(ctx, p2_and_k2[bit], sz);
+        p1_and_k1_xor = mk_bvxor(ctx, p1_and_k1, sz);
+        p2_and_k2_xor = mk_bvxor(ctx, p2_and_k2, sz);
 
-        args[bit]         = Z3_mk_eq(ctx, p1_and_k1_xor[bit], p2_and_k2_xor[bit]);
+        args[bit]     = Z3_mk_eq(ctx, p1_and_k1_xor, p2_and_k2_xor);
     }
 
     return Z3_mk_and(ctx, HASH_OUTPUT_SIZE_BITS, args);
@@ -577,8 +531,9 @@ Z3_sort mk_d_sort(RSSKS_cfg_t rssks_cfg, Z3_context ctx)
     return d_sort;
 }
 
-void mk_p(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, Z3_ast **p)
+Z3_ast* mk_p(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d)
 {
+    Z3_ast   *p;
     Z3_sort  d_sort;
     unsigned n_loaded_opts;
     unsigned input_sz;
@@ -589,7 +544,7 @@ void mk_p(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, Z3_ast **p)
     d_sort_sz     = Z3_get_bv_sort_size(ctx, d_sort);
     
     n_loaded_opts = rssks_cfg.n_loaded_opts;
-    *p            = (Z3_ast*) malloc(sizeof(Z3_ast) * n_loaded_opts);
+    p             = (Z3_ast*) malloc(sizeof(Z3_ast) * n_loaded_opts);
     
     for (unsigned iopt = 0; iopt < n_loaded_opts; iopt++)
     {
@@ -600,8 +555,10 @@ void mk_p(RSSKS_cfg_t rssks_cfg, Z3_context ctx, Z3_ast d, Z3_ast **p)
         high        = d_sort_sz - 1;
         low         = high - input_sz + 1;
 
-        (*p)[iopt]  = Z3_mk_extract(ctx, high, low, d);
+        p[iopt]  = Z3_mk_extract(ctx, high, low, d);
     }
+
+    return p;
 }
 
 Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func *mk_p_cnstrs, Z3_ast *keys)
@@ -614,8 +571,8 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func *mk_
     Z3_ast     *p2;
     Z3_ast     p_cnstrs;
 
-    Z3_ast     *left_implies;
-    Z3_ast     *right_implies;
+    Z3_ast     left_implies;
+    Z3_ast     right_implies;
     Z3_ast     *implies;
     Z3_ast     and_implies;
 
@@ -628,21 +585,19 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func *mk_
     unsigned   n_implies;
     unsigned   n_loaded_opts;
 
-    d_sort        = mk_d_sort(rssks_cfg, ctx);
+    d_sort         = mk_d_sort(rssks_cfg, ctx);
            
-    d1            = mk_var(ctx, "d1", d_sort);
-    d2            = mk_var(ctx, "d2", d_sort);
+    d1             = mk_var(ctx, "d1", d_sort);
+    d2             = mk_var(ctx, "d2", d_sort);
 
-    mk_p(rssks_cfg, ctx, d1, &p1);
-    mk_p(rssks_cfg, ctx, d2, &p2);
+    p1             = mk_p(rssks_cfg, ctx, d1);
+    p2             = mk_p(rssks_cfg, ctx, d2);
 
     n_loaded_opts  = rssks_cfg.n_loaded_opts;
     n_key_pairs    = combinations(rssks_cfg.n_keys, 2);
     n_cnstrs       = (rssks_cfg.n_keys + n_key_pairs) * n_loaded_opts;
     n_implies      = 0;
 
-    left_implies   = (Z3_ast*) malloc(sizeof(Z3_ast) * n_cnstrs);
-    right_implies  = (Z3_ast*) malloc(sizeof(Z3_ast) * n_cnstrs);
     implies        = (Z3_ast*) malloc(sizeof(Z3_ast) * n_cnstrs);
 
     for (cnstr = 0; cnstr < rssks_cfg.n_keys; cnstr++)
@@ -656,9 +611,9 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func *mk_
 
             if (p_cnstrs == NULL) continue;
 
-            left_implies[n_implies]  = p_cnstrs;
-            right_implies[n_implies] = mk_hash_eq(rssks_cfg, iopt, ctx, keys[cnstr], p1[iopt], p2[iopt]);
-            implies[n_implies]       = Z3_mk_implies(ctx, left_implies[n_implies], right_implies[n_implies]);
+            left_implies       = p_cnstrs;
+            right_implies      = mk_hash_eq(rssks_cfg, iopt, ctx, keys[cnstr], p1[iopt], p2[iopt]);
+            implies[n_implies] = Z3_mk_implies(ctx, left_implies, right_implies);
             
             n_implies++;
         }
@@ -677,9 +632,9 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func *mk_
 
                 if (p_cnstrs == NULL) continue;
 
-                left_implies[n_implies]  = p_cnstrs;
-                right_implies[n_implies] = mk_hash_eq_two_keys(rssks_cfg, iopt, ctx, keys[k1], p1[iopt], keys[k2], p2[iopt]);
-                implies[n_implies]       = Z3_mk_implies(ctx, left_implies[n_implies], right_implies[n_implies]);
+                left_implies       = p_cnstrs;
+                right_implies      = mk_hash_eq_two_keys(rssks_cfg, iopt, ctx, keys[k1], p1[iopt], keys[k2], p2[iopt]);
+                implies[n_implies] = Z3_mk_implies(ctx, left_implies, right_implies);
                 
                 cnstr++;
                 n_implies++;
@@ -694,8 +649,6 @@ Z3_ast mk_rss_stmt(RSSKS_cfg_t rssks_cfg, Z3_context ctx, RSSKS_cnstrs_func *mk_
  
     forall      = Z3_mk_forall_const(ctx, 0, 2, vars, 0, 0, and_implies);
 
-    free(left_implies);
-    free(right_implies);
     free(implies);
     free(p1);
     free(p2);
