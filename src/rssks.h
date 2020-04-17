@@ -243,8 +243,8 @@ RSSKS_status_t RSSKS_rand_packet(RSSKS_cfg_t cfg, out RSSKS_packet_t *p);
 RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_packet_t h, out RSSKS_out_t *result);
 
 //void           RSSKS_check_p_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_cnstrs_func mk_p_cnstrs, RSSKS_packet_t h1, RSSKS_packet_t h2);
-RSSKS_status_t RSSKS_packet_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_packet_t h, RSSKS_cnstrs_func mk_p_cnstrs, out RSSKS_packet_t *result);
-RSSKS_status_t RSSKS_extract_pf_from_p(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast d, RSSKS_pf_t pf, out Z3_ast *result);
+RSSKS_status_t RSSKS_packet_from_cnstrs(RSSKS_cfg_t rssks_cfg, RSSKS_packet_t p, RSSKS_cnstrs_func mk_p_cnstrs, out RSSKS_packet_t *result);
+RSSKS_status_t RSSKS_extract_pf_from_p(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, RSSKS_pf_t pf, out Z3_ast *result);
 
 /*
  * Find keys that fit the given constraints, and insert them
