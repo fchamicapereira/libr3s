@@ -10,8 +10,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+
+################################################################################
+# Arguments
+################################################################################
+
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_DEBUG_POSTFIX d)
+
+set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
 
 
 ################################################################################
@@ -69,10 +76,12 @@ target_link_libraries(r3s PUBLIC z3)
 # Build examples
 ###############################################################################
 
-include(${PROJECT_SOURCE_DIR}/examples.cmake)
+if (${BUILD_EXAMPLES})
+    include(${PROJECT_SOURCE_DIR}/examples.cmake)
 
-foreach( example_src ${EXAMPLES_SOURCES} )
-    get_filename_component(example ${example_src} NAME_WE)
-    add_executable(${example} ${example_src})
-    target_link_libraries(${example} r3s)
-endforeach( example_src ${EXAMPLES_SOURCES} )
+    foreach( example_src ${EXAMPLES_SOURCES} )
+        get_filename_component(example ${example_src} NAME_WE)
+        add_executable(${example} ${example_src})
+        target_link_libraries(${example} r3s)
+    endforeach( example_src ${EXAMPLES_SOURCES} )
+endif ()
