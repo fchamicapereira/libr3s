@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <string.h>
 
-void RSSKS_rand_key(RSSKS_cfg_t cfg, RSSKS_key_t key)
+void R3S_rand_key(R3S_cfg_t cfg, R3S_key_t key)
 {
     init_rand();
 
@@ -19,41 +19,41 @@ void RSSKS_rand_key(RSSKS_cfg_t cfg, RSSKS_key_t key)
         key[byte] = rand() & 0xff;
 }
 
-void RSSKS_zero_key(RSSKS_key_t key)
+void R3S_zero_key(R3S_key_t key)
 {
     for (int byte = 0; byte < KEY_SIZE; byte++)
         key[byte] = 0;
 }
 
-bool RSSKS_is_zero_key(RSSKS_key_t key)
+bool R3S_is_zero_key(R3S_key_t key)
 {
     for (int byte = 0; byte < KEY_SIZE; byte++)
         if (key[byte]) return false;
     return true;
 }
 
-RSSKS_in_t RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_packet_t p)
+R3S_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
 {
-    RSSKS_in_t   hi;
+    R3S_in_t   hi;
     unsigned     sz, offset;
-    RSSKS_byte_t *field;
-    RSSKS_pf_t   pf;
+    R3S_byte_t *field;
+    R3S_pf_t   pf;
 
-    hi     = (RSSKS_in_t) malloc(sizeof(RSSKS_byte_t) * (cfg.loaded_opts[iopt].sz / 8));
+    hi     = (R3S_in_t) malloc(sizeof(R3S_byte_t) * (cfg.loaded_opts[iopt].sz / 8));
     offset = 0;
     sz     = 0;
 
-    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {   
-        pf = (RSSKS_pf_t) ipf;
+        pf = (R3S_pf_t) ipf;
 
-        if (RSSKS_cfg_check_pf(cfg, iopt, pf) != RSSKS_STATUS_PF_LOADED)
+        if (R3S_cfg_check_pf(cfg, iopt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
-        if (!RSSKS_packet_has_pf(p, pf)) continue;
+        if (!R3S_packet_has_pf(p, pf)) continue;
 
-        field = RSSKS_field_from_packet(&p, pf);
-        sz    = RSSKS_pf_sz(pf);
+        field = R3S_field_from_packet(&p, pf);
+        sz    = R3S_pf_sz(pf);
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
             hi[offset + byte] = *field;
@@ -64,28 +64,28 @@ RSSKS_in_t RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_pack
     return hi;
 }
 
-RSSKS_packet_t RSSKS_in_to_packet(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_in_t hi, RSSKS_packet_cfg_t p_cfg)
+R3S_packet_t R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_packet_cfg_t p_cfg)
 {
-    RSSKS_packet_t p;
+    R3S_packet_t p;
     unsigned       sz, offset;
-    RSSKS_byte_t   *field;
-    RSSKS_pf_t     pf;
+    R3S_byte_t   *field;
+    R3S_pf_t     pf;
 
     p.cfg  = p_cfg;
     offset = 0;
     sz     = 0;
 
-    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {   
-        pf = (RSSKS_pf_t) ipf;
+        pf = (R3S_pf_t) ipf;
 
-        if (RSSKS_cfg_check_pf(cfg, iopt, pf) != RSSKS_STATUS_PF_LOADED)
+        if (R3S_cfg_check_pf(cfg, iopt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
-        if (!RSSKS_packet_has_pf(p, pf)) continue;
+        if (!R3S_packet_has_pf(p, pf)) continue;
 
-        field = RSSKS_field_from_packet(&p, pf);
-        sz    = RSSKS_pf_sz(pf);
+        field = R3S_field_from_packet(&p, pf);
+        sz    = R3S_pf_sz(pf);
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
             (*field) = hi[offset + byte];
@@ -96,9 +96,9 @@ RSSKS_packet_t RSSKS_in_to_packet(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_in_t hi,
     return p;
 }
 
-void lshift(RSSKS_key_t k)
+void lshift(R3S_key_t k)
 {
-    RSSKS_byte_t lsb, msb = 0; // there are no 1-bit data structures in C :(
+    R3S_byte_t lsb, msb = 0; // there are no 1-bit data structures in C :(
 
     for (int i = KEY_SIZE; i >= 0; i--)
     {
@@ -110,21 +110,21 @@ void lshift(RSSKS_key_t k)
     k[KEY_SIZE - 1] |= msb;
 }
 
-RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_packet_t p, out RSSKS_out_t *o)
+R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_out_t *o)
 {
-    RSSKS_key_t    k_copy;
-    RSSKS_in_t     hi;
-    RSSKS_status_t status;
+    R3S_key_t    k_copy;
+    R3S_in_t     hi;
+    R3S_status_t status;
     unsigned       ipot;
 
-    status = RSSKS_cfg_packet_to_in_opt(cfg, p, &ipot);
+    status = R3S_cfg_packet_to_in_opt(cfg, p, &ipot);
 
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    if (status != R3S_STATUS_SUCCESS) return status;
 
     *o = 0;
-    hi = RSSKS_packet_to_hash_input(cfg, ipot, p);
+    hi = R3S_packet_to_hash_input(cfg, ipot, p);
     
-    memcpy(k_copy, k, sizeof(RSSKS_byte_t) * KEY_SIZE);
+    memcpy(k_copy, k, sizeof(R3S_byte_t) * KEY_SIZE);
 
     for (unsigned i = 0; i < cfg.loaded_opts[ipot].sz / 8; i++)
     {
@@ -138,21 +138,21 @@ RSSKS_status_t RSSKS_hash(RSSKS_cfg_t cfg, RSSKS_key_t k, RSSKS_packet_t p, out 
 
     free(hi);
 
-    return RSSKS_STATUS_SUCCESS;
+    return R3S_STATUS_SUCCESS;
 }
 
-float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
+float k_dist_mean(R3S_cfg_t cfg, R3S_key_t k)
 {
-    RSSKS_packet_t  p;
-    RSSKS_out_t     o;
+    R3S_packet_t  p;
+    R3S_out_t     o;
     unsigned        core_dist[CORES];
     float           mean;
 
     for (int core = 0; core < CORES; core++) core_dist[core] = 0;
 
     for (unsigned counter = 0; counter < STATS; counter++) {
-        RSSKS_rand_packet(cfg, &p);
-        RSSKS_hash(cfg, k, p, &o);
+        R3S_rand_packet(cfg, &p);
+        R3S_hash(cfg, k, p, &o);
 
         core_dist[HASH_TO_CORE(o)] += 1;
     }
@@ -165,7 +165,7 @@ float k_dist_mean(RSSKS_cfg_t cfg, RSSKS_key_t k)
     return mean;
 }
 
-bool RSSKS_k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k)
+bool R3S_k_test_dist(R3S_cfg_t cfg, R3S_key_t k)
 {
     float observed_mean;
     float goal_mean;
@@ -186,7 +186,7 @@ bool RSSKS_k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k)
         \rmean       : %.3lf    \n\
         \rdm         : %.3lf %% \n\
         \rthreshold  : %.3lf %% \n",
-        RSSKS_key_to_string(k),
+        R3S_key_to_string(k),
         observed_mean,
         dm,
         DIST_THRESHOLD);

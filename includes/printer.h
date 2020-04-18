@@ -1,5 +1,5 @@
-#ifndef __RSSKS_PRINTER_H__
-#define __RSSKS_PRINTER_H__
+#ifndef __R3S_PRINTER_H__
+#define __R3S_PRINTER_H__
 
 #include <sys/types.h>
 #include <unistd.h>

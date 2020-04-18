@@ -1,17 +1,17 @@
-#include <rssks.h>
+#include <r3s.h>
 
-Z3_ast p_cnstrs(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
+Z3_ast p_cnstrs(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
     Z3_ast         p1_ipv4_src;
     Z3_ast         p2_ipv4_src;
     Z3_ast         eq_src_ip;
 
-    status = RSSKS_extract_pf_from_p(rssks_cfg, iopt, ctx, p1, RSSKS_PF_IPV4_SRC, &p1_ipv4_src);
-    if (status != RSSKS_STATUS_SUCCESS) return NULL;
+    status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
+    if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    status = RSSKS_extract_pf_from_p(rssks_cfg, iopt, ctx, p2, RSSKS_PF_IPV4_SRC, &p2_ipv4_src);
-    if (status != RSSKS_STATUS_SUCCESS) return NULL;
+    status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
+    if (status != R3S_STATUS_SUCCESS) return NULL;
 
     eq_src_ip = Z3_mk_eq(ctx, p1_ipv4_src, p2_ipv4_src);
 
@@ -19,22 +19,22 @@ Z3_ast p_cnstrs(RSSKS_cfg_t rssks_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1,
 }
 
 int main () {
-    RSSKS_cfg_t       cfg;
-    RSSKS_key_t       k;
-    RSSKS_cnstrs_func cnstrs[1];
-    RSSKS_status_t    status;
+    R3S_cfg_t       cfg;
+    R3S_key_t       k;
+    R3S_cnstrs_func cnstrs[1];
+    R3S_status_t    status;
 
-    RSSKS_cfg_init(&cfg);
-    RSSKS_cfg_load_in_opt(&cfg, RSSKS_IN_OPT_NON_FRAG_IPV4);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4);
 
     cnstrs[0] = &p_cnstrs;
-    status    = RSSKS_find_keys(cfg, cnstrs, &k);
+    status    = R3S_find_keys(cfg, cnstrs, &k);
     
-    printf("%s\n", RSSKS_cfg_to_string(cfg));
-    printf("%s\n", RSSKS_status_to_string(status));
+    printf("%s\n", R3S_cfg_to_string(cfg));
+    printf("%s\n", R3S_status_to_string(status));
 
-    if (status == RSSKS_STATUS_SUCCESS)
-        printf("result:\n%s\n", RSSKS_key_to_string(k));
+    if (status == R3S_STATUS_SUCCESS)
+        printf("result:\n%s\n", R3S_key_to_string(k));
 
-    RSSKS_cfg_delete(&cfg);
+    R3S_cfg_delete(&cfg);
 }

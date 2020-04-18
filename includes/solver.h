@@ -1,7 +1,7 @@
-#ifndef __RSSKS_SOLVER_H__
-#define __RSSKS_SOLVER_H__
+#ifndef __R3S_SOLVER_H__
+#define __R3S_SOLVER_H__
 
-#include "rssks.h"
+#include "r3s.h"
 
 #define SOLVER_TIMEOUT_SEC      (60 * 60) // 1 hour
 
@@ -11,6 +11,6 @@ typedef struct {
     int *wpipe;
 } comm_t;
 
-typedef void (*RSSKS_worker)(RSSKS_cfg_t,RSSKS_cnstrs_func*);
+typedef void (*R3S_worker)(R3S_cfg_t,R3S_cnstrs_func*);
 
 #endif

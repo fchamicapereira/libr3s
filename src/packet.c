@@ -1,4 +1,4 @@
-#include "../includes/rssks.h"
+#include "../includes/r3s.h"
 #include "../includes/packet.h"
 #include "../includes/util.h"
 #include "../includes/config.h"
@@ -6,272 +6,272 @@
 #include <stdlib.h>
 #include <assert.h>
 
-size_t RSSKS_pf_sz_bits(RSSKS_pf_t pf)
+size_t R3S_pf_sz_bits(R3S_pf_t pf)
 {
     switch (pf)
     {
-        case RSSKS_PF_VXLAN_UDP_OUTER:  return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_VXLAN_VNI:        return sizeof(RSSKS_vni_t)   * 8;
-        case RSSKS_PF_IPV4_SRC:         return sizeof(RSSKS_ipv4_t)  * 8;
-        case RSSKS_PF_IPV4_DST:         return sizeof(RSSKS_ipv4_t)  * 8;
-        case RSSKS_PF_IPV6_SRC:         return sizeof(RSSKS_ipv6_t)  * 8;
-        case RSSKS_PF_IPV6_DST:         return sizeof(RSSKS_ipv6_t)  * 8;
-        case RSSKS_PF_TCP_SRC:          return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_TCP_DST:          return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_UDP_SRC:          return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_UDP_DST:          return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_SCTP_SRC:         return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_SCTP_DST:         return sizeof(RSSKS_port_t)  * 8;
-        case RSSKS_PF_SCTP_V_TAG:       return sizeof(RSSKS_v_tag_t) * 8;
-        case RSSKS_PF_ETHERTYPE:        return 6;
+        case R3S_PF_VXLAN_UDP_OUTER:  return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_VXLAN_VNI:        return sizeof(R3S_vni_t)   * 8;
+        case R3S_PF_IPV4_SRC:         return sizeof(R3S_ipv4_t)  * 8;
+        case R3S_PF_IPV4_DST:         return sizeof(R3S_ipv4_t)  * 8;
+        case R3S_PF_IPV6_SRC:         return sizeof(R3S_ipv6_t)  * 8;
+        case R3S_PF_IPV6_DST:         return sizeof(R3S_ipv6_t)  * 8;
+        case R3S_PF_TCP_SRC:          return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_TCP_DST:          return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_UDP_SRC:          return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_UDP_DST:          return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_SCTP_SRC:         return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_SCTP_DST:         return sizeof(R3S_port_t)  * 8;
+        case R3S_PF_SCTP_V_TAG:       return sizeof(R3S_v_tag_t) * 8;
+        case R3S_PF_ETHERTYPE:        return 6;
         default:                        assert(false);
     }
 }
 
-RSSKS_bytes_t RSSKS_field_from_packet(RSSKS_packet_t *p, RSSKS_pf_t pf)
+R3S_bytes_t R3S_field_from_packet(R3S_packet_t *p, R3S_pf_t pf)
 {
     switch (pf)
     {
-        case RSSKS_PF_VXLAN_UDP_OUTER:  return (RSSKS_bytes_t) p->vxlan.outer;
-        case RSSKS_PF_VXLAN_VNI:        return (RSSKS_bytes_t) p->vxlan.vni;
-        case RSSKS_PF_IPV4_SRC:         return (RSSKS_bytes_t) p->ipv4.src;
-        case RSSKS_PF_IPV4_DST:         return (RSSKS_bytes_t) p->ipv4.dst;
-        case RSSKS_PF_IPV6_SRC:         return (RSSKS_bytes_t) p->ipv6.src;
-        case RSSKS_PF_IPV6_DST:         return (RSSKS_bytes_t) p->ipv6.dst;
-        case RSSKS_PF_TCP_SRC:          return (RSSKS_bytes_t) p->tcp.src;
-        case RSSKS_PF_TCP_DST:          return (RSSKS_bytes_t) p->tcp.dst;
-        case RSSKS_PF_UDP_SRC:          return (RSSKS_bytes_t) p->udp.src;
-        case RSSKS_PF_UDP_DST:          return (RSSKS_bytes_t) p->udp.dst;
-        case RSSKS_PF_SCTP_SRC:         return (RSSKS_bytes_t) p->sctp.src;
-        case RSSKS_PF_SCTP_DST:         return (RSSKS_bytes_t) p->sctp.dst;
-        case RSSKS_PF_SCTP_V_TAG:       return (RSSKS_bytes_t) p->sctp.tag;
-        case RSSKS_PF_ETHERTYPE:        return (RSSKS_bytes_t) p->ethertype;
+        case R3S_PF_VXLAN_UDP_OUTER:  return (R3S_bytes_t) p->vxlan.outer;
+        case R3S_PF_VXLAN_VNI:        return (R3S_bytes_t) p->vxlan.vni;
+        case R3S_PF_IPV4_SRC:         return (R3S_bytes_t) p->ipv4.src;
+        case R3S_PF_IPV4_DST:         return (R3S_bytes_t) p->ipv4.dst;
+        case R3S_PF_IPV6_SRC:         return (R3S_bytes_t) p->ipv6.src;
+        case R3S_PF_IPV6_DST:         return (R3S_bytes_t) p->ipv6.dst;
+        case R3S_PF_TCP_SRC:          return (R3S_bytes_t) p->tcp.src;
+        case R3S_PF_TCP_DST:          return (R3S_bytes_t) p->tcp.dst;
+        case R3S_PF_UDP_SRC:          return (R3S_bytes_t) p->udp.src;
+        case R3S_PF_UDP_DST:          return (R3S_bytes_t) p->udp.dst;
+        case R3S_PF_SCTP_SRC:         return (R3S_bytes_t) p->sctp.src;
+        case R3S_PF_SCTP_DST:         return (R3S_bytes_t) p->sctp.dst;
+        case R3S_PF_SCTP_V_TAG:       return (R3S_bytes_t) p->sctp.tag;
+        case R3S_PF_ETHERTYPE:        return (R3S_bytes_t) p->ethertype;
     }
     
     printf("ERROR: field %d not found on header\n", pf);
     assert(false);
 }
 
-void RSSKS_packet_init(RSSKS_packet_t *p)
+void R3S_packet_init(R3S_packet_t *p)
 {
     p->cfg = 0;
 }
 
-bool RSSKS_packet_has_pf(RSSKS_packet_t p, RSSKS_pf_t pf)
+bool R3S_packet_has_pf(R3S_packet_t p, R3S_pf_t pf)
 {
     return (p.cfg >> pf) & 1;
 }
 
-RSSKS_status_t RSSKS_packet_set_pf(RSSKS_pf_t pf, RSSKS_bytes_t v, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_pf(R3S_pf_t pf, R3S_bytes_t v, R3S_packet_t *p)
 {
-    RSSKS_bytes_t field;
+    R3S_bytes_t field;
 
     switch (pf)
     {
-        case RSSKS_PF_VXLAN_UDP_OUTER:
-        case RSSKS_PF_VXLAN_VNI:
+        case R3S_PF_VXLAN_UDP_OUTER:
+        case R3S_PF_VXLAN_VNI:
             break;
 
-        case RSSKS_PF_IPV6_SRC:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV4_SRC)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV4_DST)) return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_IPV6_SRC:
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_IPV6_DST:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV4_SRC)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV4_DST)) return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_IPV6_DST:
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_IPV4_SRC:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV6_SRC)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV6_DST)) return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_IPV4_SRC:
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_IPV4_DST:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV6_SRC)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_IPV6_DST)) return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_IPV4_DST:
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_TCP_SRC:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_UDP_OUTER)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_VNI))       return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_SRC))        return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_DST))        return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_V_TAG))      return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_TCP_SRC:
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))        return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))        return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG))      return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_TCP_DST:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_UDP_OUTER)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_VNI))       return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_SRC))        return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_DST))        return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_V_TAG))      return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_TCP_DST:
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))        return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))        return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG))      return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_UDP_SRC:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_SRC))        return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_DST))        return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_V_TAG))      return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_UDP_SRC:
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))        return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))        return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG))      return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_UDP_DST:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_SRC))    return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_DST))    return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_SRC))   return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_DST))   return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_SCTP_V_TAG)) return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_UDP_DST:
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))    return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))    return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))   return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))   return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG)) return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_SCTP_SRC:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_UDP_OUTER)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_VNI))       return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_SCTP_SRC:
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_SCTP_DST:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_UDP_OUTER)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_VNI))       return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_SCTP_DST:
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_SCTP_V_TAG:
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_UDP_OUTER)) return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_VXLAN_VNI))       return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_TCP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_SRC))         return RSSKS_STATUS_PF_INCOMPATIBLE;
-            if (RSSKS_packet_has_pf(*p, RSSKS_PF_UDP_DST))         return RSSKS_STATUS_PF_INCOMPATIBLE;
+        case R3S_PF_SCTP_V_TAG:
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
+            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
             break;
 
-        case RSSKS_PF_ETHERTYPE:
+        case R3S_PF_ETHERTYPE:
             break;
     }
 
     p->cfg |= (1 << pf);
-    field = RSSKS_field_from_packet(p, pf);
+    field = R3S_field_from_packet(p, pf);
 
-    for (unsigned byte = 0; byte < RSSKS_pf_sz(pf); byte++)
+    for (unsigned byte = 0; byte < R3S_pf_sz(pf); byte++)
         field[byte] = v[byte];
 
-    return RSSKS_STATUS_SUCCESS;
+    return R3S_STATUS_SUCCESS;
 }
 
-RSSKS_status_t RSSKS_packet_set_ethertype(RSSKS_ethertype_t ethertype, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_ethertype(R3S_ethertype_t ethertype, R3S_packet_t *p)
 {
-    return RSSKS_packet_set_pf(RSSKS_PF_ETHERTYPE, ethertype, p);
+    return R3S_packet_set_pf(R3S_PF_ETHERTYPE, ethertype, p);
 }
 
-RSSKS_status_t RSSKS_packet_set_ipv4(RSSKS_ipv4_t src, RSSKS_ipv4_t dst, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_ipv4(R3S_ipv4_t src, R3S_ipv4_t dst, R3S_packet_t *p)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_IPV4_SRC, src, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_IPV4_SRC, src, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_IPV4_DST, dst, p);
+    status = R3S_packet_set_pf(R3S_PF_IPV4_DST, dst, p);
     return status;
 }
 
-RSSKS_status_t RSSKS_packet_set_ipv6(RSSKS_ipv6_t src, RSSKS_ipv6_t dst, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_ipv6(R3S_ipv6_t src, R3S_ipv6_t dst, R3S_packet_t *p)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_IPV6_SRC, src, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_IPV6_SRC, src, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_IPV6_DST, dst, p);
+    status = R3S_packet_set_pf(R3S_PF_IPV6_DST, dst, p);
     return status;
 }
 
-RSSKS_status_t RSSKS_packet_set_tcp(RSSKS_port_t src, RSSKS_port_t dst, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_tcp(R3S_port_t src, R3S_port_t dst, R3S_packet_t *p)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_TCP_SRC, src, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_TCP_SRC, src, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_TCP_DST, dst, p);
+    status = R3S_packet_set_pf(R3S_PF_TCP_DST, dst, p);
     return status;
 }
 
-RSSKS_status_t RSSKS_packet_set_udp(RSSKS_port_t src, RSSKS_port_t dst, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_udp(R3S_port_t src, R3S_port_t dst, R3S_packet_t *p)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_UDP_SRC, src, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_UDP_SRC, src, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_UDP_DST, dst, p);
+    status = R3S_packet_set_pf(R3S_PF_UDP_DST, dst, p);
     return status;
 }
 
-RSSKS_status_t RSSKS_packet_set_sctp(RSSKS_port_t src, RSSKS_port_t dst, RSSKS_v_tag_t tag, RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_sctp(R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, R3S_packet_t *p)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_SCTP_SRC, src, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_SCTP_SRC, src, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_SCTP_DST, dst, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_SCTP_DST, dst, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_SCTP_V_TAG, tag, p);
+    status = R3S_packet_set_pf(R3S_PF_SCTP_V_TAG, tag, p);
     return status;
 }
 
-RSSKS_status_t RSSKS_packet_set_vxlan(RSSKS_port_t outer, RSSKS_vni_t vni, out RSSKS_packet_t *p)
+R3S_status_t R3S_packet_set_vxlan(R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p)
 {
-    RSSKS_status_t status;
+    R3S_status_t status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_VXLAN_UDP_OUTER, outer, p);
-    if (status != RSSKS_STATUS_SUCCESS) return status;
+    status = R3S_packet_set_pf(R3S_PF_VXLAN_UDP_OUTER, outer, p);
+    if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = RSSKS_packet_set_pf(RSSKS_PF_VXLAN_VNI, vni, p);
+    status = R3S_packet_set_pf(R3S_PF_VXLAN_VNI, vni, p);
     return status;
 }
 
-RSSKS_status_t RSSKS_rand_packet(RSSKS_cfg_t cfg, out RSSKS_packet_t *p)
+R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p)
 {
-    RSSKS_pf_t    pf;
+    R3S_pf_t    pf;
     unsigned      chosen_opt;
-    RSSKS_bytes_t v;
+    R3S_bytes_t v;
     unsigned      sz;
 
-    RSSKS_packet_init(p);
+    R3S_packet_init(p);
     init_rand();
 
     v          = NULL;
     chosen_opt = rand() % cfg.n_loaded_opts;
 
-    for (int ipf = RSSKS_FIRST_PF; ipf <= RSSKS_LAST_PF; ipf++)
+    for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {   
-        pf = (RSSKS_pf_t) ipf;
+        pf = (R3S_pf_t) ipf;
         
-        if (RSSKS_cfg_check_pf(cfg, chosen_opt, pf) != RSSKS_STATUS_PF_LOADED)
+        if (R3S_cfg_check_pf(cfg, chosen_opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
 
-        sz = RSSKS_pf_sz(pf);
-        v  = (RSSKS_bytes_t) realloc(v, sizeof(RSSKS_byte_t) * sz);
+        sz = R3S_pf_sz(pf);
+        v  = (R3S_bytes_t) realloc(v, sizeof(R3S_byte_t) * sz);
 
         for (unsigned byte = 0; byte < sz; byte++)
-            v[byte] = (RSSKS_byte_t) rand() & 0xff;
+            v[byte] = (R3S_byte_t) rand() & 0xff;
         
-        RSSKS_packet_set_pf(pf, v, p);
+        R3S_packet_set_pf(pf, v, p);
     }
 
     free(v);
 
-    return RSSKS_STATUS_SUCCESS;
+    return R3S_STATUS_SUCCESS;
 }

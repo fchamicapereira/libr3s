@@ -7,9 +7,9 @@ BIN=$(DIR)/../bin
 
 LIB_FLAGS=-lz3 -Wl,-rpath,$(Z3_DIR)/lib -L$(Z3_DIR)/lib -I$(Z3_DIR)/build/include
 
-LIB_RSSKS=$(BUILD)/lib
-LIB_RSSKS_INCLUDE=$(BUILD)/include
-LIB_RSSKS_FLAGS=-lrssks -Wl,-rpath,$(LIB_RSSKS) -L$(LIB_RSSKS) -I$(LIB_RSSKS_INCLUDE)
+LIB_R3S=$(BUILD)/lib
+LIB_R3S_INCLUDE=$(BUILD)/include
+LIB_R3S_FLAGS=-lr3s -Wl,-rpath,$(LIB_R3S) -L$(LIB_R3S) -I$(LIB_R3S_INCLUDE)
 
 SRCS=$(wildcard *.c)
 EXEC=$(patsubst %.c,%,$(SRCS))
@@ -18,7 +18,7 @@ all: $(EXEC)
 
 $(EXEC): %: %.c
 	@mkdir -p $(BIN)
-	$(CC) -o $(BIN)/$@ $< $(LIB_FLAGS) $(LIB_RSSKS_FLAGS)
+	$(CC) -o $(BIN)/$@ $< $(LIB_FLAGS) $(LIB_R3S_FLAGS)
 
 .PHONY: clean
 clean:

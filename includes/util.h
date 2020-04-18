@@ -1,5 +1,5 @@
-#ifndef __RSSKS_UTIL_H__
-#define __RSSKS_UTIL_H__
+#ifndef __R3S_UTIL_H__
+#define __R3S_UTIL_H__
 
 #include <stdint.h>
 

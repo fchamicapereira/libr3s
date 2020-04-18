@@ -1,18 +1,18 @@
-#ifndef __RSSKS_HASH_H__
-#define __RSSKS_HASH_H__
+#ifndef __R3S_HASH_H__
+#define __R3S_HASH_H__
 
-#include "rssks.h"
+#include "r3s.h"
 
 #define STATS                   1000000
 #define DIST_THRESHOLD          0.1
 
 typedef unsigned packet_fields_t;
 
-RSSKS_in_t     RSSKS_packet_to_hash_input(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_packet_t h);
-RSSKS_packet_t RSSKS_in_to_packet(RSSKS_cfg_t cfg, unsigned iopt, RSSKS_in_t hi, RSSKS_packet_cfg_t p_cfg);
-void           RSSKS_rand_key(RSSKS_cfg_t cfg, out RSSKS_key_t key);
-void           RSSKS_zero_key(RSSKS_key_t key);
-bool           RSSKS_is_zero_key(RSSKS_key_t key);
-bool           RSSKS_k_test_dist(RSSKS_cfg_t cfg, RSSKS_key_t k);
+R3S_in_t     R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t h);
+R3S_packet_t R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_packet_cfg_t p_cfg);
+void           R3S_rand_key(R3S_cfg_t cfg, out R3S_key_t key);
+void           R3S_zero_key(R3S_key_t key);
+bool           R3S_is_zero_key(R3S_key_t key);
+bool           R3S_k_test_dist(R3S_cfg_t cfg, R3S_key_t k);
 
 #endif
