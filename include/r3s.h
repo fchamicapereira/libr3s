@@ -1,5 +1,5 @@
-#ifndef __R3S_H__
-#define __R3S_H__
+#ifndef __R3S_API_H__
+#define __R3S_API_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -24,7 +24,7 @@ typedef R3S_byte_t*  R3S_bytes_t;
 
 typedef R3S_bytes_t  R3S_in_t;
 typedef R3S_byte_t   R3S_key_t[KEY_SIZE];
-typedef uint32_t       R3S_out_t;
+typedef uint32_t     R3S_out_t;
 
 typedef R3S_byte_t   R3S_ipv6_t[16];
 typedef R3S_byte_t   R3S_ipv4_t[4];
@@ -33,7 +33,7 @@ typedef R3S_byte_t   R3S_vni_t[3];    // unique identifier for the individual VX
 typedef R3S_byte_t   R3S_port_t[2];
 typedef R3S_byte_t   R3S_ethertype_t[1];
 
-typedef unsigned       R3S_in_cfg_t;
+typedef unsigned     R3S_in_cfg_t;
 
 typedef enum {
     

@@ -1,4 +1,4 @@
-#include "../includes/r3s.h"
+#include "../include/r3s.h"
 
 Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {

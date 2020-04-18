@@ -9,12 +9,12 @@
 #include <signal.h>
 #include <assert.h>
 
-#include "../includes/solver.h"
-#include "../includes/util.h"
-#include "../includes/hash.h"
-#include "../includes/printer.h"
-#include "../includes/packet.h"
-#include "../includes/config.h"
+#include "solver.h"
+#include "util.h"
+#include "hash.h"
+#include "printer.h"
+#include "packet.h"
+#include "config.h"
 
 void exitf(const char *message)
 {

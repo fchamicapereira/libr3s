@@ -1,8 +1,8 @@
-#include "../includes/util.h"
-#include "../includes/hash.h"
-#include "../includes/printer.h"
-#include "../includes/packet.h"
-#include "../includes/config.h"
+#include "util.h"
+#include "hash.h"
+#include "printer.h"
+#include "packet.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>

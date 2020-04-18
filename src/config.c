@@ -1,9 +1,9 @@
-#include "../includes/r3s.h"
-#include "../includes/util.h"
-#include "../includes/hash.h"
-#include "../includes/printer.h"
-#include "../includes/packet.h"
-#include "../includes/config.h"
+#include "../include/r3s.h"
+#include "util.h"
+#include "hash.h"
+#include "printer.h"
+#include "packet.h"
+#include "config.h"
 
 #include <stdlib.h>
 

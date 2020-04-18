@@ -1,7 +1,7 @@
 #ifndef __R3S_PACKET_H__
 #define __R3S_PACKET_H__
 
-#include "r3s.h"
+#include "../include/r3s.h"
 #include <stdbool.h>
 
 #define R3S_pf_sz(pf)   (R3S_pf_sz_bits((pf)) < 1 ? 8 : R3S_pf_sz_bits((pf)) / 8)

@@ -1,7 +1,7 @@
 #ifndef __R3S_HASH_H__
 #define __R3S_HASH_H__
 
-#include "r3s.h"
+#include "../include/r3s.h"
 
 #define STATS                   1000000
 #define DIST_THRESHOLD          0.1

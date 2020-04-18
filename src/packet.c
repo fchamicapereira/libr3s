@@ -1,7 +1,7 @@
-#include "../includes/r3s.h"
-#include "../includes/packet.h"
-#include "../includes/util.h"
-#include "../includes/config.h"
+#include "../include/r3s.h"
+#include "packet.h"
+#include "util.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <assert.h>
