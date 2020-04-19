@@ -7,11 +7,17 @@ cmake_minimum_required(VERSION 3.10)
 project("r3s")
 
 include(GNUInstallDirs)
-include(ExternalProject)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+
+################################################################################
+# Add our CMake module directory to the list of module search directories
+################################################################################
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 
 ################################################################################
@@ -39,17 +45,7 @@ endif()
 # Configure external projects
 ###############################################################################
 
-set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
-
-ExternalProject_Add(Z3Download
-    PREFIX              z3-prefix
-    GIT_REPOSITORY      https://github.com/Z3Prover/z3.git
-    CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
-    UPDATE_COMMAND      "" # Skip annoying updates for every build
-)
-
-include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
-link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
+include(${CMAKE_SOURCE_DIR}/cmake/find_z3.cmake)
 
 
 ###############################################################################
@@ -68,11 +64,9 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
-add_dependencies(${PROJECT_NAME} Z3Download)
 
-#set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(${PROJECT_NAME} PUBLIC z3)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Z3_LIBRARIES})
 
 
 ###############################################################################
@@ -80,7 +74,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC z3)
 ###############################################################################
 
 if (${BUILD_EXAMPLES})
-    include(${PROJECT_SOURCE_DIR}/examples.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/examples.cmake)
 
     foreach( example_src ${EXAMPLES_SOURCES} )
         get_filename_component(example ${example_src} NAME_WE)
@@ -103,12 +97,6 @@ install(
 
 INSTALL (
     DIRECTORY       ${CMAKE_SOURCE_DIR}/include/
-    DESTINATION     include
-    FILES_MATCHING  PATTERN "*.h*"
-)
-
-INSTALL (
-    DIRECTORY       ${EXTERNAL_INSTALL_LOCATION}/include/
     DESTINATION     include
     FILES_MATCHING  PATTERN "*.h*"
 )

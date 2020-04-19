@@ -1,0 +1,5 @@
+# cmake
+
+```bash
+$ CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_FIND_DEBUG_MODE=ON -DBUILD_EXAMPLES=ON $PATH_TO_THIS_REPO
+```
