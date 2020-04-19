@@ -153,14 +153,13 @@ float k_dist_mean(R3S_cfg_t cfg, R3S_key_t k)
     for (unsigned counter = 0; counter < STATS; counter++) {
         R3S_rand_packet(cfg, &p);
         R3S_hash(cfg, k, p, &o);
-
         core_dist[HASH_TO_CORE(o)] += 1;
     }
 
     mean = 0;
     for (int core = 0; core < CORES; core++)
         mean += core * core_dist[core];
-    mean = mean / STATS;
+    mean = mean / (float) STATS;
 
     return mean;
 }

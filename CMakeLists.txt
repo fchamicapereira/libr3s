@@ -4,7 +4,10 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(libr3s)
+project("r3s")
+
+include(GNUInstallDirs)
+include(ExternalProject)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -37,7 +40,6 @@ endif()
 ###############################################################################
 
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
-include(ExternalProject)
 
 ExternalProject_Add(Z3Download
     PREFIX              z3-prefix
@@ -55,21 +57,22 @@ link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
 ###############################################################################
 
 file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/src/*.c)
-add_library(r3s SHARED ${SOURCES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
-target_include_directories(r3s
+target_include_directories(${PROJECT_NAME}
     PUBLIC 
-        $<INSTALL_INTERFACE:include>    
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_options(r3s PRIVATE -Werror)
-add_dependencies(r3s Z3Download)
+target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+add_dependencies(${PROJECT_NAME} Z3Download)
 
-set_target_properties(r3s PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(r3s PUBLIC z3)
+#set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+target_link_libraries(${PROJECT_NAME} PUBLIC z3)
 
 
 ###############################################################################
@@ -82,6 +85,30 @@ if (${BUILD_EXAMPLES})
     foreach( example_src ${EXAMPLES_SOURCES} )
         get_filename_component(example ${example_src} NAME_WE)
         add_executable(${example} ${example_src})
-        target_link_libraries(${example} r3s)
+        target_link_libraries(${example} ${PROJECT_NAME})
     endforeach( example_src ${EXAMPLES_SOURCES} )
 endif ()
+
+
+###############################################################################
+# Installation
+###############################################################################
+
+install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT  ${PROJECT_NAME}_Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+INSTALL (
+    DIRECTORY       ${CMAKE_SOURCE_DIR}/include/
+    DESTINATION     include
+    FILES_MATCHING  PATTERN "*.h*"
+)
+
+INSTALL (
+    DIRECTORY       ${EXTERNAL_INSTALL_LOCATION}/include/
+    DESTINATION     include
+    FILES_MATCHING  PATTERN "*.h*"
+)

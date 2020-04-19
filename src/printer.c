@@ -117,7 +117,7 @@ R3S_string_t __hash_output_to_string(R3S_out_t output)
     
     result.output[0] = '\0';
 
-    sprintf(result.output, "output    %02x %02x %02x %02x\n",
+    sprintf(result.output, "%02x %02x %02x %02x",
         (output >> 24) & 0xff,
         (output >> 16) & 0xff,
         (output >>  8) & 0xff,
