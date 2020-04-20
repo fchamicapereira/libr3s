@@ -9,6 +9,8 @@ if (Z3_FOUND)
     
     include_directories(${Z3_INCLUDE_DIRS})
     link_directories(${Z3_LIBRARIES})
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${Z3_LIBRARIES})
 else()
     message (FATAL_ERROR "Z3 not found. Installing.")
 

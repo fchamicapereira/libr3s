@@ -7,4 +7,6 @@ set(EXAMPLES_SOURCES ${EXAMPLES_SOURCES}
     ${PROJECT_SOURCE_DIR}/examples/symmetric_session_2_cnstrs_eq_pf.c
     ${PROJECT_SOURCE_DIR}/examples/symmetric_session.c
     ${PROJECT_SOURCE_DIR}/examples/X710hash.c
+
+    ${PROJECT_SOURCE_DIR}/examples/pcap.c
 )

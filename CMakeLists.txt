@@ -42,13 +42,6 @@ endif()
 
 
 ###############################################################################
-# Configure external projects
-###############################################################################
-
-include(${CMAKE_SOURCE_DIR}/cmake/find_z3.cmake)
-
-
-###############################################################################
 # Create r3s library
 ###############################################################################
 
@@ -66,7 +59,14 @@ target_include_directories(${PROJECT_NAME}
 target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Z3_LIBRARIES})
+
+
+###############################################################################
+# Configure external projects
+###############################################################################
+
+include(${CMAKE_SOURCE_DIR}/cmake/find_z3.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/find_pcap.cmake)
 
 
 ###############################################################################
