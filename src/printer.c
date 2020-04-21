@@ -153,6 +153,12 @@ R3S_string_t __status_to_string(R3S_status_t status)
             sprintf(result.status, "incompatible packet field"); break;
         case R3S_STATUS_OPT_UNKNOWN:
             sprintf(result.status, "unknown option"); break;
+        case R3S_STATUS_OPT_LOADED:
+            sprintf(result.status, "option loaded"); break;
+        case R3S_STATUS_OPT_NOT_LOADED:
+            sprintf(result.status, "option not loaded"); break;
+        case R3S_STATUS_INVALID_IOPT:
+            sprintf(result.status, "option index invalid (must be < cfg.n_loaded_opts)"); break;
         case R3S_STATUS_FAILURE:
             sprintf(result.status, "failure"); break;
     }
@@ -169,31 +175,31 @@ R3S_string_t __in_opt_to_string(R3S_in_opt_t opt)
     switch (opt)
     {
         case R3S_IN_OPT_GENEVE_OAM:
-            sprintf(result.opt, "Geneve OAM"); break;
+            sprintf(result.opt, "Geneve OAM");          break;
         case R3S_IN_OPT_VXLAN_GPE_OAM:
-            sprintf(result.opt, "VXLAN GPE OAM"); break;
+            sprintf(result.opt, "VXLAN GPE OAM");       break;
         case R3S_IN_OPT_NON_FRAG_IPV4_TCP:
-            sprintf(result.opt, "Non-frag TCP/IPv4"); break;
+            sprintf(result.opt, "Non-frag TCP/IPv4");   break;
         case R3S_IN_OPT_NON_FRAG_IPV4_UDP:
-            sprintf(result.opt, "Non-frag UDP/IPv4"); break;
+            sprintf(result.opt, "Non-frag UDP/IPv4");   break;
         case R3S_IN_OPT_NON_FRAG_IPV4_SCTP:
-            sprintf(result.opt, "Non-frag SCTP/IPv4"); break;
+            sprintf(result.opt, "Non-frag SCTP/IPv4");  break;
         case R3S_IN_OPT_NON_FRAG_IPV4:
-            sprintf(result.opt, "Non-frag IPv4"); break;
+            sprintf(result.opt, "Non-frag IPv4");       break;
         case R3S_IN_OPT_FRAG_IPV4:
-            sprintf(result.opt, "Frag IPv4"); break;
+            sprintf(result.opt, "Frag IPv4");           break;
         case R3S_IN_OPT_NON_FRAG_IPV6_TCP:
-            sprintf(result.opt, "Non-frag TCP/IPv6"); break;
+            sprintf(result.opt, "Non-frag TCP/IPv6");   break;
         case R3S_IN_OPT_NON_FRAG_IPV6_UDP:
-            sprintf(result.opt, "Non-frag UDP/IPv6"); break;
+            sprintf(result.opt, "Non-frag UDP/IPv6");   break;
         case R3S_IN_OPT_NON_FRAG_IPV6_SCTP:
-            sprintf(result.opt, "Non-frag SCTP/IPv6"); break;
+            sprintf(result.opt, "Non-frag SCTP/IPv6");  break;
         case R3S_IN_OPT_NON_FRAG_IPV6:
-            sprintf(result.opt, "Non-frag IPv6"); break;
+            sprintf(result.opt, "Non-frag IPv6");       break;
         case R3S_IN_OPT_FRAG_IPV6:
-            sprintf(result.opt, "Frag IPv6"); break;
+            sprintf(result.opt, "Frag IPv6");           break;
         case R3S_IN_OPT_ETHERTYPE:
-            sprintf(result.opt, "Ethertype"); break;
+            sprintf(result.opt, "Ethertype");           break;
     }
 
     return result;

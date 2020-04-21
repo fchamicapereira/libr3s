@@ -110,11 +110,14 @@ typedef enum {
     R3S_STATUS_PF_INCOMPATIBLE,
 
     R3S_STATUS_OPT_UNKNOWN,
+    R3S_STATUS_OPT_LOADED,
+    R3S_STATUS_OPT_NOT_LOADED,
+    R3S_STATUS_INVALID_IOPT,
     
     R3S_STATUS_FAILURE
 } R3S_status_t;
 
-typedef unsigned R3S_packet_cfg_t;
+typedef unsigned R3S_in_cfg_t;
 
 typedef struct {
     R3S_ipv4_t src;
@@ -148,7 +151,7 @@ typedef struct {
 } R3S_h_vxlan_t;
 
 typedef struct {
-    R3S_packet_cfg_t cfg;
+    R3S_in_cfg_t cfg;
 
     union {
         R3S_ethertype_t ethertype;
@@ -174,7 +177,7 @@ typedef struct {
 typedef struct {
     R3S_in_opt_t opt; /* Configuration option */
     R3S_in_cfg_t pfs; /* Hash input configuration (chosen packet fields) */
-    unsigned       sz;  /* Size of the hash input */
+    unsigned     sz;  /* Size of the hash input */
 } R3S_loaded_in_opt_t;
 
 typedef struct {
@@ -208,13 +211,13 @@ typedef union {
     char cfg[1000];
 } R3S_string_t;
 
-#define R3S_status_to_string(s)       __status_to_string((s)).status
-#define R3S_key_to_string(k)          __key_to_string((k)).key
-#define R3S_packet_to_string(p)       __packet_to_string((p)).packet
-#define R3S_hash_output_to_string(o)  __hash_output_to_string((o)).output
-#define R3S_in_opt_to_string(opt)     __in_opt_to_string((opt)).opt
-#define R3S_pf_to_string(pf)          __pf_to_string((pf)).pf
-#define R3S_cfg_to_string(cfg)        __cfg_to_string((cfg)).cfg
+#define R3S_status_to_string(_s)      __status_to_string((_s)).status
+#define R3S_key_to_string(_k)         __key_to_string((_k)).key
+#define R3S_packet_to_string(_p)      __packet_to_string((_p)).packet
+#define R3S_hash_output_to_string(_o) __hash_output_to_string((_o)).output
+#define R3S_in_opt_to_string(_opt)    __in_opt_to_string((_opt)).opt
+#define R3S_pf_to_string(_pf)         __pf_to_string((_pf)).pf
+#define R3S_cfg_to_string(_cfg)       __cfg_to_string((_cfg)).cfg
 
 R3S_string_t __key_to_string(R3S_key_t k);
 R3S_string_t __packet_to_string(R3S_packet_t p);
@@ -225,14 +228,14 @@ R3S_string_t __pf_to_string(R3S_pf_t pf);
 R3S_string_t __cfg_to_string(R3S_cfg_t cfg);
 
 void         R3S_packet_init(R3S_packet_t *p);
-R3S_status_t R3S_packet_set_pf(R3S_pf_t pf, R3S_bytes_t v, R3S_packet_t *p);
-R3S_status_t R3S_packet_set_ethertype(R3S_ethertype_t ethertype, out R3S_packet_t *p);
-R3S_status_t R3S_packet_set_ipv4(R3S_ipv4_t src, R3S_ipv4_t dst, out R3S_packet_t *p);
-R3S_status_t R3S_packet_set_ipv6(R3S_ipv6_t src, R3S_ipv6_t dst, out R3S_packet_t *p);
-R3S_status_t R3S_packet_set_tcp(R3S_port_t src, R3S_port_t dst, out R3S_packet_t *p);
-R3S_status_t R3S_packet_set_udp(R3S_port_t src, R3S_port_t dst, out R3S_packet_t *p);
-R3S_status_t R3S_packet_set_sctp(R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
-R3S_status_t R3S_packet_set_vxlan(R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_pf(R3S_cfg_t cfg, R3S_pf_t pf, R3S_bytes_t v, R3S_packet_t *p);
+R3S_status_t R3S_packet_set_ethertype(R3S_cfg_t cfg, R3S_ethertype_t ethertype, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_ipv4(R3S_cfg_t cfg, R3S_ipv4_t src, R3S_ipv4_t dst, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_ipv6(R3S_cfg_t cfg, R3S_ipv6_t src, R3S_ipv6_t dst, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_tcp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
+R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
 
 void         R3S_cfg_init(out R3S_cfg_t *cfg);
 void         R3S_cfg_reset(out R3S_cfg_t *cfg);
@@ -293,5 +296,7 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
 Z3_ast       R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 Z3_ast       R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 Z3_ast       R3S_mk_symmetric_tcp_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+
+R3S_status_t R3S_parse_packets(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
 
 #endif

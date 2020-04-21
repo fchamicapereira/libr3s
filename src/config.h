@@ -5,7 +5,8 @@
 
 R3S_status_t R3S_cfg_load_pf(out R3S_cfg_t *cfg, unsigned iopt, R3S_pf_t pf);
 R3S_status_t R3S_cfg_check_pf(R3S_cfg_t cfg, unsigned iopt, R3S_pf_t pf);
-R3S_status_t R3S_cfg_packet_to_in_opt(R3S_cfg_t cfg, R3S_packet_t p, out unsigned *ipot);
-unsigned       R3S_cfg_max_in_sz(R3S_cfg_t cfg);
+unsigned     R3S_cfg_max_in_sz(R3S_cfg_t cfg);
+R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs);
+bool R3S_cfg_are_compatible_pfs(R3S_cfg_t cfg, R3S_in_cfg_t pfs);
 
 #endif

@@ -52,7 +52,7 @@ R3S_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
         
         if (!R3S_packet_has_pf(p, pf)) continue;
 
-        field = R3S_field_from_packet(&p, pf);
+        field = R3S_packet_get_field(&p, pf);
         sz    = R3S_pf_sz(pf);
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
@@ -64,7 +64,7 @@ R3S_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
     return hi;
 }
 
-R3S_packet_t R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_packet_cfg_t p_cfg)
+R3S_packet_t R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_in_cfg_t p_cfg)
 {
     R3S_packet_t p;
     unsigned       sz, offset;
@@ -84,7 +84,7 @@ R3S_packet_t R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_pac
         
         if (!R3S_packet_has_pf(p, pf)) continue;
 
-        field = R3S_field_from_packet(&p, pf);
+        field = R3S_packet_get_field(&p, pf);
         sz    = R3S_pf_sz(pf);
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
@@ -115,9 +115,9 @@ R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_out_t 
     R3S_key_t    k_copy;
     R3S_in_t     hi;
     R3S_status_t status;
-    unsigned       ipot;
+    unsigned     ipot;
 
-    status = R3S_cfg_packet_to_in_opt(cfg, p, &ipot);
+    status = R3S_packet_to_in_opt(cfg, p, &ipot);
 
     if (status != R3S_STATUS_SUCCESS) return status;
 

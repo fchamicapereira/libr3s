@@ -304,7 +304,7 @@ Z3_ast mk_d_const(R3S_cfg_t r3s_cfg, Z3_context ctx, Z3_ast input, R3S_packet_t 
     unsigned       input_sz;
     unsigned       high, low;
 
-    status = R3S_cfg_packet_to_in_opt(r3s_cfg, p, &ipot);
+    status = R3S_packet_to_in_opt(r3s_cfg, p, &ipot);
 
     if (status != R3S_STATUS_SUCCESS) assert(false);
 
@@ -326,7 +326,7 @@ Z3_ast mk_d_const(R3S_cfg_t r3s_cfg, Z3_context ctx, Z3_ast input, R3S_packet_t 
         if (R3S_cfg_check_pf(r3s_cfg, ipot, pf) != R3S_STATUS_PF_LOADED)
             continue;
 
-        field = R3S_field_from_packet(&p, pf);
+        field = R3S_packet_get_field(&p, pf);
         sz    = R3S_pf_sz(pf);
 
         for (unsigned byte = 0; byte < sz; byte++, field++)
@@ -449,7 +449,7 @@ R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p_in, R3S_cn
     R3S_status_t status;
     unsigned       iopt;
 
-    status    = R3S_cfg_packet_to_in_opt(r3s_cfg, p_in, &iopt);
+    status    = R3S_packet_to_in_opt(r3s_cfg, p_in, &iopt);
 
     if (status != R3S_STATUS_SUCCESS) return status;
 

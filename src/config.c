@@ -7,13 +7,6 @@
 
 #include <stdlib.h>
 
-#define LOAD_PF_OR_RETURN(cfg, iopt, pf) ({             \
-            R3S_status_t s;                           \
-            s = R3S_cfg_load_pf((cfg), (iopt), (pf)); \
-            if (s == R3S_STATUS_PF_UNKNOWN)           \
-                return s;                               \
-            })
-
 #define MAX(x,y) ((x) >= (y) ? (x) : (y))
 
 void R3S_cfg_init(R3S_cfg_t *cfg)
@@ -57,9 +50,126 @@ bool is_valid_in_opt(R3S_in_opt_t opt)
     return false;
 }
 
+R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
+{
+    // TODO: check if is valid opt
+    *n_pfs = 0;
+
+    switch (opt)
+    {
+        case R3S_IN_OPT_GENEVE_OAM:
+        case R3S_IN_OPT_VXLAN_GPE_OAM:
+            *n_pfs    = 2;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_VXLAN_UDP_OUTER;
+            (*pfs)[1] = R3S_PF_VXLAN_VNI;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV4_UDP:
+            *n_pfs    = 4;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV4_SRC;
+            (*pfs)[1] = R3S_PF_IPV4_DST;
+            (*pfs)[2] = R3S_PF_UDP_SRC;
+            (*pfs)[3] = R3S_PF_UDP_DST;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV4_TCP:
+            *n_pfs    = 4;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV4_SRC;
+            (*pfs)[1] = R3S_PF_IPV4_DST;
+            (*pfs)[2] = R3S_PF_TCP_SRC;
+            (*pfs)[3] = R3S_PF_TCP_DST;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV4_SCTP:
+            *n_pfs    = 5;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV4_SRC;
+            (*pfs)[1] = R3S_PF_IPV4_DST;
+            (*pfs)[2] = R3S_PF_SCTP_SRC;
+            (*pfs)[3] = R3S_PF_SCTP_DST;
+            (*pfs)[3] = R3S_PF_SCTP_V_TAG;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV4:
+        case R3S_IN_OPT_FRAG_IPV4:
+            *n_pfs    = 2;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV4_SRC;
+            (*pfs)[1] = R3S_PF_IPV4_DST;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV6_UDP:
+            *n_pfs    = 4;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV6_SRC;
+            (*pfs)[1] = R3S_PF_IPV6_DST;
+            (*pfs)[2] = R3S_PF_UDP_SRC;
+            (*pfs)[3] = R3S_PF_UDP_DST;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV6_TCP:
+            *n_pfs    = 4;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV6_SRC;
+            (*pfs)[1] = R3S_PF_IPV6_DST;
+            (*pfs)[2] = R3S_PF_TCP_SRC;
+            (*pfs)[3] = R3S_PF_TCP_DST;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV6_SCTP:
+            *n_pfs    = 5;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV6_SRC;
+            (*pfs)[1] = R3S_PF_IPV6_DST;
+            (*pfs)[2] = R3S_PF_SCTP_SRC;
+            (*pfs)[3] = R3S_PF_SCTP_DST;
+            (*pfs)[3] = R3S_PF_SCTP_V_TAG;
+
+            break;
+        case R3S_IN_OPT_NON_FRAG_IPV6:
+        case R3S_IN_OPT_FRAG_IPV6:
+            *n_pfs    = 2;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_IPV6_SRC;
+            (*pfs)[1] = R3S_PF_IPV6_DST;
+            
+            break;
+        case R3S_IN_OPT_ETHERTYPE:
+            *n_pfs    = 1;
+            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
+
+            (*pfs)[0] = R3S_PF_ETHERTYPE;
+    }
+
+    return R3S_STATUS_SUCCESS;
+}
+
+bool R3S_cfg_are_compatible_pfs(R3S_cfg_t cfg, R3S_in_cfg_t pfs)
+{
+    for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++) {
+        if ((pfs & cfg.loaded_opts[iopt].pfs) != 0) return true;
+    }
+    return false;
+}
+
 R3S_status_t R3S_cfg_load_in_opt(R3S_cfg_t *cfg, R3S_in_opt_t opt)
 {
-    unsigned iopt;
+    R3S_status_t s;
+    R3S_pf_t     *pfs;
+    unsigned     n_pfs;
+    unsigned     iopt;
 
     if (!is_valid_in_opt(opt)) return R3S_STATUS_OPT_UNKNOWN;
 
@@ -74,64 +184,20 @@ R3S_status_t R3S_cfg_load_in_opt(R3S_cfg_t *cfg, R3S_in_opt_t opt)
     cfg->loaded_opts[iopt].pfs = 0;
     cfg->loaded_opts[iopt].sz  = 0;
 
-    switch (opt)
+    s = R3S_in_opt_to_pfs(opt, &pfs, &n_pfs);
+    if (s != R3S_STATUS_SUCCESS) return s;
+
+    for (unsigned i = 0; i < n_pfs; i++)
     {
-        case R3S_IN_OPT_GENEVE_OAM:
-        case R3S_IN_OPT_VXLAN_GPE_OAM:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_VXLAN_UDP_OUTER);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_VXLAN_VNI);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_UDP:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_UDP_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_UDP_DST);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_TCP:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_TCP_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_TCP_DST);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_SCTP:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_SCTP_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_SCTP_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_SCTP_V_TAG);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV4:
-        case R3S_IN_OPT_FRAG_IPV4:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV4_DST);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_UDP:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_UDP_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_UDP_DST);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_TCP:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_TCP_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_TCP_DST);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_SCTP:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_SCTP_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_SCTP_DST);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_SCTP_V_TAG);
-            break;
-        case R3S_IN_OPT_NON_FRAG_IPV6:
-        case R3S_IN_OPT_FRAG_IPV6:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_SRC);
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_IPV6_DST);
-            break;
-        case R3S_IN_OPT_ETHERTYPE:
-            LOAD_PF_OR_RETURN(cfg, iopt, R3S_PF_ETHERTYPE);
+        s = R3S_cfg_load_pf(cfg, iopt, pfs[i]);
+        if (s == R3S_STATUS_PF_UNKNOWN) 
+        {
+            free(pfs);
+            return s;
+        }
     }
+
+    free(pfs);
 
     return R3S_STATUS_SUCCESS;
 }
@@ -160,50 +226,12 @@ R3S_status_t R3S_cfg_load_pf(R3S_cfg_t *cfg, unsigned iopt, R3S_pf_t pf)
 
 R3S_status_t R3S_cfg_check_pf(R3S_cfg_t cfg, unsigned iopt, R3S_pf_t pf)
 {
-    if (!is_valid_pf(pf)) return R3S_STATUS_PF_UNKNOWN;
-
+    if (!is_valid_pf(pf))         return R3S_STATUS_PF_UNKNOWN;
+    if (iopt > cfg.n_loaded_opts) return R3S_STATUS_INVALID_IOPT;
+    
     return ((cfg.loaded_opts[iopt].pfs >> pf) & 1)
         ? R3S_STATUS_PF_LOADED
         : R3S_STATUS_PF_NOT_LOADED;
-}
-
-R3S_status_t R3S_cfg_packet_to_in_opt(R3S_cfg_t cfg, R3S_packet_t p, unsigned *ipot)
-{
-    R3S_pf_t pf;
-    unsigned   n_opts;
-    int        match;
-    int        chosen_opt;
-    int        max_match;
-
-    max_match  = -1;
-    chosen_opt = -1;
-    n_opts     = cfg.n_loaded_opts;
-    
-    for (unsigned i = 0; i < n_opts; i++)
-    {
-        match = 0;
-
-        for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
-        {
-            pf = (R3S_pf_t) ipf;
-
-            if (!R3S_cfg_check_pf(cfg, i, pf)) continue;
-            if (!R3S_packet_has_pf(p, pf))     break;
-
-            match++;
-        }
-
-        if (match > max_match)
-        {
-            chosen_opt = i;
-            max_match = match;
-        }
-    }
-
-    if (chosen_opt == -1) return R3S_STATUS_NO_SOLUTION;
-    
-    *ipot = chosen_opt;
-    return R3S_STATUS_SUCCESS;
 }
 
 unsigned R3S_cfg_max_in_sz(R3S_cfg_t cfg)
