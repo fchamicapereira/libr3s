@@ -10,8 +10,7 @@ int main() {
     R3S_packet_t    *packets;
     int             n_packets;
 
-    sprintf(pcap, "/home/fcp/libr3s/pcap/misc.pcap");
-    //sprintf(pcap, "/home/fcp/libr3s/pcap/tcp-ecn-sample.pcap");
+    sprintf(pcap, "/home/fcp/libr3s/pcap/tcp-ecn-sample.pcap");
 
     R3S_cfg_init(&cfg);
     
