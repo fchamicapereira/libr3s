@@ -22,7 +22,7 @@ void ipv4_1()
 
     R3S_ipv4_t ipv4_src = {  66,   9, 149, 187};
     R3S_ipv4_t ipv4_dst = { 161, 142, 100,  80};
-    R3S_packet_set_ipv4(ipv4_src, ipv4_dst, &p);
+    R3S_packet_set_ipv4(cfg, ipv4_src, ipv4_dst, &p);
 
     R3S_hash(cfg, k, p, &o);
 
@@ -55,7 +55,7 @@ void ipv4_2()
 
     R3S_ipv4_t ipv4_src = { 199,  92, 111,   2};
     R3S_ipv4_t ipv4_dst = {  65,  69, 140,  83};
-    R3S_packet_set_ipv4(ipv4_src, ipv4_dst, &p);
+    R3S_packet_set_ipv4(cfg, ipv4_src, ipv4_dst, &p);
 
     R3S_hash(cfg, k, p, &o);
 
@@ -88,11 +88,11 @@ void ipv4_tcp_1()
 
     R3S_ipv4_t ipv4_src = {  66,   9, 149, 187};
     R3S_ipv4_t ipv4_dst = { 161, 142, 100,  80};
-    R3S_packet_set_ipv4(ipv4_src, ipv4_dst, &p);
+    R3S_packet_set_ipv4(cfg, ipv4_src, ipv4_dst, &p);
 
     R3S_port_t tcp_src  = { (2794 >> 8) & 0xff, (2794 >> 0) & 0xff };
     R3S_port_t tcp_dst  = { (1766 >> 8) & 0xff, (1766 >> 0) & 0xff };
-    R3S_packet_set_tcp(tcp_src, tcp_dst, &p);
+    R3S_packet_set_tcp(cfg, tcp_src, tcp_dst, &p);
 
     R3S_hash(cfg, k, p, &o);
 
@@ -126,11 +126,11 @@ void ipv6_tcp_1()
 
     R3S_ipv6_t ipv6_src = { 0x3f, 0xfe, 0x25, 0x01, 0x02, 0x00, 0x1f, 0xff, 0, 0, 0, 0, 0, 0, 0, 7};
     R3S_ipv6_t ipv6_dst = { 0x3f, 0xfe, 0x25, 0x01, 0x02, 0x00, 0x00, 0x03, 0, 0, 0, 0, 0, 0, 0, 1};
-    R3S_packet_set_ipv6(ipv6_src, ipv6_dst, &p);
+    R3S_packet_set_ipv6(cfg, ipv6_src, ipv6_dst, &p);
 
     R3S_port_t tcp_src  = { (2794 >> 8) & 0xff, (2794 >> 0) & 0xff };
     R3S_port_t tcp_dst  = { (1766 >> 8) & 0xff, (1766 >> 0) & 0xff };
-    R3S_packet_set_tcp(tcp_src, tcp_dst, &p);
+    R3S_packet_set_tcp(cfg, tcp_src, tcp_dst, &p);
 
     R3S_hash(cfg, k, p, &o);
 

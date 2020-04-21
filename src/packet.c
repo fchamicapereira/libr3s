@@ -28,7 +28,7 @@ size_t R3S_pf_sz_bits(R3S_pf_t pf)
     }
 }
 
-R3S_bytes_t R3S_field_from_packet(R3S_packet_t *p, R3S_pf_t pf)
+R3S_bytes_t R3S_packet_get_field(R3S_packet_t *p, R3S_pf_t pf)
 {
     switch (pf)
     {
@@ -62,105 +62,17 @@ bool R3S_packet_has_pf(R3S_packet_t p, R3S_pf_t pf)
     return (p.cfg >> pf) & 1;
 }
 
-R3S_status_t R3S_packet_set_pf(R3S_pf_t pf, R3S_bytes_t v, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_pf(R3S_cfg_t cfg, R3S_pf_t pf, R3S_bytes_t v, R3S_packet_t *p)
 {
     R3S_bytes_t field;
+    R3S_in_cfg_t test_cfg;
+    unsigned    n_pfs;
+    bool        compatible_pf;
 
-    switch (pf)
-    {
-        case R3S_PF_VXLAN_UDP_OUTER:
-        case R3S_PF_VXLAN_VNI:
-            break;
-
-        case R3S_PF_IPV6_SRC:
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_IPV6_DST:
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV4_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_IPV4_SRC:
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_IPV4_DST:
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_SRC)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_IPV6_DST)) return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_TCP_SRC:
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))        return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))        return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG))      return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_TCP_DST:
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))        return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))        return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG))      return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_UDP_SRC:
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))        return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))        return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG))      return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_UDP_DST:
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))    return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))    return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_SRC))   return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_DST))   return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_SCTP_V_TAG)) return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_SCTP_SRC:
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_SCTP_DST:
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_SCTP_V_TAG:
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_UDP_OUTER)) return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_VXLAN_VNI))       return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_TCP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_SRC))         return R3S_STATUS_PF_INCOMPATIBLE;
-            if (R3S_packet_has_pf(*p, R3S_PF_UDP_DST))         return R3S_STATUS_PF_INCOMPATIBLE;
-            break;
-
-        case R3S_PF_ETHERTYPE:
-            break;
-    }
-
-    p->cfg |= (1 << pf);
-    field = R3S_field_from_packet(p, pf);
+    test_cfg = p->cfg | (1 << pf);
+    if (!R3S_cfg_are_compatible_pfs(cfg, test_cfg)) return R3S_STATUS_PF_INCOMPATIBLE;
+    p->cfg   = test_cfg;
+    field = R3S_packet_get_field(p, pf);
 
     for (unsigned byte = 0; byte < R3S_pf_sz(pf); byte++)
         field[byte] = v[byte];
@@ -168,86 +80,86 @@ R3S_status_t R3S_packet_set_pf(R3S_pf_t pf, R3S_bytes_t v, R3S_packet_t *p)
     return R3S_STATUS_SUCCESS;
 }
 
-R3S_status_t R3S_packet_set_ethertype(R3S_ethertype_t ethertype, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_ethertype(R3S_cfg_t cfg, R3S_ethertype_t ethertype, R3S_packet_t *p)
 {
-    return R3S_packet_set_pf(R3S_PF_ETHERTYPE, ethertype, p);
+    return R3S_packet_set_pf(cfg, R3S_PF_ETHERTYPE, ethertype, p);
 }
 
-R3S_status_t R3S_packet_set_ipv4(R3S_ipv4_t src, R3S_ipv4_t dst, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_ipv4(R3S_cfg_t cfg, R3S_ipv4_t src, R3S_ipv4_t dst, R3S_packet_t *p)
 {
     R3S_status_t status;
 
-    status = R3S_packet_set_pf(R3S_PF_IPV4_SRC, src, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_IPV4_SRC, src, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_IPV4_DST, dst, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_IPV4_DST, dst, p);
     return status;
 }
 
-R3S_status_t R3S_packet_set_ipv6(R3S_ipv6_t src, R3S_ipv6_t dst, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_ipv6(R3S_cfg_t cfg, R3S_ipv6_t src, R3S_ipv6_t dst, R3S_packet_t *p)
 {
     R3S_status_t status;
 
-    status = R3S_packet_set_pf(R3S_PF_IPV6_SRC, src, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_IPV6_SRC, src, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_IPV6_DST, dst, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_IPV6_DST, dst, p);
     return status;
 }
 
-R3S_status_t R3S_packet_set_tcp(R3S_port_t src, R3S_port_t dst, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_tcp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_packet_t *p)
 {
     R3S_status_t status;
 
-    status = R3S_packet_set_pf(R3S_PF_TCP_SRC, src, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_TCP_SRC, src, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_TCP_DST, dst, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_TCP_DST, dst, p);
     return status;
 }
 
-R3S_status_t R3S_packet_set_udp(R3S_port_t src, R3S_port_t dst, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_packet_t *p)
 {
     R3S_status_t status;
 
-    status = R3S_packet_set_pf(R3S_PF_UDP_SRC, src, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_UDP_SRC, src, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_UDP_DST, dst, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_UDP_DST, dst, p);
     return status;
 }
 
-R3S_status_t R3S_packet_set_sctp(R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, R3S_packet_t *p)
+R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, R3S_packet_t *p)
 {
     R3S_status_t status;
 
-    status = R3S_packet_set_pf(R3S_PF_SCTP_SRC, src, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_SCTP_SRC, src, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_SCTP_DST, dst, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_SCTP_DST, dst, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_SCTP_V_TAG, tag, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_SCTP_V_TAG, tag, p);
     return status;
 }
 
-R3S_status_t R3S_packet_set_vxlan(R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p)
+R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p)
 {
     R3S_status_t status;
 
-    status = R3S_packet_set_pf(R3S_PF_VXLAN_UDP_OUTER, outer, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_VXLAN_UDP_OUTER, outer, p);
     if (status != R3S_STATUS_SUCCESS) return status;
 
-    status = R3S_packet_set_pf(R3S_PF_VXLAN_VNI, vni, p);
+    status = R3S_packet_set_pf(cfg, R3S_PF_VXLAN_VNI, vni, p);
     return status;
 }
 
 R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p)
 {
     R3S_pf_t    pf;
-    unsigned      chosen_opt;
+    unsigned    chosen_opt;
     R3S_bytes_t v;
-    unsigned      sz;
+    unsigned    sz;
 
     R3S_packet_init(p);
     init_rand();
@@ -268,10 +180,49 @@ R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p)
         for (unsigned byte = 0; byte < sz; byte++)
             v[byte] = (R3S_byte_t) rand() & 0xff;
         
-        R3S_packet_set_pf(pf, v, p);
+        R3S_packet_set_pf(cfg, pf, v, p);
     }
 
     free(v);
 
+    return R3S_STATUS_SUCCESS;
+}
+
+R3S_status_t R3S_packet_to_in_opt(R3S_cfg_t cfg, R3S_packet_t p, unsigned *ipot)
+{
+    unsigned n_opts;
+
+    int      match;
+    int      chosen_opt;
+    int      max_match;
+
+    max_match  = 0;
+    chosen_opt = -1;
+    n_opts     = cfg.n_loaded_opts;
+    
+    for (unsigned iopt = 0; iopt < n_opts; iopt++)
+    {
+        match = 0;
+
+        for (unsigned ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
+        {
+            if (R3S_cfg_check_pf(cfg, iopt, (R3S_pf_t) ipf) == R3S_STATUS_PF_NOT_LOADED)
+                continue;
+
+            if (!R3S_packet_has_pf(p, (R3S_pf_t) ipf)) { match = 0; break; }
+            
+            match++;
+        }
+
+        if (match > max_match)
+        {
+            chosen_opt = iopt;
+            max_match = match;
+        }
+    }
+
+    if (chosen_opt == -1) return R3S_STATUS_NO_SOLUTION;
+    
+    *ipot = chosen_opt;
     return R3S_STATUS_SUCCESS;
 }
