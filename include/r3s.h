@@ -360,29 +360,55 @@ typedef struct {
 
 } R3S_packet_t;
 
+/**
+ * \struct R3S_loaded_in_opt_t
+ * \brief Information regarding loaded option and consequently the associated
+ * packet fields and the size of the hash input.
+ * 
+ * \var R3S_loaded_in_opt_t::opt
+ * Loaded option.
+ * 
+ * \var R3S_loaded_in_opt_t::pfs
+ * Hash input configuration, i.e., chosen packet fields associated
+ * with this option.
+ * 
+ * \var R3S_loaded_in_opt_t::sz
+ * Size of the hash input.
+ */
 typedef struct {
-    R3S_in_opt_t opt; /* Configuration option */
-    R3S_in_cfg_t pfs; /* Hash input configuration (chosen packet fields) */
-    unsigned     sz;  /* Size of the hash input */
+    R3S_in_opt_t opt;
+    R3S_in_cfg_t pfs;
+    unsigned     sz; 
 } R3S_loaded_in_opt_t;
 
+/**
+ * \struct R3S_cfg_t
+ * \brief R3S configuration used to store information useful
+ * throughout the API.
+ * 
+ * \var R3S_cfg_t::loaded_opts
+ * Options loaded in this configuration.
+ * \see R3S_in_opt_t
+ * 
+ * \var R3S_cfg_t::n_loaded_opts
+ * Number of loaded configurations. Stores the size of
+ * the R3S_cfg_t::loaded_opts array.
+ * 
+ * \var R3S_cfg_t::n_procs
+ * Number of processes to be used by the R3S_find_keys().
+ * If this value is <= 0, then the number of processes
+ * used will be equal to the number of available cores.
+ * 
+ * \var R3S_cfg_t::n_keys
+ * Number of keys to take into consideration.
+ * This is useful when there are constraints needed to be
+ * considered between multiple NICs/ports in NICs.
+ */
 typedef struct {
     R3S_loaded_in_opt_t *loaded_opts;
-    unsigned              n_loaded_opts;
-
-    /*
-     * Use #cores in find_k.
-     * If cores <= 0, then find_k will use *all* cores.
-    */
-    int n_procs;
-
-    /*
-     * Number of keys to generate.
-     * This is useful when there are constraints needed to be
-     * considered between multiple NICs/ports in NICs.
-    */
-    unsigned n_keys;
-
+    unsigned            n_loaded_opts;
+    int                 n_procs;
+    unsigned            n_keys;
 } R3S_cfg_t;
 
 /**
@@ -506,51 +532,39 @@ R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p, R3S_cnstr
 R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_pf_t pf, out Z3_ast *result);
 
 /**
- * \brief Find keys and respect constraints between packets.
+ * \brief Find keys that fit the given constraints, and insert them
+ * in the parameter array \p keys.
  * 
- * 
- * Find keys that fit the given constraints, and insert them
- * in the parameter array R3S_key_t *keys.
- * 
- * The array *keys must be allocated beforehand, and its size
- * is specified in the R3S_cfg_t r3s_cfg input parameter, using
- * its n_keys field.
+ * The array \p keys must be allocated beforehand, and its size
+ * is specified in the R3S_cfg_t input parameter, using
+ * its R3S_cfg_t::n_keys field.
  * 
  * The constraints are represented using a function with the definition
  * R3S_cnstrs_func (check its documentation).
  * 
- * The first N = r3s_cfg.n_keys elements of mk_p_cnstrs relate to
- * constraints on each key independently, i.e.:
+ * The first n = r3s_cfg.n_keys elements of \p mk_p_cnstrs relate to
+ * constraints on each key independently. The remaining elements
+ * correspond to the constraints related to combinations of keys.
  * 
- *   - mk_p_cnstrs[0]    => constraints on k[0],
- * 
- *   - mk_p_cnstrs[1]    => constraints on k[1],
- * 
- *   - ...
- * 
- *   - mk_p_cnstrs[N-1]  => constraints on k[N-1]
- * 
- * Next, we have the constraints related to combinations of keys:
- * 
- *   - mk_p_cnstrs[N]    => constraints between k[0] and k[1]
- * 
- *   - mk_p_cnstrs[N+1]  => constraints between k[0] and k[2]
- * 
- *   - ...
- * 
- *   - mk_p_cnstrs[2N-1] => constraints between k[0] and k[N-1]
- * 
- *   - mk_p_cnstrs[2N]   => constraints between k[1] and k[2]
- * 
- *   - mk_p_cnstrs[2N+1] => constraints between k[1] and k[3]
- * 
- *   etc.
+ *  index  | keys         | description
+ * ------- | -------------|-------------
+ *    0    | k[0]         | Constraints for the first key
+ *    1    | k[1]         | Constraints for the second key
+ *   ...   | ...          | ...
+ *   n-1   | k[n-1]       | Constraints for the last key
+ *    n    | k[0], k[1]   | Constraints for the first and second keys
+ *   n+1   | k[0], k[2]   | Constraints for the first and third keys
+ *   ...   | ...          | ...
+ *  2n-1   | k[0], k[n-1] | Constraints for the first and last keys
+ *   2n    | k[1], k[2]   | Constraints for the second and third keys
+ *   ...   | ...          | ...
+ *   
  * 
  * Considering C(N,M) as combinations of N, M by M, the size of
- * mk_p_cnstrs must be at least N + C(N,2). This condition is
+ * \p mk_p_cnstrs must be at least N + C(N,2). This condition is
  * checked within this function, and it fails if it isn't met.
  * 
- * For example, using cssks_cfg.n_keys = 3:
+ * For example, using r3s_cfg.n_keys = 3:
  *   - mk_p_cnstrs[0]    => constraints on k[0]
  * 
  *   - mk_p_cnstrs[1]    => constraints on k[1]
