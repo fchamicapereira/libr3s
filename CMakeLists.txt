@@ -100,3 +100,30 @@ INSTALL (
     DESTINATION     include
     FILES_MATCHING  PATTERN "*.h*"
 )
+
+
+################################################################################
+# Global clean target
+################################################################################
+# CMake already uses the "clean" target name but it doesn't clean everything
+# unfortunately. We can't modify the target so we provide our own "clean_all"
+# target that runs clean. Other rules for performing clean up should declare
+# that "clean_all" depends on those rules.
+add_custom_target(clean_all
+  # Invoke CMake's own clean target
+  COMMAND
+    "${CMAKE_COMMAND}"
+    "--build"
+    "${CMAKE_BINARY_DIR}"
+    "--target"
+    "clean"
+)
+
+################################################################################
+# Documentation
+################################################################################
+
+option(ENABLE_DOCS "Enable building documentation" ON)
+if (ENABLE_DOCS)
+    add_subdirectory(docs)
+endif()

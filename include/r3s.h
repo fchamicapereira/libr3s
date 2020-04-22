@@ -1,6 +1,8 @@
 #ifndef __R3S_API_H__
 #define __R3S_API_H__
 
+/** @file */ 
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -249,7 +251,7 @@ R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_out_t 
 R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p, R3S_cnstrs_func mk_p_cnstrs, out R3S_packet_t *result);
 R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_pf_t pf, out Z3_ast *result);
 
-/*
+/**
  * Find keys that fit the given constraints, and insert them
  * in the parameter array R3S_key_t *keys.
  * 
@@ -263,19 +265,28 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
  * The first N = r3s_cfg.n_keys elements of mk_p_cnstrs relate to
  * constraints on each key independently, i.e.:
  * 
- *   mk_p_cnstrs[0]    => constraints on k[0],
- *   mk_p_cnstrs[1]    => constraints on k[1],
- *   ...
- *   mk_p_cnstrs[N-1]  => constraints on k[N-1]
+ *   - mk_p_cnstrs[0]    => constraints on k[0],
+ * 
+ *   - mk_p_cnstrs[1]    => constraints on k[1],
+ * 
+ *   - ...
+ * 
+ *   - mk_p_cnstrs[N-1]  => constraints on k[N-1]
  * 
  * Next, we have the constraints related to combinations of keys:
  * 
- *   mk_p_cnstrs[N]    => constraints between k[0] and k[1]
- *   mk_p_cnstrs[N+1]  => constraints between k[0] and k[2]
- *   ...
- *   mk_p_cnstrs[2N-1] => constraints between k[0] and k[N-1]
- *   mk_p_cnstrs[2N]   => constraints between k[1] and k[2]
- *   mk_p_cnstrs[2N+1] => constraints between k[1] and k[3]
+ *   - mk_p_cnstrs[N]    => constraints between k[0] and k[1]
+ * 
+ *   - mk_p_cnstrs[N+1]  => constraints between k[0] and k[2]
+ * 
+ *   - ...
+ * 
+ *   - mk_p_cnstrs[2N-1] => constraints between k[0] and k[N-1]
+ * 
+ *   - mk_p_cnstrs[2N]   => constraints between k[1] and k[2]
+ * 
+ *   - mk_p_cnstrs[2N+1] => constraints between k[1] and k[3]
+ * 
  *   etc.
  * 
  * Considering C(N,M) as combinations of N, M by M, the size of
@@ -283,14 +294,20 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
  * checked within this function, and it fails if it isn't met.
  * 
  * For example, using cssks_cfg.n_keys = 3:
- *   mk_p_cnstrs[0]    => constraints on k[0]
- *   mk_p_cnstrs[1]    => constraints on k[1]
- *   mk_p_cnstrs[2]    => constraints on k[2]
- *   mk_p_cnstrs[3]    => constraints between k[0] and k[1]
- *   mk_p_cnstrs[4]    => constraints between k[0] and k[2]
- *   mk_p_cnstrs[5]    => constraints between k[1] and k[2]
+ *   - mk_p_cnstrs[0]    => constraints on k[0]
+ * 
+ *   - mk_p_cnstrs[1]    => constraints on k[1]
+ * 
+ *   - mk_p_cnstrs[2]    => constraints on k[2]
+ * 
+ *   - mk_p_cnstrs[3]    => constraints between k[0] and k[1]
+ * 
+ *   - mk_p_cnstrs[4]    => constraints between k[0] and k[2]
+ * 
+ *   - mk_p_cnstrs[5]    => constraints between k[1] and k[2]
+ * 
  *  
-*/
+ */
 R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
 
 Z3_ast       R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
