@@ -3,9 +3,9 @@
 Z3_ast p_cnstrs(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
     R3S_status_t status;
-    Z3_ast         p1_ipv4_src;
-    Z3_ast         p2_ipv4_src;
-    Z3_ast         eq_src_ip;
+    Z3_ast       p1_ipv4_src;
+    Z3_ast       p2_ipv4_src;
+    Z3_ast       eq_src_ip;
 
     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;

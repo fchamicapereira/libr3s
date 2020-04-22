@@ -3,9 +3,9 @@
 Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
     R3S_status_t status;
-    Z3_ast         p1_ipv4_src, p1_ipv4_dst;
-    Z3_ast         p2_ipv4_src, p2_ipv4_dst;
-    Z3_ast         and_args[2];
+    Z3_ast       p1_ipv4_src, p1_ipv4_dst;
+    Z3_ast       p2_ipv4_src, p2_ipv4_dst;
+    Z3_ast       and_args[2];
 
     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;
@@ -25,6 +25,9 @@ Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ct
     return Z3_mk_and(ctx, 2, and_args);
 }
 
+/**
+ * @example
+ */
 Z3_ast R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
     R3S_status_t status;
@@ -50,6 +53,9 @@ Z3_ast R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context c
     return Z3_mk_and(ctx, 2, and_args);
 }
 
+/**
+ * @example
+ */
 Z3_ast R3S_mk_symmetric_tcp_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
     Z3_ast symmetric_ip;

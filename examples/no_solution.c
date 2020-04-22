@@ -4,8 +4,8 @@
 Z3_ast mk_p_cnstrs(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
 {
     R3S_status_t status;
-    Z3_ast         p1_ipv4_src;
-    Z3_ast         eq_ipv4;
+    Z3_ast       p1_ipv4_src;
+    Z3_ast       eq_ipv4;
 
     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
 
@@ -29,6 +29,9 @@ int main () {
     status    = R3S_find_keys(cfg, cnstrs, &k);
 
     printf("%s\n", R3S_cfg_to_string(cfg));
+
+    // R3S_STATUS_NO_SOLUTION
     printf("%s\n", R3S_status_to_string(status));
+
     R3S_cfg_delete(&cfg);
 }
