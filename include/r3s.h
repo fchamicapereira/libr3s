@@ -766,11 +766,13 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
  *   ...   | ...          | ...
  *   
  * 
- * Considering C(N,M) as combinations of N, M by M, the size of
- * \p mk_p_cnstrs must be at least N + C(N,2). This condition is
+ * Considering \f$ \binom{n}{m} \f$ as combinations of \f$ n \f$, \f$ m \f$
+ * by \f$ m \f$, the size of \p mk_p_cnstrs must be at least
+ * \f$ n + \binom{n}{2} \f$. This condition is
  * checked within this function, and it fails if it isn't met.
  * 
- * For example, using r3s_cfg.n_keys = 3:
+ * For example, using r3s_cfg.n_keys = 3, and knowing that
+ * \f$ \binom{3}{2} = 3 \f$:
  *   - mk_p_cnstrs[0]    => constraints on k[0]
  * 
  *   - mk_p_cnstrs[1]    => constraints on k[1]

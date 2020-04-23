@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <r3s.h>
 
 int main() {
@@ -10,12 +11,12 @@ int main() {
     R3S_packet_t    *packets;
     int             n_packets;
 
-    sprintf(pcap, "/home/fcp/libr3s/pcap/v6.pcap");
+    sprintf(pcap, "/home/fcp/libr3s/pcap/tcp-ecn-sample.pcap");
 
     R3S_cfg_init(&cfg);
     
-    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV6);
-    //R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4);
+    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4_TCP);
+    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4_UDP);
 
     status = R3S_parse_packets(cfg, pcap, &packets, &n_packets);
 
@@ -24,6 +25,8 @@ int main() {
 
     for (unsigned i = 0; i < n_packets; i++)
         printf("packet %u\n%s\n", i, R3S_packet_to_string(packets[i]));
+
+    free(packets);
 
     R3S_cfg_delete(&cfg);
 }
