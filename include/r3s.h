@@ -8,32 +8,58 @@
 
 #include <z3.h>
 
-/*
- * Used for documentation. It's an explicit indication
- * that the parameter prefixed with this keyword is
- * going to be used as an output parameter.
+/**
+ * \brief Used for documentation.
+ * It's an explicit indication that the parameter
+ * prefixed with this keyword is going to be used
+ * as an output parameter.
 */
 #define out
 
+//! \brief RSS hash output in bytes
 #define HASH_OUTPUT_SIZE        4
+
+//! \brief RSS key size in bytes
 #define KEY_SIZE                52
 
+//! \brief RSS hash output size in bits
 #define HASH_OUTPUT_SIZE_BITS   (HASH_OUTPUT_SIZE * 8)
+
+//! \brief RSS key size in bits
 #define KEY_SIZE_BITS           (KEY_SIZE * 8)
 
-typedef unsigned char  R3S_byte_t;
-typedef R3S_byte_t*  R3S_bytes_t;
+//! \brief Byte used all over this library.
+typedef unsigned char R3S_byte_t;
 
-typedef R3S_bytes_t  R3S_in_t;
-typedef R3S_byte_t   R3S_key_t[KEY_SIZE];
-typedef uint32_t     R3S_out_t;
+//! \brief Array of bytes type.
+typedef R3S_byte_t* R3S_bytes_t;
 
-typedef R3S_byte_t   R3S_ipv6_t[16];
-typedef R3S_byte_t   R3S_ipv4_t[4];
-typedef R3S_byte_t   R3S_v_tag_t[4];  // verification tag (SCTP)
-typedef R3S_byte_t   R3S_vni_t[3];    // unique identifier for the individual VXLAN segment
-typedef R3S_byte_t   R3S_port_t[2];
-typedef R3S_byte_t   R3S_ethertype_t[1];
+//! \brief RSS hash input type.
+typedef R3S_bytes_t R3S_in_t;
+
+//! \brief RSS key type.
+typedef R3S_byte_t R3S_key_t[KEY_SIZE];
+
+//! \brief RSS hash output type.
+typedef uint32_t R3S_out_t;
+
+//! \brief IPv6 packet field type.
+typedef R3S_byte_t R3S_ipv6_t[16];
+
+//! \brief IPv4 packet field type.
+typedef R3S_byte_t R3S_ipv4_t[4];
+
+//! \brief SCTP verification tag packet field type.
+typedef R3S_byte_t R3S_v_tag_t[4];
+
+//! \brief VXLAN segment's network identifier type.
+typedef R3S_byte_t R3S_vni_t[3];
+
+//! \brief L4 port type.
+typedef R3S_byte_t R3S_port_t[2];
+
+//! \brief L2 protocol type.
+typedef R3S_byte_t R3S_ethertype_t[1];
 
 /**
  * \typedef R3S_in_cfg_t
@@ -137,9 +163,14 @@ typedef enum {
 
 } R3S_in_opt_t;
 
-// This is used for R3S_in_opt_t iteration
-#define R3S_FIRST_IN_OPT R3S_IN_OPT_GENEVE_OAM
-#define R3S_LAST_IN_OPT  R3S_IN_OPT_ETHERTYPE
+// Undocumented and not really important
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    #define R3S_FIRST_PF R3S_PF_VXLAN_UDP_OUTER
+    #define R3S_LAST_PF  R3S_PF_ETHERTYPE
+
+    #define R3S_FIRST_IN_OPT R3S_IN_OPT_GENEVE_OAM
+    #define R3S_LAST_IN_OPT  R3S_IN_OPT_ETHERTYPE
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 /**
  * \enum R3S_pf_t
@@ -220,10 +251,6 @@ typedef enum {
     R3S_PF_ETHERTYPE,
 
 } R3S_pf_t;
-
-// This is used for R3S_pf_t iteration
-#define R3S_FIRST_PF R3S_PF_VXLAN_UDP_OUTER
-#define R3S_LAST_PF  R3S_PF_ETHERTYPE
 
 /**
  * \enum R3S_status_t
@@ -413,28 +440,56 @@ typedef struct {
  * Packet field configuration, i.e., which packet fields
  * are being used.
  * 
- * \var R3S_ethertype_t R3S_packet_t::ethertype
+ * \var R3S_packet_t::ethertype
  * L2 protocol.
+ * 
+ * \var R3S_packet_t::ipv4
+ * IPv4 header
+ * 
+ * \var R3S_packet_t::ipv6
+ * IPv6 header
+ * 
+ * \var R3S_packet_t::tcp
+ * TCP header
+ * 
+ * \var R3S_packet_t::udp
+ * UDP header
+ * 
+ * \var R3S_packet_t::sctp
+ * SCTP header
+ * 
+ * \var R3S_packet_t::vxlan
+ * VXLAN header
  */
 typedef struct {
     R3S_in_cfg_t cfg;
 
     union {
+        //! \unnamed{union}
         R3S_ethertype_t ethertype;
     };
 
     union {
+        //! \unnamed{union}
         R3S_h_ipv4_t ipv4;
+        
+        //! \unnamed{union}
         R3S_h_ipv6_t ipv6;
     };
 
     union {
+        //! \unnamed{union}
         R3S_h_tcp_t  tcp;
+        
+        //! \unnamed{union}
         R3S_h_udp_t  udp;
+
+        //! \unnamed{union}
         R3S_h_sctp_t sctp;
     };
 
     union {
+        //! \unnamed{union}
         R3S_h_vxlan_t vxlan;
     };
 
@@ -527,6 +582,14 @@ typedef struct {
  */
 typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_context,Z3_ast,Z3_ast);
 
+
+/**********************************************//**
+ * \defgroup StringAPI String
+ * Typical toString functions.
+ * @{
+ *************************************************/
+
+
 /**
  * \brief R3S boilerplate string.
  * \note There is no need to worry about freeing memory when using this.
@@ -589,6 +652,48 @@ R3S_string_t R3S_pf_to_string(R3S_pf_t pf);
  */
 R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
 
+
+/**********************************************//**
+ * @}
+ * 
+ * \defgroup ConfigAPI Config
+ * Configuration related functions.
+ * @{
+ *************************************************/
+
+/**
+ * \brief Initialize a configuration.
+ * \param cfg Configuration to initialize.
+ */
+void         R3S_cfg_init(out R3S_cfg_t *cfg);
+
+/**
+ * \brief Reset a configuration.
+ * \param cfg Configuration to reset.
+ */
+void         R3S_cfg_reset(out R3S_cfg_t *cfg);
+
+/**
+ * \brief Delete a configuration.
+ * \param cfg Configuration to delete.
+ */
+void         R3S_cfg_delete(out R3S_cfg_t *cfg);
+
+/**
+ * \brief Load option into configuration.
+ * \param cfg Configuration to modify.
+ * \param in_opt Option to load.
+ */
+R3S_status_t R3S_cfg_load_in_opt(out R3S_cfg_t *cfg, R3S_in_opt_t in_opt);
+
+/**********************************************//**
+ * @}
+ *
+ * \defgroup PacketAPI Packet
+ * Packet related functions.
+ * @{
+ *************************************************/
+
 /**
  * Initialize packet.
  * 
@@ -619,10 +724,11 @@ R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, o
 R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
 R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
 
-void         R3S_cfg_init(out R3S_cfg_t *cfg);
-void         R3S_cfg_reset(out R3S_cfg_t *cfg);
-void         R3S_cfg_delete(out R3S_cfg_t *cfg);
-R3S_status_t R3S_cfg_load_in_opt(out R3S_cfg_t *cfg, R3S_in_opt_t in_opt);
+/**********************************************//**
+ * @}
+ *************************************************/
+
+
 
 R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p);
 R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_out_t *result);
