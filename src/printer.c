@@ -58,7 +58,7 @@ R3S_string_t R3S_packet_to_string(R3S_packet_t p)
             BYTE_FROM_BYTES(p.ipv6.src, 14), BYTE_FROM_BYTES(p.ipv6.src, 15));
     
     if (R3S_packet_has_pf(p, R3S_PF_IPV6_DST))
-        APPEND(result, "ipv6 src  : %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x\n",
+        APPEND(result, "ipv6 dst  : %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x\n",
             BYTE_FROM_BYTES(p.ipv6.dst,  0), BYTE_FROM_BYTES(p.ipv6.dst,  1),
             BYTE_FROM_BYTES(p.ipv6.dst,  2), BYTE_FROM_BYTES(p.ipv6.dst,  3),
             BYTE_FROM_BYTES(p.ipv6.dst,  4), BYTE_FROM_BYTES(p.ipv6.dst,  5),

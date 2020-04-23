@@ -15,6 +15,7 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 #include <netinet/ip.h>
+#include <netinet/ip6.h>
 #include <netinet/in.h>
 
 #include <netinet/sctp.h>
@@ -32,8 +33,6 @@ struct sctphdr
   unsigned short    dest;
   unsigned int      veriftag;
   unsigned int      sctp_sum;
-  // chunk follows
-  //struct chunk          chnk;
 };
 
 void parse_packet_with_opt(
@@ -50,6 +49,7 @@ void parse_packet_with_opt(
 
     const struct ether_header  *ether_hdr;
     const struct ip            *ip_hdr;
+    const struct ip6_hdr       *ip6_hdr;
     const struct tcphdr        *tcp_hdr;
     const struct udphdr        *udp_hdr;
     const struct sctphdr       *sctp_hdr;
@@ -79,13 +79,10 @@ void parse_packet_with_opt(
 
             ip_hdr = (struct ip*) l3_hdr;
 
-            inet_ntop(AF_INET, &(ip_hdr->ip_src), sourceIP, INET_ADDRSTRLEN);
-            inet_ntop(AF_INET, &(ip_hdr->ip_dst), destIP, INET_ADDRSTRLEN);
-
             unsigned sourceIPv, destIPv;
 
-            in_addr_t addr_s = inet_addr(sourceIP);
-            in_addr_t addr_d = inet_addr(destIP);
+            in_addr_t addr_s = ip_hdr->ip_src.s_addr;
+            in_addr_t addr_d = ip_hdr->ip_dst.s_addr;
             
             R3S_ipv4_t ipv4_src;
             ipv4_src[0] = (addr_s >>  0) & 0xff;
@@ -105,6 +102,25 @@ void parse_packet_with_opt(
             break;
 
         case ETHERTYPE_IPV6:
+            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_IPV6_SRC);
+            if (status != R3S_STATUS_PF_LOADED) break;
+
+            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_IPV6_DST);
+            if (status != R3S_STATUS_PF_LOADED) break;
+
+            ip6_hdr = (struct ip6_hdr*) l3_hdr;
+
+            R3S_ipv6_t ipv6_src;
+            for (unsigned i = 0; i < INET_ADDRSTRLEN; i++)
+                ipv6_src[i] = (R3S_byte_t) ip6_hdr->ip6_src.s6_addr[i];
+
+            R3S_ipv6_t ipv6_dst;
+            for (unsigned i = 0; i < INET_ADDRSTRLEN; i++)
+                ipv6_dst[i] = (R3S_byte_t) ip6_hdr->ip6_dst.s6_addr[i];
+
+            R3S_packet_set_pf(cfg, R3S_PF_IPV6_SRC, ipv6_src, pp);
+            R3S_packet_set_pf(cfg, R3S_PF_IPV6_DST, ipv6_dst, pp);
+
             break;
 
         default:
