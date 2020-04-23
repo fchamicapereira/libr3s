@@ -1,7 +1,7 @@
 #ifndef __R3S_API_H__
 #define __R3S_API_H__
 
-/** @file */ 
+/** \file */ 
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -40,7 +40,7 @@ typedef R3S_byte_t   R3S_ethertype_t[1];
  * Used to infer if a given packet field is loaded.
  * \see R3S_pf_t
  */
-typedef unsigned     R3S_in_cfg_t;
+typedef unsigned R3S_in_cfg_t;
 
 /**
  * \enum R3S_in_opt_t
@@ -305,37 +305,117 @@ typedef enum {
     R3S_STATUS_FAILURE
 } R3S_status_t;
 
+/**
+ * \struct R3S_h_ipv4_t
+ * \brief IPv4 header.
+ * \see R3S_packet_t
+ * 
+ * \var R3S_h_ipv4_t::src
+ * Source address.
+ * 
+ * \var R3S_h_ipv4_t::dst
+ * Destination address.
+ */
 typedef struct {
     R3S_ipv4_t src;
     R3S_ipv4_t dst;
 } R3S_h_ipv4_t;
 
+/**
+ * \struct R3S_h_ipv6_t
+ * \brief IPv6 header.
+ * \see R3S_packet_t
+ * 
+ * \var R3S_h_ipv6_t::src
+ * Source address.
+ * 
+ * \var R3S_h_ipv6_t::dst
+ * Destination address.
+ */
 typedef struct {
     R3S_ipv6_t src;
     R3S_ipv6_t dst;
 } R3S_h_ipv6_t;
 
+/**
+ * \struct R3S_h_tcp_t
+ * \brief TCP header.
+ * \see R3S_packet_t
+ * 
+ * \var R3S_h_tcp_t::src
+ * Source port.
+ * 
+ * \var R3S_h_tcp_t::dst
+ * Destination port.
+ */
 typedef struct {
     R3S_port_t src;
     R3S_port_t dst;
 } R3S_h_tcp_t;
 
+/**
+ * \struct R3S_h_udp_t
+ * \brief UDP header.
+ * \see R3S_packet_t
+ * 
+ * \var R3S_h_udp_t::src
+ * Source port.
+ * 
+ * \var R3S_h_udp_t::dst
+ * Destination port.
+ */
 typedef struct {
     R3S_port_t src;
     R3S_port_t dst;
 } R3S_h_udp_t;
 
+/**
+ * \struct R3S_h_sctp_t
+ * \brief SCTP header.
+ * \see R3S_packet_t
+ * 
+ * \var R3S_h_sctp_t::src
+ * Source port.
+ * 
+ * \var R3S_h_sctp_t::dst
+ * Destination port.
+ * 
+ * \var R3S_h_sctp_t::tag
+ * Verification tag.
+ */
 typedef struct {
     R3S_port_t  src;
     R3S_port_t  dst;
     R3S_v_tag_t tag;
 } R3S_h_sctp_t;
 
+/**
+ * \struct R3S_h_vxlan_t
+ * \brief VXLAN header.
+ * \see R3S_packet_t
+ * 
+ * \var R3S_h_vxlan_t::outer
+ * Outer UDP port.
+ * 
+ * \var R3S_h_vxlan_t::vni
+ * VXLAN network identifier.
+ */
 typedef struct {
     R3S_port_t outer;
     R3S_vni_t  vni;
 } R3S_h_vxlan_t;
 
+/**
+ * \struct R3S_packet_t
+ * \brief Packet associated with an RSS configuration.
+ * 
+ * \var R3S_packet_t::cfg
+ * Packet field configuration, i.e., which packet fields
+ * are being used.
+ * 
+ * \var R3S_ethertype_t R3S_packet_t::ethertype
+ * L2 protocol.
+ */
 typedef struct {
     R3S_in_cfg_t cfg;
 
@@ -447,62 +527,82 @@ typedef struct {
  */
 typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_context,Z3_ast,Z3_ast);
 
-typedef union {
-    char key[KEY_SIZE * 3];
-    char packet[700];
-    char output[12];
-    char status[40];
-    char opt[35];
-    char pf[30];
-    char cfg[1000];
-} R3S_string_t;
+/**
+ * \brief R3S boilerplate string.
+ * \note There is no need to worry about freeing memory when using this.
+ */
+typedef char* R3S_string_t;
 
 /**
- * \def R3S_status_to_string(_s)
- * Gets a status' string representation.
+ * Get the string representation of a key.
+ * 
+ * \param k Key
+ * \return ::R3S_string_t String representation of \p k.
  */
-#define R3S_status_to_string(_s)      __status_to_string((_s)).status
+R3S_string_t R3S_key_to_string(R3S_key_t k);
 
 /**
- * \def R3S_key_to_string(_k)
- * Gets a key's string representation.
+ * Get the string representation of a packet.
+ * 
+ * \param p Packet
+ * \return ::R3S_string_t String representation of \p p.
  */
-#define R3S_key_to_string(_k)         __key_to_string((_k)).key
+R3S_string_t R3S_packet_to_string(R3S_packet_t p);
 
 /**
- * \def R3S_packet_to_string(_p)
- * Gets a packet's string representation.
+ * Get the string representation of a hash output.
+ * 
+ * \param o Hash output
+ * \return ::R3S_string_t String representation of \p o.
  */
-#define R3S_packet_to_string(_p)      __packet_to_string((_p)).packet
+R3S_string_t R3S_hash_output_to_string(R3S_out_t o);
 
+/**
+ * Get the string representation of a status code.
+ * 
+ * \param s Status
+ * \return ::R3S_string_t String representation of \p s.
+ */
+R3S_string_t R3S_status_to_string(R3S_status_t s);
 
-#define R3S_hash_output_to_string(_o) __hash_output_to_string((_o)).output
-#define R3S_in_opt_to_string(_opt)    __in_opt_to_string((_opt)).opt
-#define R3S_pf_to_string(_pf)         __pf_to_string((_pf)).pf
-#define R3S_cfg_to_string(_cfg)       __cfg_to_string((_cfg)).cfg
+/**
+ * Get the string representation of a configuration option.
+ * 
+ * \param opt Option
+ * \return ::R3S_string_t String representation of \p opt.
+ */
+R3S_string_t R3S_in_opt_to_string(R3S_in_opt_t opt);
 
-R3S_string_t __key_to_string(R3S_key_t k);
-R3S_string_t __packet_to_string(R3S_packet_t p);
-R3S_string_t __hash_output_to_string(R3S_out_t o);
-R3S_string_t __status_to_string(R3S_status_t s);
-R3S_string_t __in_opt_to_string(R3S_in_opt_t opt);
-R3S_string_t __pf_to_string(R3S_pf_t pf);
-R3S_string_t __cfg_to_string(R3S_cfg_t cfg);
+/**
+ * Get the string representation of a packet field.
+ * 
+ * \param pf Packet field
+ * \return ::R3S_string_t String representation of \p pf.
+ */
+R3S_string_t R3S_pf_to_string(R3S_pf_t pf);
+
+/**
+ * Get the string representation of a configuration.
+ * 
+ * \param cfg Configuration
+ * \return ::R3S_string_t String representation of \p cfg.
+ */
+R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
 
 /**
  * Initialize packet.
  * 
- * @param p Packet.
+ * \param p Packet.
  */
-void         R3S_packet_init(R3S_packet_t *p);
+void R3S_packet_init(R3S_packet_t *p);
 
 /**
  * Set packet field in packet.
  * 
- * @param cfg R3S configuration.
- * @param pf Type of packet field to store.
- * @param v Value of the packet field.
- * @param p Pointer to a packet field with the value set.
+ * \param cfg R3S configuration.
+ * \param pf Type of packet field to store.
+ * \param v Value of the packet field.
+ * \param p Pointer to a packet field with the value set.
  * 
  * \return ::R3S_STATUS_SUCCESS
  * Packet *p* with the packet field *pf* set with value *v*.
@@ -588,7 +688,7 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
  */
 R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
 /** 
- * @example no_solution.c
+ * \example no_solution.c
  * Consider the following scenario:
  * *find an RSS key that for every pair of IPv4 packets p1 and p2,
  * if the IP source address of the packet p1 is equal to itself (i.e.,
@@ -598,27 +698,27 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
  * constraints.
  */
 /** 
- * @example src_ip.c
+ * \example src_ip.c
  * \todo explanation
  */
 /** 
- * @example symmetric_ip_and_symmetric_session.c
+ * \example symmetric_ip_and_symmetric_session.c
  * \todo explanation
  */
 /** 
- * @example symmetric_ip.c
+ * \example symmetric_ip.c
  * \todo explanation
  */
 /** 
- * @example symmetric_session_2_cnstrs_diff_pf.c
+ * \example symmetric_session_2_cnstrs_diff_pf.c
  * \todo explanation
  */
 /** 
- * @example symmetric_session_2_cnstrs_eq_pf.c
+ * \example symmetric_session_2_cnstrs_eq_pf.c
  * \todo explanation
  */
 /** 
- * @example symmetric_session.c
+ * \example symmetric_session.c
  * \todo explanation
  */
 
