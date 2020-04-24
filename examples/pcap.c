@@ -28,21 +28,12 @@ int main() {
     R3S_rand_key(cfg, k);
     printf("Key:\n%s\n", R3S_key_to_string(k));
 
-    R3S_stats_init(cfg, 2, &stats);
-    R3S_stats_from_packets(k, packets, n_packets, &stats);
-    printf("Stats:\n%s\n", R3S_key_stats_to_string(stats));
-
-    R3S_stats_init(cfg, 4, &stats);
-    R3S_stats_from_packets(k, packets, n_packets, &stats);
-    printf("Stats:\n%s\n", R3S_key_stats_to_string(stats));
-
-    R3S_stats_init(cfg, 8, &stats);
-    R3S_stats_from_packets(k, packets, n_packets, &stats);
-    printf("Stats:\n%s\n", R3S_key_stats_to_string(stats));
-
-    R3S_stats_init(cfg, 16, &stats);
-    R3S_stats_from_packets(k, packets, n_packets, &stats);
-    printf("Stats:\n%s\n", R3S_key_stats_to_string(stats));
+    for (unsigned n_cores = 2; n_cores <= 32; n_cores *= 2)
+    {
+        R3S_stats_init(cfg, n_cores, &stats);
+        R3S_stats_from_packets(k, packets, n_packets, &stats);
+        printf("%u cores stats:\n%s\n", n_cores, R3S_key_stats_to_string(stats));
+    }
 
     free(packets);
 

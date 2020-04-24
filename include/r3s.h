@@ -210,7 +210,7 @@ typedef enum {
  * TCP destination port.
  * 
  * \var R3S_pf_t::R3S_PF_UDP_SRC
- * UDP destination port.
+ * UDP source port.
  * 
  * \var R3S_pf_t::R3S_PF_UDP_DST
  * UDP destination port.
@@ -551,6 +551,9 @@ typedef struct {
  * 
  * \param cfg R3S configuration
  * \param iopt Index of the option 
+ * \param ctx Z3 context
+ * \param p1 A packet
+ * \param p2 Another packet
  * \see R3S_find_keys()
  * 
  * \code
@@ -580,7 +583,7 @@ typedef struct {
  * }
  * \endcode
  */
-typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_context,Z3_ast,Z3_ast);
+typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_context ctx,Z3_ast p1,Z3_ast p2);
 
 
 /**
@@ -762,7 +765,7 @@ void R3S_packet_init(R3S_packet_t *p);
  * \param cfg R3S configuration.
  * \param pf Type of packet field to store.
  * \param v Value of the packet field.
- * \param p Pointer to a packet field with the value set.
+ * \param p Pointer to a packet with the value set.
  * 
  * \return ::R3S_STATUS_SUCCESS
  * Packet *p* with the packet field *pf* set with value *v*.
