@@ -6,7 +6,7 @@ int main() {
     R3S_cfg_t       cfg;
     R3S_key_t       k;
     R3S_status_t    status;
-    R3S_key_stats_t stats;
+    R3S_stats_t stats;
     char            pcap[50];
     R3S_packet_t    *packets;
     int             n_packets;
@@ -32,7 +32,7 @@ int main() {
     {
         R3S_stats_init(cfg, n_cores, &stats);
         R3S_stats_from_packets(k, packets, n_packets, &stats);
-        printf("%u cores stats:\n%s\n", n_cores, R3S_key_stats_to_string(stats));
+        printf("%u cores stats:\n%s\n", n_cores, R3S_stats_to_string(stats));
     }
 
     free(packets);

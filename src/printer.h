@@ -19,12 +19,9 @@
     #define DEBUG_PLOG(f_, ...)
 #endif
 
-#define CORES                   8
-#define HASH_TO_CORE(hash)      ((hash) % CORES)
-
-#define BYTE_FROM_BYTES(bb, b)  ((bb)[(b)] & 0xff)
-#define BIT_FROM_BYTE(b, i)     (((b) >> (i)) & 1)
-#define BIT_FROM_KEY(b, k)      (BIT_FROM_BYTE((k)[(b) / 8], 7 - ((b) % 8)))
+#define BYTE_FROM_BYTES(bb, b)      ((bb)[(b)] & 0xff)
+#define BIT_FROM_BYTE(b, i)         (((b) >> (i)) & 1)
+#define BIT_FROM_KEY(b, k)          (BIT_FROM_BYTE((k)[(b) / 8], 7 - ((b) % 8)))
 
 #define R3S_STRING_SZ           1000
 

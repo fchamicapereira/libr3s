@@ -28,6 +28,9 @@
 //! \brief RSS key size in bits
 #define KEY_SIZE_BITS   (KEY_SIZE * 8)
 
+//! \brief From RSS hash to core assoginment
+#define HASH_TO_CORE(hash, cores)   (((hash) & 0x1ff) % (cores))
+
 //! \brief Byte used all over this library.
 typedef unsigned char R3S_byte_t;
 
@@ -544,6 +547,13 @@ typedef struct {
     unsigned    n_loaded_opts;
     int         n_procs;
     unsigned    n_keys;
+
+    struct {
+        char     *pcap_fname;
+        float    std_dev_threshold;
+        int      time_limit;
+        unsigned n_cores;
+    } key_fit_params;
 } R3S_cfg_t;
 
 /**
@@ -602,22 +612,22 @@ typedef struct {
 } R3S_core_stats_t;
 
 /**
- * \struct R3S_key_stats_t
+ * \struct R3S_stats_t
  * \brief Key statistics.
  * 
- * \var R3S_key_stats_t::cfg
+ * \var R3S_stats_t::cfg
  * R3S configuration.
  * 
- * \var R3S_key_stats_t::core_stats
+ * \var R3S_stats_t::core_stats
  * Statistics related to each core.
  * 
- * \var R3S_key_stats_t::n_cores
+ * \var R3S_stats_t::n_cores
  * Total number of cores to be considered.
  * 
- * \var R3S_key_stats_t::avg_dist
+ * \var R3S_stats_t::avg_dist
  * Average distribution of packets per core (in percentage).
  * 
- * \var R3S_key_stats_t::std_dev
+ * \var R3S_stats_t::std_dev
  * Standard deviation of the distribution of packets per core (in percentage).
  */
 typedef struct {
@@ -629,7 +639,7 @@ typedef struct {
     float avg_dist;
     float std_dev;
 
-} R3S_key_stats_t;
+} R3S_stats_t;
 
 
 
@@ -708,7 +718,7 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
  * \param stats Statistics.
  * \return ::R3S_string_t String representation of \p stats.
  */
-R3S_string_t R3S_key_stats_to_string(R3S_key_stats_t stats);
+R3S_string_t R3S_stats_to_string(R3S_stats_t stats);
 
 
 /**********************************************//**
@@ -889,14 +899,17 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
  * \todo explanation
  */
 
+R3S_status_t R3S_test_keys_agains_contraints(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
+
 Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 Z3_ast R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 Z3_ast R3S_mk_symmetric_tcp_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 
-void R3S_stats_init(R3S_cfg_t cfg, unsigned n_cores, out R3S_key_stats_t *stats);
-void R3S_stats_reset(R3S_cfg_t cfg, unsigned n_cores, out R3S_key_stats_t *stats);
-void R3S_stats_delete(out R3S_key_stats_t *stats);
+void R3S_stats_init(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats);
+void R3S_stats_reset(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats);
+void R3S_stats_delete(out R3S_stats_t *stats);
 R3S_status_t R3S_parse_packets(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
-R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_key_stats_t *stats);
+R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_stats_t *stats);
+bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats);
 
 #endif

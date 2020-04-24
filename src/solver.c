@@ -739,6 +739,8 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast *keys, R3S_key_t 
     unsigned     num_soft_cnstrs_new;
     unsigned     unsat_core_sz;
 
+    init_rand();
+
     for (int bit = 0; bit < KEY_SIZE_BITS; bit++)
         key_constr[bit] = mk_key_bit_const(ctx, keys[0], KEY_SIZE_BITS - 1 - bit, BIT_FROM_KEY(bit, keys_proposals[0]));
 
@@ -751,9 +753,17 @@ void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast *keys, R3S_key_t 
         unsat_core_sz = 0;
         num_soft_cnstrs_new = 0;
         for (unsigned i = 0; i < num_soft_cnstrs; i++) {
+
+            // this assumption is in the unsat core
             if (core[i]) {
                 unsat_core_sz++;
                 core[i] = false;
+
+                // randomly choose between removing and not removing this assumption
+                if (rand() & 1) {
+                    key_constr[num_soft_cnstrs_new++] = key_constr[i];
+                }
+
                 continue;
             }
          
@@ -888,6 +898,10 @@ R3S_status_t sat_checker(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs)
         return R3S_STATUS_NO_SOLUTION;
     }
 
+    del_solver(setup.ctx, setup.s);
+    free(setup.keys_decl);
+    free(setup.keys);
+
     return R3S_STATUS_HAS_SOLUTION;
 }
 
@@ -907,10 +921,11 @@ void alarm_handler(int sig)
 
 void worker_key_adjuster(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs)
 {
-    R3S_status_t status;
-    R3S_key_t    *keys;
+    R3S_status_t    status;
+    R3S_key_t       *keys;
+    R3S_stats_t stats;
     
-    keys = (R3S_key_t*) malloc(sizeof(R3S_key_t) * r3s_cfg.n_keys);
+    keys    = (R3S_key_t*) malloc(sizeof(R3S_key_t) * r3s_cfg.n_keys);
 
     DEBUG_PLOG("started\n");
 
@@ -926,6 +941,7 @@ void worker_key_adjuster(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs)
     {
         write(wp, &status, sizeof(R3S_status_t));
         free(keys);
+        R3S_stats_delete(&stats);
         exit(0);
     }
 
@@ -933,13 +949,14 @@ void worker_key_adjuster(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs)
     {
         DEBUG_PLOG("testing key %u\n", ikey);
 
-        if (!R3S_k_test_dist(r3s_cfg, keys[ikey]))
+        if (!R3S_stats_eval(r3s_cfg, keys[ikey], &stats))
         {
             DEBUG_PLOG("test failed\n");
 
             status = R3S_STATUS_BAD_SOLUTION;
             write(wp, &status, sizeof(R3S_status_t));
             free(keys);
+            R3S_stats_delete(&stats);
             exit(0);
         }
     }
@@ -953,6 +970,7 @@ void worker_key_adjuster(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs)
     DEBUG_PLOG("terminated\n");
 
     free(keys);
+    R3S_stats_delete(&stats);
     exit(0);
 }
 
@@ -1053,8 +1071,8 @@ R3S_status_t master(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, int np, com
 
 R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys)
 {
-    int            nworkers;
-    comm_t         comm;
+    int          nworkers;
+    comm_t       comm;
     R3S_status_t status;
 
     nworkers   = r3s_cfg.n_procs <= 0 ? get_nprocs() : r3s_cfg.n_procs;
@@ -1079,6 +1097,40 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
     free(comm.wpipe);
 
     return status;
+}
+
+R3S_status_t R3S_test_keys_agains_contraints(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys)
+{
+    R3S_setup_t setup;
+    Z3_ast      key_const;
+
+    setup = mk_setup(r3s_cfg, mk_p_cnstrs);
+
+    for (unsigned ikey = 0; ikey < r3s_cfg.n_keys; ikey++)
+    {
+        key_const = mk_key_const(setup.ctx, setup.keys[ikey], keys[ikey]);
+        Z3_solver_assert(setup.ctx, setup.s, key_const);
+    }
+
+    DEBUG_LOG("checking keys against constraints\n");
+
+    if (Z3_solver_check(setup.ctx, setup.s) == Z3_L_FALSE) {
+        /*
+         * It is not possible to make the formula satisfiable
+         * even when ignoring all soft constraints.
+        */
+        del_solver(setup.ctx, setup.s);
+        free(setup.keys_decl);
+        free(setup.keys);
+        
+        return R3S_STATUS_FAILURE;
+    }
+
+    del_solver(setup.ctx, setup.s);
+    free(setup.keys_decl);
+    free(setup.keys);
+
+    return R3S_STATUS_SUCCESS;
 }
 
 /*

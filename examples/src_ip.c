@@ -36,5 +36,8 @@ int main () {
     if (status == R3S_STATUS_SUCCESS)
         printf("result:\n%s\n", R3S_key_to_string(k));
 
+    status = R3S_test_keys_agains_contraints(cfg, cnstrs, &k);
+    printf("valid keys: %s\n", R3S_status_to_string(status));
+
     R3S_cfg_delete(&cfg);
 }

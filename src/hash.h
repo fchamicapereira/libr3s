@@ -13,6 +13,5 @@ R3S_packet_t   R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_i
 void           R3S_rand_key(R3S_cfg_t cfg, out R3S_key_t key);
 void           R3S_zero_key(R3S_key_t key);
 bool           R3S_is_zero_key(R3S_key_t key);
-bool           R3S_k_test_dist(R3S_cfg_t cfg, R3S_key_t k);
 
 #endif
