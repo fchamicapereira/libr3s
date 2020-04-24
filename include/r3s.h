@@ -20,13 +20,13 @@
 #define HASH_OUTPUT_SIZE        4
 
 //! \brief RSS key size in bytes
-#define KEY_SIZE                52
+#define KEY_SIZE        52
 
 //! \brief RSS hash output size in bits
 #define HASH_OUTPUT_SIZE_BITS   (HASH_OUTPUT_SIZE * 8)
 
 //! \brief RSS key size in bits
-#define KEY_SIZE_BITS           (KEY_SIZE * 8)
+#define KEY_SIZE_BITS   (KEY_SIZE * 8)
 
 //! \brief Byte used all over this library.
 typedef unsigned char R3S_byte_t;
@@ -541,9 +541,9 @@ typedef struct {
  */
 typedef struct {
     R3S_loaded_in_opt_t *loaded_opts;
-    unsigned            n_loaded_opts;
-    int                 n_procs;
-    unsigned            n_keys;
+    unsigned    n_loaded_opts;
+    int         n_procs;
+    unsigned    n_keys;
 } R3S_cfg_t;
 
 /**
@@ -581,6 +581,53 @@ typedef struct {
  * \endcode
  */
 typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_context,Z3_ast,Z3_ast);
+
+
+/**
+ * \struct R3S_core_stats_t
+ * \brief Number of packets redirected to a single core, and its percentage.
+ * 
+ * \var R3S_core_stats_t::n_packets
+ * Total number of packets redirected to a single core.
+ * 
+ * \var R3S_core_stats_t::percentage
+ * Percentage of the total number of packets that was redirected to a single core.
+ */
+typedef struct {
+    unsigned n_packets;
+    float percentage;
+} R3S_core_stats_t;
+
+/**
+ * \struct R3S_key_stats_t
+ * \brief Key statistics.
+ * 
+ * \var R3S_key_stats_t::cfg
+ * R3S configuration.
+ * 
+ * \var R3S_key_stats_t::core_stats
+ * Statistics related to each core.
+ * 
+ * \var R3S_key_stats_t::n_cores
+ * Total number of cores to be considered.
+ * 
+ * \var R3S_key_stats_t::avg_dist
+ * Average distribution of packets per core (in percentage).
+ * 
+ * \var R3S_key_stats_t::std_dev
+ * Standard deviation of the distribution of packets per core (in percentage).
+ */
+typedef struct {
+    R3S_cfg_t cfg;
+    
+    R3S_core_stats_t *core_stats;
+    unsigned n_cores;
+
+    float avg_dist;
+    float std_dev;
+
+} R3S_key_stats_t;
+
 
 
 /**********************************************//**
@@ -652,6 +699,14 @@ R3S_string_t R3S_pf_to_string(R3S_pf_t pf);
  */
 R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
 
+/**
+ * Get the string representation of key statistics.
+ * 
+ * \param stats Statistics.
+ * \return ::R3S_string_t String representation of \p stats.
+ */
+R3S_string_t R3S_key_stats_to_string(R3S_key_stats_t stats);
+
 
 /**********************************************//**
  * @}
@@ -665,19 +720,19 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
  * \brief Initialize a configuration.
  * \param cfg Configuration to initialize.
  */
-void         R3S_cfg_init(out R3S_cfg_t *cfg);
+void R3S_cfg_init(out R3S_cfg_t *cfg);
 
 /**
  * \brief Reset a configuration.
  * \param cfg Configuration to reset.
  */
-void         R3S_cfg_reset(out R3S_cfg_t *cfg);
+void R3S_cfg_reset(out R3S_cfg_t *cfg);
 
 /**
  * \brief Delete a configuration.
  * \param cfg Configuration to delete.
  */
-void         R3S_cfg_delete(out R3S_cfg_t *cfg);
+void R3S_cfg_delete(out R3S_cfg_t *cfg);
 
 /**
  * \brief Load option into configuration.
@@ -729,8 +784,9 @@ R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni
  *************************************************/
 
 
-
+void R3S_rand_key(R3S_cfg_t cfg, R3S_key_t key);
 R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p);
+R3S_status_t R3S_rand_packets(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p);
 R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_out_t *result);
 
 //void       R3S_check_p_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t h1, R3S_packet_t h2);
@@ -752,18 +808,18 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
  * constraints on each key independently. The remaining elements
  * correspond to the constraints related to combinations of keys.
  * 
- *  index  | keys         | description
+ *  index  | keys | description
  * ------- | -------------|-------------
- *    0    | k[0]         | Constraints for the first key
- *    1    | k[1]         | Constraints for the second key
- *   ...   | ...          | ...
+ *    0    | k[0] | Constraints for the first key
+ *    1    | k[1] | Constraints for the second key
+ *   ...   | ...  | ...
  *   n-1   | k[n-1]       | Constraints for the last key
  *    n    | k[0], k[1]   | Constraints for the first and second keys
  *   n+1   | k[0], k[2]   | Constraints for the first and third keys
- *   ...   | ...          | ...
+ *   ...   | ...  | ...
  *  2n-1   | k[0], k[n-1] | Constraints for the first and last keys
  *   2n    | k[1], k[2]   | Constraints for the second and third keys
- *   ...   | ...          | ...
+ *   ...   | ...  | ...
  *   
  * 
  * Considering \f$ \binom{n}{m} \f$ as combinations of \f$ n \f$, \f$ m \f$
@@ -830,10 +886,14 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
  * \todo explanation
  */
 
-Z3_ast       R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
-Z3_ast       R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
-Z3_ast       R3S_mk_symmetric_tcp_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast R3S_mk_symmetric_tcp_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 
+void R3S_stats_init(R3S_cfg_t cfg, unsigned n_cores, out R3S_key_stats_t *stats);
+void R3S_stats_reset(R3S_cfg_t cfg, unsigned n_cores, out R3S_key_stats_t *stats);
+void R3S_stats_delete(out R3S_key_stats_t *stats);
 R3S_status_t R3S_parse_packets(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
+R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_key_stats_t *stats);
 
 #endif

@@ -269,3 +269,24 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg)
 
     return result;
 }
+
+R3S_string_t R3S_key_stats_to_string(R3S_key_stats_t stats)
+{
+    static char result[R3S_STRING_SZ];
+    float       percentage;
+    unsigned    n_packets;
+
+    result[0] = '\0';
+
+    APPEND(result, "avg        %5.2f %%\n", stats.avg_dist);
+    APPEND(result, "std dev    %5.2f %%\n", stats.std_dev);
+
+    for (unsigned core = 0; core < stats.n_cores; core++)
+    {
+        percentage = stats.core_stats[core].percentage;
+        n_packets  = stats.core_stats[core].n_packets;
+        APPEND(result, "core %3u   %5.2f %% (%u)\n", core, percentage, n_packets);
+    }
+
+    return result;
+}

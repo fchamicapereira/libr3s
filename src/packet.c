@@ -188,6 +188,16 @@ R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p)
     return R3S_STATUS_SUCCESS;
 }
 
+R3S_status_t R3S_rand_packets(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p)
+{
+    *p = (R3S_packet_t*) malloc(sizeof(R3S_packet_t) * n_packets);
+    
+    for (unsigned ipacket = 0; ipacket < n_packets; ipacket++)
+        R3S_rand_packet(cfg, &((*p)[ipacket]));
+
+    return R3S_STATUS_SUCCESS;
+}
+
 R3S_status_t R3S_packet_to_in_opt(R3S_cfg_t cfg, R3S_packet_t p, unsigned *ipot)
 {
     unsigned n_opts;
