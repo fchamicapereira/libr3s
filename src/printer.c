@@ -166,7 +166,7 @@ R3S_string_t R3S_status_to_string(R3S_status_t status)
     return result;
 }
 
-R3S_string_t R3S_in_opt_to_string(R3S_in_opt_t opt)
+R3S_string_t R3S_opt_to_string(R3S_opt_t opt)
 {
     static char result[R3S_STRING_SZ];
     
@@ -174,31 +174,31 @@ R3S_string_t R3S_in_opt_to_string(R3S_in_opt_t opt)
 
     switch (opt)
     {
-        case R3S_IN_OPT_GENEVE_OAM:
+        case R3S_OPT_GENEVE_OAM:
             sprintf(result, "Geneve OAM");          break;
-        case R3S_IN_OPT_VXLAN_GPE_OAM:
+        case R3S_OPT_VXLAN_GPE_OAM:
             sprintf(result, "VXLAN GPE OAM");       break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_TCP:
+        case R3S_OPT_NON_FRAG_IPV4_TCP:
             sprintf(result, "Non-frag TCP/IPv4");   break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_UDP:
+        case R3S_OPT_NON_FRAG_IPV4_UDP:
             sprintf(result, "Non-frag UDP/IPv4");   break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_SCTP:
+        case R3S_OPT_NON_FRAG_IPV4_SCTP:
             sprintf(result, "Non-frag SCTP/IPv4");  break;
-        case R3S_IN_OPT_NON_FRAG_IPV4:
+        case R3S_OPT_NON_FRAG_IPV4:
             sprintf(result, "Non-frag IPv4");       break;
-        case R3S_IN_OPT_FRAG_IPV4:
+        case R3S_OPT_FRAG_IPV4:
             sprintf(result, "Frag IPv4");           break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_TCP:
+        case R3S_OPT_NON_FRAG_IPV6_TCP:
             sprintf(result, "Non-frag TCP/IPv6");   break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_UDP:
+        case R3S_OPT_NON_FRAG_IPV6_UDP:
             sprintf(result, "Non-frag UDP/IPv6");   break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_SCTP:
+        case R3S_OPT_NON_FRAG_IPV6_SCTP:
             sprintf(result, "Non-frag SCTP/IPv6");  break;
-        case R3S_IN_OPT_NON_FRAG_IPV6:
+        case R3S_OPT_NON_FRAG_IPV6:
             sprintf(result, "Non-frag IPv6");       break;
-        case R3S_IN_OPT_FRAG_IPV6:
+        case R3S_OPT_FRAG_IPV6:
             sprintf(result, "Frag IPv6");           break;
-        case R3S_IN_OPT_ETHERTYPE:
+        case R3S_OPT_ETHERTYPE:
             sprintf(result, "Ethertype");           break;
     }
 
@@ -258,7 +258,7 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg)
 
     for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++)
     {
-        APPEND(result, "\topt: %s\n", R3S_in_opt_to_string(cfg.loaded_opts[iopt].opt));
+        APPEND(result, "\topt: %s\n", R3S_opt_to_string(cfg.loaded_opts[iopt].opt));
         APPEND(result, "\tsz : %u bits\n", cfg.loaded_opts[iopt].sz);
         APPEND(result, "\tpfs:\n");
 

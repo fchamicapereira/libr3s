@@ -198,7 +198,7 @@ R3S_status_t R3S_rand_packets(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_
     return R3S_STATUS_SUCCESS;
 }
 
-R3S_status_t R3S_packet_to_in_opt(R3S_cfg_t cfg, R3S_packet_t p, unsigned *ipot)
+R3S_status_t R3S_packet_to_opt(R3S_cfg_t cfg, R3S_packet_t p, unsigned *ipot)
 {
     unsigned n_opts;
 

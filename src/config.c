@@ -36,37 +36,37 @@ void R3S_cfg_delete(R3S_cfg_t *cfg)
         free(cfg->key_fit_params.pcap_fname);
 }
 
-bool is_valid_in_opt(R3S_in_opt_t opt)
+bool is_valid_opt(R3S_opt_t opt)
 {
     switch (opt)
     {
-        case R3S_IN_OPT_GENEVE_OAM:
-        case R3S_IN_OPT_VXLAN_GPE_OAM:
-        case R3S_IN_OPT_NON_FRAG_IPV4_TCP:
-        case R3S_IN_OPT_NON_FRAG_IPV4_UDP:
-        case R3S_IN_OPT_NON_FRAG_IPV4_SCTP:
-        case R3S_IN_OPT_NON_FRAG_IPV4:
-        case R3S_IN_OPT_FRAG_IPV4:
-        case R3S_IN_OPT_NON_FRAG_IPV6_TCP:
-        case R3S_IN_OPT_NON_FRAG_IPV6_UDP:
-        case R3S_IN_OPT_NON_FRAG_IPV6_SCTP:
-        case R3S_IN_OPT_NON_FRAG_IPV6:
-        case R3S_IN_OPT_FRAG_IPV6:
-        case R3S_IN_OPT_ETHERTYPE: return true;
+        case R3S_OPT_GENEVE_OAM:
+        case R3S_OPT_VXLAN_GPE_OAM:
+        case R3S_OPT_NON_FRAG_IPV4_TCP:
+        case R3S_OPT_NON_FRAG_IPV4_UDP:
+        case R3S_OPT_NON_FRAG_IPV4_SCTP:
+        case R3S_OPT_NON_FRAG_IPV4:
+        case R3S_OPT_FRAG_IPV4:
+        case R3S_OPT_NON_FRAG_IPV6_TCP:
+        case R3S_OPT_NON_FRAG_IPV6_UDP:
+        case R3S_OPT_NON_FRAG_IPV6_SCTP:
+        case R3S_OPT_NON_FRAG_IPV6:
+        case R3S_OPT_FRAG_IPV6:
+        case R3S_OPT_ETHERTYPE: return true;
     }
 
     return false;
 }
 
-R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
+R3S_status_t R3S_opt_to_pfs(R3S_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
 {
     // TODO: check if is valid opt
     *n_pfs = 0;
 
     switch (opt)
     {
-        case R3S_IN_OPT_GENEVE_OAM:
-        case R3S_IN_OPT_VXLAN_GPE_OAM:
+        case R3S_OPT_GENEVE_OAM:
+        case R3S_OPT_VXLAN_GPE_OAM:
             *n_pfs    = 2;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -74,7 +74,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[1] = R3S_PF_VXLAN_VNI;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_UDP:
+        case R3S_OPT_NON_FRAG_IPV4_UDP:
             *n_pfs    = 4;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -84,7 +84,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[3] = R3S_PF_UDP_DST;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_TCP:
+        case R3S_OPT_NON_FRAG_IPV4_TCP:
             *n_pfs    = 4;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -94,7 +94,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[3] = R3S_PF_TCP_DST;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV4_SCTP:
+        case R3S_OPT_NON_FRAG_IPV4_SCTP:
             *n_pfs    = 5;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -105,8 +105,8 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[3] = R3S_PF_SCTP_V_TAG;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV4:
-        case R3S_IN_OPT_FRAG_IPV4:
+        case R3S_OPT_NON_FRAG_IPV4:
+        case R3S_OPT_FRAG_IPV4:
             *n_pfs    = 2;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -114,7 +114,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[1] = R3S_PF_IPV4_DST;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_UDP:
+        case R3S_OPT_NON_FRAG_IPV6_UDP:
             *n_pfs    = 4;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -124,7 +124,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[3] = R3S_PF_UDP_DST;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_TCP:
+        case R3S_OPT_NON_FRAG_IPV6_TCP:
             *n_pfs    = 4;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -134,7 +134,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[3] = R3S_PF_TCP_DST;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV6_SCTP:
+        case R3S_OPT_NON_FRAG_IPV6_SCTP:
             *n_pfs    = 5;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -145,8 +145,8 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[3] = R3S_PF_SCTP_V_TAG;
 
             break;
-        case R3S_IN_OPT_NON_FRAG_IPV6:
-        case R3S_IN_OPT_FRAG_IPV6:
+        case R3S_OPT_NON_FRAG_IPV6:
+        case R3S_OPT_FRAG_IPV6:
             *n_pfs    = 2;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -154,7 +154,7 @@ R3S_status_t R3S_in_opt_to_pfs(R3S_in_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs
             (*pfs)[1] = R3S_PF_IPV6_DST;
             
             break;
-        case R3S_IN_OPT_ETHERTYPE:
+        case R3S_OPT_ETHERTYPE:
             *n_pfs    = 1;
             *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
 
@@ -172,27 +172,27 @@ bool R3S_cfg_are_compatible_pfs(R3S_cfg_t cfg, R3S_in_cfg_t pfs)
     return false;
 }
 
-R3S_status_t R3S_cfg_load_in_opt(R3S_cfg_t *cfg, R3S_in_opt_t opt)
+R3S_status_t R3S_cfg_load_opt(R3S_cfg_t *cfg, R3S_opt_t opt)
 {
     R3S_status_t s;
     R3S_pf_t     *pfs;
     unsigned     n_pfs;
     unsigned     iopt;
 
-    if (!is_valid_in_opt(opt)) return R3S_STATUS_OPT_UNKNOWN;
+    if (!is_valid_opt(opt)) return R3S_STATUS_OPT_UNKNOWN;
 
     iopt = cfg->n_loaded_opts;
 
     cfg->n_loaded_opts++;
-    cfg->loaded_opts = (R3S_loaded_in_opt_t*) realloc(
+    cfg->loaded_opts = (R3S_loaded_opt_t*) realloc(
         cfg->loaded_opts,
-        sizeof(R3S_loaded_in_opt_t) * cfg->n_loaded_opts);
+        sizeof(R3S_loaded_opt_t) * cfg->n_loaded_opts);
     
     cfg->loaded_opts[iopt].opt = opt;
     cfg->loaded_opts[iopt].pfs = 0;
     cfg->loaded_opts[iopt].sz  = 0;
 
-    s = R3S_in_opt_to_pfs(opt, &pfs, &n_pfs);
+    s = R3S_opt_to_pfs(opt, &pfs, &n_pfs);
     if (s != R3S_STATUS_SUCCESS) return s;
 
     for (unsigned i = 0; i < n_pfs; i++)

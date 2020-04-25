@@ -25,8 +25,8 @@ int main () {
     R3S_status_t    status;
 
     R3S_cfg_init(&cfg);
-    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4);
-    
+    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
+
     cnstrs[0] = &p_cnstrs;
     status    = R3S_find_keys(cfg, cnstrs, &k);
     

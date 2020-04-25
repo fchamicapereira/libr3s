@@ -15,7 +15,7 @@ int main() {
 
     R3S_cfg_init(&cfg);
     
-    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4);
+    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
     status = R3S_parse_packets(cfg, pcap, &packets, &n_packets);
 

@@ -117,7 +117,7 @@ R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_out_t 
     R3S_status_t status;
     unsigned     ipot;
 
-    status = R3S_packet_to_in_opt(cfg, p, &ipot);
+    status = R3S_packet_to_opt(cfg, p, &ipot);
 
     if (status != R3S_STATUS_SUCCESS) return status;
 

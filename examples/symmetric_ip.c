@@ -7,7 +7,7 @@ int main () {
     R3S_cnstrs_func cnstrs[1];
 
     R3S_cfg_init(&cfg);
-    R3S_cfg_load_in_opt(&cfg, R3S_IN_OPT_NON_FRAG_IPV4);
+    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
     cnstrs[0] = &R3S_mk_symmetric_ip_cnstr;
     status    = R3S_find_keys(cfg, cnstrs, &k);
