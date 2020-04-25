@@ -9,6 +9,11 @@
 #include <z3.h>
 
 /**
+   \defgroup capi C API
+*/
+/// \{
+
+/**
  * \brief Used for documentation.
  * It's an explicit indication that the parameter
  * prefixed with this keyword is going to be used
@@ -30,6 +35,10 @@
 
 //! \brief From RSS hash to core assoginment
 #define HASH_TO_CORE(hash, cores)   (((hash) & 0x1ff) % (cores))
+
+
+/** \name Types */
+/// \{
 
 //! \brief Byte used all over this library.
 typedef unsigned char R3S_byte_t;
@@ -74,96 +83,112 @@ typedef unsigned R3S_in_cfg_t;
 /**
  * \enum R3S_opt_t
  * Input options typically associated with certains NICs.
- * 
- * \var R3S_opt_t::R3S_OPT_GENEVE_OAM
- * \todo Which packets?
- * 
- * - ::R3S_PF_VXLAN_UDP_OUTER
- * - ::R3S_PF_VXLAN_VNI
- * 
- * \var R3S_opt_t::R3S_OPT_VXLAN_GPE_OAM
- * \todo Which packets?
- * 
- * - ::R3S_PF_VXLAN_UDP_OUTER
- * - ::R3S_PF_VXLAN_VNI
- * 
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV4_TCP
- * Configures RSS to accept non fragmented TCP/IPv4 packets.
- * - ::R3S_PF_IPV4_SRC
- * - ::R3S_PF_IPV4_DST
- * - ::R3S_PF_TCP_SRC
- * - ::R3S_PF_TCP_DST
- * 
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV4_UDP
- * Configures RSS to accept non fragmented UDP/IPv4 packets.
- * - ::R3S_PF_IPV4_SRC
- * - ::R3S_PF_IPV4_DST
- * - ::R3S_PF_UDP_SRC
- * - ::R3S_PF_UDP_DST
- *
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV4_SCTP
- * Configures RSS to accept non fragmented SCTP/IPv4 packets.
- * - ::R3S_PF_IPV4_SRC
- * - ::R3S_PF_IPV4_DST
- * - ::R3S_PF_SCTP_SRC
- * - ::R3S_PF_SCTP_DST
- * - ::R3S_PF_SCTP_V_TAG
- * 
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV4
- * Configures RSS to accept fragmented IPv4 packets.
- * - ::R3S_PF_IPV4_SRC
- * - ::R3S_PF_IPV4_DST
- * 
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV6_TCP
- * Configures RSS to accept non fragmented TCP/IPv6 packets.
- * - ::R3S_PF_IPV6_SRC
- * - ::R3S_PF_IPV6_DST
- * - ::R3S_PF_TCP_SRC
- * - ::R3S_PF_TCP_DST
- * 
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV6_UDP
- * Configures RSS to accept non fragmented UDP/IPv6 packets.
- * - ::R3S_PF_IPV6_SRC
- * - ::R3S_PF_IPV6_DST
- * - ::R3S_PF_UDP_SRC
- * - ::R3S_PF_UDP_DST
- *
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV6_SCTP
- * Configures RSS to accept non fragmented SCTP/IPv6 packets.
- * - ::R3S_PF_IPV6_SRC
- * - ::R3S_PF_IPV6_DST
- * - ::R3S_PF_SCTP_SRC
- * - ::R3S_PF_SCTP_DST
- * - ::R3S_PF_SCTP_V_TAG
- * 
- * \var R3S_opt_t::R3S_OPT_NON_FRAG_IPV6
- * Configures RSS to accept fragmented IPv6 packets.
- * - ::R3S_PF_IPV6_SRC
- * - ::R3S_PF_IPV6_DST
- * 
- * \var R3S_opt_t::R3S_OPT_ETHERTYPE
- * Configures RSS to accept *all* packets.
- * - ::R3S_PF_ETHERTYPE
  */
-typedef enum {
-    
+typedef enum
+{
+    /**
+     * \todo Which packets?
+     * - ::R3S_PF_VXLAN_UDP_OUTER
+     * - ::R3S_PF_VXLAN_VNI
+     */
     R3S_OPT_GENEVE_OAM,
+
+    /**
+     * \todo Which packets?
+     * - ::R3S_PF_VXLAN_UDP_OUTER
+     * - ::R3S_PF_VXLAN_VNI
+     */
     R3S_OPT_VXLAN_GPE_OAM,
 
+    /**
+     * Configures RSS to accept non fragmented TCP/IPv4 packets.
+     * - ::R3S_PF_IPV4_SRC
+     * - ::R3S_PF_IPV4_DST
+     * - ::R3S_PF_TCP_SRC
+     * - ::R3S_PF_TCP_DST
+     */
     R3S_OPT_NON_FRAG_IPV4_TCP,
+
+    /**
+     * Configures RSS to accept non fragmented UDP/IPv4 packets.
+     * - ::R3S_PF_IPV4_SRC
+     * - ::R3S_PF_IPV4_DST
+     * - ::R3S_PF_UDP_SRC
+     * - ::R3S_PF_UDP_DST
+     */
     R3S_OPT_NON_FRAG_IPV4_UDP,
+
+    /**
+     * Configures RSS to accept non fragmented SCTP/IPv4 packets.
+     * - ::R3S_PF_IPV4_SRC
+     * - ::R3S_PF_IPV4_DST
+     * - ::R3S_PF_SCTP_SRC
+     * - ::R3S_PF_SCTP_DST
+     * - ::R3S_PF_SCTP_V_TAG
+     */
     R3S_OPT_NON_FRAG_IPV4_SCTP,
+
+    /**
+     * Configures RSS to accept non fragmented IPv4 packets.
+     * - ::R3S_PF_IPV4_SRC
+     * - ::R3S_PF_IPV4_DST
+     */
     R3S_OPT_NON_FRAG_IPV4,
+
+    /**
+     * Configures RSS to accept fragmented IPv4 packets.
+     * - ::R3S_PF_IPV4_SRC
+     * - ::R3S_PF_IPV4_DST
+     */
     R3S_OPT_FRAG_IPV4,
 
+    /**
+     * Configures RSS to accept non fragmented TCP/IPv6 packets.
+     * - ::R3S_PF_IPV6_SRC
+     * - ::R3S_PF_IPV6_DST
+     * - ::R3S_PF_TCP_SRC
+     * - ::R3S_PF_TCP_DST
+     */
     R3S_OPT_NON_FRAG_IPV6_TCP,
+
+    /**
+     * Configures RSS to accept non fragmented UDP/IPv6 packets.
+     * - ::R3S_PF_IPV6_SRC
+     * - ::R3S_PF_IPV6_DST
+     * - ::R3S_PF_UDP_SRC
+     * - ::R3S_PF_UDP_DST
+     */
     R3S_OPT_NON_FRAG_IPV6_UDP,
+
+    /**
+     * Configures RSS to accept non fragmented SCTP/IPv6 packets.
+     * - ::R3S_PF_IPV6_SRC
+     * - ::R3S_PF_IPV6_DST
+     * - ::R3S_PF_SCTP_SRC
+     * - ::R3S_PF_SCTP_DST
+     * - ::R3S_PF_SCTP_V_TAG
+     */
     R3S_OPT_NON_FRAG_IPV6_SCTP,
+
+    /**
+     * Configures RSS to accept non fragmented IPv6 packets.
+     * - ::R3S_PF_IPV6_SRC
+     * - ::R3S_PF_IPV6_DST
+     */
     R3S_OPT_NON_FRAG_IPV6,
+
+    /**
+     * Configures RSS to accept fragmented IPv6 packets.
+     * - ::R3S_PF_IPV6_SRC
+     * - ::R3S_PF_IPV6_DST
+     */
     R3S_OPT_FRAG_IPV6,
 
-    R3S_OPT_ETHERTYPE,
-
+    /**
+      * Configures RSS to accept *all* packets.
+      * - ::R3S_PF_ETHERTYPE
+      */
+    R3S_OPT_ETHERTYPE
 } R3S_opt_t;
 
 // Undocumented and not really important
@@ -187,152 +212,55 @@ typedef enum {
  * Eg, if one configured the hash to accept ipv4 src and dst,
  * and tcp src and dst, then the hash input would be
  * { ipv4_src, ipv4_dst, tcp_src, tcp_dst }.
- * 
- * \var R3S_pf_t::R3S_PF_VXLAN_UDP_OUTER
- * UDP outer used in the VXLAN protocol.
- * 
- * \var R3S_pf_t::R3S_PF_VXLAN_VNI
- * VXLAN network identifier used in the VXLAN protocol.
- * 
- * \var R3S_pf_t::R3S_PF_IPV6_SRC
- * IPv6 source address.
- * 
- * \var R3S_pf_t::R3S_PF_IPV6_DST
- * IPv6 destination address.
- * 
- * \var R3S_pf_t::R3S_PF_IPV4_SRC
- * IPv4 source address.
- * 
- * \var R3S_pf_t::R3S_PF_IPV4_DST
- * IPv4 destination address.
- * 
- * \var R3S_pf_t::R3S_PF_TCP_SRC
- * TCP source port.
- * 
- * \var R3S_pf_t::R3S_PF_TCP_DST
- * TCP destination port.
- * 
- * \var R3S_pf_t::R3S_PF_UDP_SRC
- * UDP source port.
- * 
- * \var R3S_pf_t::R3S_PF_UDP_DST
- * UDP destination port.
- * 
- * \var R3S_pf_t::R3S_PF_SCTP_SRC
- * SCTP source port.
- * 
- * \var R3S_pf_t::R3S_PF_SCTP_DST
- * SCTP destination port.
- * 
- * \var R3S_pf_t::R3S_PF_SCTP_V_TAG
- * SCTP verification tag.
- * 
- * \var R3S_pf_t::R3S_PF_ETHERTYPE
- * Layer 2 protocol.
  */
-typedef enum {
+typedef enum
+{
 
-    R3S_PF_VXLAN_UDP_OUTER,
-    R3S_PF_VXLAN_VNI,
+    R3S_PF_VXLAN_UDP_OUTER, /*!< UDP outer used in the VXLAN protocol. */
+    R3S_PF_VXLAN_VNI,       /*!< VXLAN network identifier used in the VXLAN protocol. */
 
-    R3S_PF_IPV6_SRC,
-    R3S_PF_IPV6_DST,
+    R3S_PF_IPV6_SRC,        /*!< IPv6 source address. */
+    R3S_PF_IPV6_DST,        /*!< IPv6 destination address. */
 
-    R3S_PF_IPV4_SRC,
-    R3S_PF_IPV4_DST,
+    R3S_PF_IPV4_SRC,        /*!< IPv4 source address. */
+    R3S_PF_IPV4_DST,        /*!< IPv4 destination address. */
 
-    R3S_PF_TCP_SRC,
-    R3S_PF_TCP_DST,
+    R3S_PF_TCP_SRC,         /*!< TCP source port. */
+    R3S_PF_TCP_DST,         /*!< TCP destination port. */
 
-    R3S_PF_UDP_SRC,
-    R3S_PF_UDP_DST,
+    R3S_PF_UDP_SRC,         /*!< UDP source port. */
+    R3S_PF_UDP_DST,         /*!< UDP destination port. */
 
-    R3S_PF_SCTP_SRC,
-    R3S_PF_SCTP_DST,
-    R3S_PF_SCTP_V_TAG,
+    R3S_PF_SCTP_SRC,        /*!< SCTP source port. */
+    R3S_PF_SCTP_DST,        /*!< SCTP destination port. */
+    R3S_PF_SCTP_V_TAG,      /*!< SCTP verification tag. */
 
-    R3S_PF_ETHERTYPE,
+    R3S_PF_ETHERTYPE,       /*!< Layer 2 protocol. */
 
 } R3S_pf_t;
 
 /**
  * \enum R3S_status_t
  * Status code used as return values.
- * 
- * \var R3S_status_t::R3S_STATUS_SUCCESS
- * Operation finished successefully.
- *
- * \var R3S_status_t::R3S_STATUS_NO_SOLUTION
- * No solution was found.
- * 
- * \var R3S_status_t::R3S_STATUS_BAD_SOLUTION
- * A solution was found, but it doesn't fill the requirements.
- * 
- * \var R3S_status_t::R3S_STATUS_HAS_SOLUTION
- * Confirmation that a solution exists.
- * 
- * \var R3S_status_t::R3S_STATUS_PF_UNKNOWN
- * Unknown packet field.
- * \see R3S_pf_t
- * 
- * \var R3S_status_t::R3S_STATUS_PF_LOADED
- * Packet field loaded into configuration.
- * \see R3S_pf_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_PF_NOT_LOADED
- * Packet field not loaded into configuration.
- * \see R3S_pf_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_PF_INCOMPATIBLE
- * Packet field incompatible with the current configuration.
- * \see R3S_pf_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_OPT_UNKNOWN
- * Unknown configuration option.
- * \see R3S_opt_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_OPT_LOADED
- * Option loaded into configuration.
- * \see R3S_opt_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_OPT_NOT_LOADED
- * Option not loaded into configuration.
- * \see R3S_opt_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_INVALID_IOPT
- * Invalid option index.
- * This is typically returned if an used option index 
- * is bigger than the number of loaded options in a configuration.
- * \see R3S_opt_t
- * \see R3S_cfg_t
- * 
- * \var R3S_status_t::R3S_STATUS_FAILURE
- * Operation failed.
- * 
  */
-typedef enum {
-    R3S_STATUS_SUCCESS,
-    R3S_STATUS_NO_SOLUTION,
-    R3S_STATUS_BAD_SOLUTION,
-    R3S_STATUS_HAS_SOLUTION,
+typedef enum
+{
+    R3S_STATUS_SUCCESS,         /*!< Operation finished successefully. */
+    R3S_STATUS_NO_SOLUTION,     /*!< No solution was found. */
+    R3S_STATUS_BAD_SOLUTION,    /*!< A solution was found, but it doesn't fill the requirements. */
+    R3S_STATUS_HAS_SOLUTION,    /*!< Confirmation that a solution exists. */
     
-    R3S_STATUS_PF_UNKNOWN,
-    R3S_STATUS_PF_LOADED,
-    R3S_STATUS_PF_NOT_LOADED,
-    R3S_STATUS_PF_INCOMPATIBLE,
+    R3S_STATUS_PF_UNKNOWN,      /*!< Unknown packet field. */
+    R3S_STATUS_PF_LOADED,       /*!< Packet field loaded into configuration. */
+    R3S_STATUS_PF_NOT_LOADED,   /*!< Packet field not loaded into configuration. */
+    R3S_STATUS_PF_INCOMPATIBLE, /*!< Packet field incompatible with the current configuration. */
 
-    R3S_STATUS_OPT_UNKNOWN,
-    R3S_STATUS_OPT_LOADED,
-    R3S_STATUS_OPT_NOT_LOADED,
-    R3S_STATUS_INVALID_IOPT,
+    R3S_STATUS_OPT_UNKNOWN,     /*!< Unknown configuration option. */
+    R3S_STATUS_OPT_LOADED,      /*!< Option loaded into configuration. */
+    R3S_STATUS_OPT_NOT_LOADED,  /*!< Option not loaded into configuration. */
+    R3S_STATUS_INVALID_IOPT,    /*!< Invalid option index. This is typically returned if an used option index is bigger than the number of loaded options in a configuration. */
     
-    R3S_STATUS_FAILURE
+    R3S_STATUS_FAILURE          /*!< Operation failed. */
 } R3S_status_t;
 
 /**
@@ -641,20 +569,16 @@ typedef struct {
 
 } R3S_stats_t;
 
-
-
-/**********************************************//**
- * \defgroup StringAPI String
- * Typical toString functions.
- * @{
- *************************************************/
-
-
 /**
  * \brief R3S boilerplate string.
  * \note There is no need to worry about freeing memory when using this.
  */
 typedef char* R3S_string_t;
+
+/// \}
+
+/** \name String conversion */
+/// \{
 
 /**
  * Get the string representation of a key.
@@ -720,14 +644,10 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
  */
 R3S_string_t R3S_stats_to_string(R3S_stats_t stats);
 
+/// \}
 
-/**********************************************//**
- * @}
- * 
- * \defgroup ConfigAPI Config
- * Configuration related functions.
- * @{
- *************************************************/
+/** \name Configuration conversion */
+/// \{
 
 /**
  * \brief Initialize a configuration.
@@ -754,13 +674,10 @@ void R3S_cfg_delete(out R3S_cfg_t *cfg);
  */
 R3S_status_t R3S_cfg_load_opt(out R3S_cfg_t *cfg, R3S_opt_t opt);
 
-/**********************************************//**
- * @}
- *
- * \defgroup PacketAPI Packet
- * Packet related functions.
- * @{
- *************************************************/
+/// \}
+
+/** \name Packet API*/
+/// \{
 
 /**
  * Initialize packet.
@@ -792,11 +709,16 @@ R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, o
 R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
 R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
 
-/**********************************************//**
- * @}
- *************************************************/
+/// \}
 
+/** \name TBD */
+/// \{
 
+/**
+ * \brief Randomize a key.
+ * \param cfg R3S configuration.
+ * \param key Key to randomize.
+ */
 void R3S_rand_key(R3S_cfg_t cfg, out R3S_key_t key);
 R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p);
 R3S_status_t R3S_rand_packets(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p);
@@ -911,5 +833,8 @@ void R3S_stats_delete(out R3S_stats_t *stats);
 R3S_status_t R3S_parse_packets(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
 R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_stats_t *stats);
 bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats);
+
+/// \}
+/// \}
 
 #endif
