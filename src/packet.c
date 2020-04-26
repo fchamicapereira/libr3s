@@ -154,7 +154,7 @@ R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni
     return status;
 }
 
-R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p)
+R3S_status_t R3S_packet_rand(R3S_cfg_t cfg, out R3S_packet_t *p)
 {
     R3S_pf_t    pf;
     unsigned    chosen_opt;
@@ -188,12 +188,12 @@ R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p)
     return R3S_STATUS_SUCCESS;
 }
 
-R3S_status_t R3S_rand_packets(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p)
+R3S_status_t R3S_packets_rand(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p)
 {
     *p = (R3S_packet_t*) malloc(sizeof(R3S_packet_t) * n_packets);
     
     for (unsigned ipacket = 0; ipacket < n_packets; ipacket++)
-        R3S_rand_packet(cfg, &((*p)[ipacket]));
+        R3S_packet_rand(cfg, &((*p)[ipacket]));
 
     return R3S_STATUS_SUCCESS;
 }

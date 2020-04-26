@@ -47,13 +47,13 @@ typedef unsigned char R3S_byte_t;
 typedef R3S_byte_t* R3S_bytes_t;
 
 //! \brief RSS hash input type.
-typedef R3S_bytes_t R3S_in_t;
+typedef R3S_bytes_t R3S_key_hash_in_t;
 
 //! \brief RSS key type.
 typedef R3S_byte_t R3S_key_t[KEY_SIZE];
 
 //! \brief RSS hash output type.
-typedef uint32_t R3S_out_t;
+typedef uint32_t R3S_key_hash_out_t;
 
 //! \brief IPv6 packet field type.
 typedef R3S_byte_t R3S_ipv6_t[16];
@@ -361,7 +361,7 @@ typedef struct {
     unsigned         n_loaded_opts;
 
     /**
-     * Number of processes to be used by the R3S_find_keys().
+     * Number of processes to be used by the R3S_keys_fit_cnstrs().
      * If this value is <= 0, then the number of processes
      * used will be equal to the number of available cores.
      */
@@ -390,26 +390,26 @@ typedef struct {
  * \param ctx Z3 context
  * \param p1 A packet
  * \param p2 Another packet
- * \see R3S_find_keys()
+ * \see R3S_keys_fit_cnstrs()
  * 
  * \code
- * Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
+ * Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
  * {
  *     R3S_status_t status;
  *     Z3_ast       p1_ipv4_src, p1_ipv4_dst;
  *     Z3_ast       p2_ipv4_src, p2_ipv4_dst;
  *     Z3_ast       and_args[2];
  *     
- *     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
+ *     status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
  *     if (status != R3S_STATUS_SUCCESS) return NULL;
  *     
- *     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_DST, &p1_ipv4_dst);
+ *     status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_DST, &p1_ipv4_dst);
  *     if (status != R3S_STATUS_SUCCESS) return NULL;
  *     
- *     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
+ *     status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
  *     if (status != R3S_STATUS_SUCCESS) return NULL;
  *     
- *     status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_DST, &p2_ipv4_dst);
+ *     status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_DST, &p2_ipv4_dst);
  *     if (status != R3S_STATUS_SUCCESS) return NULL;
  *     
  *     and_args[0] = Z3_mk_eq(ctx, p1_ipv4_src, p2_ipv4_dst);
@@ -478,7 +478,7 @@ R3S_string_t R3S_packet_to_string(R3S_packet_t p);
  * \param o Hash output
  * \return ::R3S_string_t String representation of \p o.
  */
-R3S_string_t R3S_hash_output_to_string(R3S_out_t o);
+R3S_string_t R3S_key_hash_output_to_string(R3S_key_hash_out_t o);
 
 /**
  * \brief Get the string representation of a status code.
@@ -585,9 +585,26 @@ R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, o
 R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
 R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
 
+R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p, R3S_cnstrs_func mk_p_cnstrs, out R3S_packet_t *result);
+R3S_status_t R3S_packet_extract_pf(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_pf_t pf, out Z3_ast *result);
+R3S_status_t R3S_packets_parse(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
+R3S_status_t R3S_packet_rand(R3S_cfg_t cfg, out R3S_packet_t *p);
+R3S_status_t R3S_packets_rand(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p);
 /// \}
 
-/** \name TBD */
+
+/** \name Key statistics and evaluation */
+/// \{
+
+void R3S_stats_init(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats);
+void R3S_stats_reset(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats);
+void R3S_stats_delete(out R3S_stats_t *stats);
+R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_stats_t *stats);
+bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats);
+
+/// \}
+
+/** \name Key */
 /// \{
 
 /**
@@ -595,14 +612,7 @@ R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni
  * \param cfg R3S configuration.
  * \param key Key to randomize.
  */
-void R3S_rand_key(R3S_cfg_t cfg, out R3S_key_t key);
-R3S_status_t R3S_rand_packet(R3S_cfg_t cfg, out R3S_packet_t *p);
-R3S_status_t R3S_rand_packets(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p);
-R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_out_t *result);
-
-//void       R3S_check_p_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t h1, R3S_packet_t h2);
-R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p, R3S_cnstrs_func mk_p_cnstrs, out R3S_packet_t *result);
-R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_pf_t pf, out Z3_ast *result);
+void R3S_key_rand(R3S_cfg_t cfg, out R3S_key_t key);
 
 /**
  * \brief Find keys that fit the given constraints, and insert them
@@ -661,7 +671,7 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
  * 
  * \return Status code.
  */
-R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
+R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
 /** 
  * \example no_solution.c
  * Consider the following scenario:
@@ -697,18 +707,19 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
  * \todo explanation
  */
 
-R3S_status_t R3S_test_keys_agains_contraints(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
+R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
 
-Z3_ast R3S_mk_symmetric_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
-Z3_ast R3S_mk_symmetric_tcp_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
-Z3_ast R3S_mk_symmetric_tcp_ip_cnstr(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_key_hash_out_t *result);
 
-void R3S_stats_init(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats);
-void R3S_stats_reset(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats);
-void R3S_stats_delete(out R3S_stats_t *stats);
-R3S_status_t R3S_parse_packets(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
-R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_stats_t *stats);
-bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats);
+/// \}
+
+/** \name Constraints */
+/// \{
+
+//void R3S_cnstrs_test(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t h1, R3S_packet_t h2);
+Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast R3S_cnstr_symmetric_tcp(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
+Z3_ast R3S_cnstr_symmetric_tcp_ip(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2);
 
 /// \}
 /// \}

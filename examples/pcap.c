@@ -17,7 +17,7 @@ int main() {
     
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
-    status = R3S_parse_packets(cfg, pcap, &packets, &n_packets);
+    status = R3S_packets_parse(cfg, pcap, &packets, &n_packets);
 
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("Status: %s\n", R3S_status_to_string(status));
@@ -25,7 +25,7 @@ int main() {
     for (unsigned i = 0; i < n_packets; i++)
         printf("packet %u\n%s\n", i, R3S_packet_to_string(packets[i]));
     
-    R3S_rand_key(cfg, k);
+    R3S_key_rand(cfg, k);
     printf("Key:\n%s\n", R3S_key_to_string(k));
 
     for (unsigned n_cores = 2; n_cores <= 32; n_cores *= 2)

@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <string.h>
 
-void R3S_rand_key(R3S_cfg_t cfg, R3S_key_t key)
+void R3S_key_rand(R3S_cfg_t cfg, R3S_key_t key)
 {
     init_rand();
 
@@ -32,14 +32,14 @@ bool R3S_is_zero_key(R3S_key_t key)
     return true;
 }
 
-R3S_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
+R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
 {
-    R3S_in_t   hi;
+    R3S_key_hash_in_t   hi;
     unsigned     sz, offset;
     R3S_byte_t *field;
     R3S_pf_t   pf;
 
-    hi     = (R3S_in_t) malloc(sizeof(R3S_byte_t) * (cfg.loaded_opts[iopt].sz / 8));
+    hi     = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * (cfg.loaded_opts[iopt].sz / 8));
     offset = 0;
     sz     = 0;
 
@@ -64,7 +64,7 @@ R3S_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
     return hi;
 }
 
-R3S_packet_t R3S_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_in_t hi, R3S_in_cfg_t p_cfg)
+R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_key_hash_in_t hi, R3S_in_cfg_t p_cfg)
 {
     R3S_packet_t p;
     unsigned       sz, offset;
@@ -110,10 +110,10 @@ void lshift(R3S_key_t k)
     k[KEY_SIZE - 1] |= msb;
 }
 
-R3S_status_t R3S_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_out_t *o)
+R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_key_hash_out_t *o)
 {
     R3S_key_t    k_copy;
-    R3S_in_t     hi;
+    R3S_key_hash_in_t     hi;
     R3S_status_t status;
     unsigned     ipot;
 

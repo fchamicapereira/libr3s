@@ -76,7 +76,7 @@ Z3_ast mk_var(Z3_context ctx, const char *name, Z3_sort ty)
     return Z3_mk_const(ctx, s, ty);
 }
 
-void p_ast_to_hash_input(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_in_t hi)
+void p_ast_to_hash_input(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_key_hash_in_t hi)
 {
     /*
      *  I know what you're thinking. Getting the value of a bit vector
@@ -351,7 +351,7 @@ Z3_ast mk_d_const(R3S_cfg_t r3s_cfg, Z3_context ctx, Z3_ast input, R3S_packet_t 
     return d_const;
 }
 
-R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_pf_t pf, out Z3_ast *output)
+R3S_status_t R3S_packet_extract_pf(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p, R3S_pf_t pf, out Z3_ast *output)
 {
     R3S_pf_t     current_pf;
     R3S_status_t status;
@@ -366,7 +366,7 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
 
     if (input_sz != Z3_get_bv_sort_size(ctx, Z3_get_sort(ctx, p)))
     {
-        DEBUG_PLOG("[R3S_extract_pf_from_p] ERROR: input_sz (%u) != p_sz (%u)\n",
+        DEBUG_PLOG("[R3S_packet_extract_pf] ERROR: input_sz (%u) != p_sz (%u)\n",
             input_sz, Z3_get_bv_sort_size(ctx, Z3_get_sort(ctx, p)));
         return R3S_STATUS_PF_NOT_LOADED;
     }
@@ -375,7 +375,7 @@ R3S_status_t R3S_extract_pf_from_p(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context 
 
     if (status != R3S_STATUS_PF_LOADED)
     {
-        DEBUG_PLOG("[R3S_extract_pf_from_p] ERROR: %u\n", status);
+        DEBUG_PLOG("[R3S_packet_extract_pf] ERROR: %u\n", status);
         return status;
     }
 
@@ -444,7 +444,7 @@ R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p_in, R3S_cn
     Z3_ast         p_const;
     Z3_ast         stmt;
 
-    R3S_in_t     hi2;
+    R3S_key_hash_in_t     hi2;
 
     R3S_status_t status;
     unsigned       iopt;
@@ -489,11 +489,11 @@ R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p_in, R3S_cn
     Z3_model_inc_ref(ctx, m);
 
     p2_model = Z3_model_get_const_interp(ctx, m, p2_decl);
-    hi2      = (R3S_in_t) malloc(sizeof(R3S_byte_t) * r3s_cfg.loaded_opts[iopt].sz);
+    hi2      = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * r3s_cfg.loaded_opts[iopt].sz);
 
     p_ast_to_hash_input(r3s_cfg, iopt, ctx, p2_model, hi2);
 
-    *p_out   = R3S_in_to_packet(r3s_cfg, iopt, hi2, p_in.cfg);
+    *p_out   = R3S_key_hash_in_to_packet(r3s_cfg, iopt, hi2, p_in.cfg);
     
     free(hi2);
     Z3_model_dec_ref(ctx, m);
@@ -933,7 +933,7 @@ void worker_key_adjuster(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs)
     alarm(SOLVER_TIMEOUT_SEC);
 
     for (unsigned ikey = 0; ikey < r3s_cfg.n_keys; ikey++)
-        R3S_rand_key(r3s_cfg, keys[ikey]);
+        R3S_key_rand(r3s_cfg, keys[ikey]);
 
     status = adjust_keys_to_cnstrs(r3s_cfg, mk_p_cnstrs, keys);
 
@@ -1069,7 +1069,7 @@ R3S_status_t master(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, int np, com
     }
 }
 
-R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys)
+R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys)
 {
     int          nworkers;
     comm_t       comm;
@@ -1099,7 +1099,7 @@ R3S_status_t R3S_find_keys(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out 
     return status;
 }
 
-R3S_status_t R3S_test_keys_agains_contraints(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys)
+R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys)
 {
     R3S_setup_t setup;
     Z3_ast      key_const;
@@ -1134,7 +1134,7 @@ R3S_status_t R3S_test_keys_agains_contraints(R3S_cfg_t r3s_cfg, R3S_cnstrs_func 
 }
 
 /*
-void R3S_check_p_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t p1, R3S_packet_t p2)
+void R3S_cnstrs_test(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t p1, R3S_packet_t p2)
 {
     Z3_context ctx;
     Z3_solver  s;

@@ -9,8 +9,8 @@ int main () {
     R3S_cfg_init(&cfg);
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
-    cnstrs[0] = &R3S_mk_symmetric_ip_cnstr;
-    status    = R3S_find_keys(cfg, cnstrs, &k);
+    cnstrs[0] = &R3S_cnstr_symmetric_ip;
+    status    = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
     
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_status_to_string(status));

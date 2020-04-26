@@ -7,10 +7,10 @@ Z3_ast p_cnstrs(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_
     Z3_ast       p2_ipv4_src;
     Z3_ast       eq_src_ip;
 
-    status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
+    status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    status = R3S_extract_pf_from_p(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
+    status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
     eq_src_ip = Z3_mk_eq(ctx, p1_ipv4_src, p2_ipv4_src);
@@ -28,7 +28,7 @@ int main () {
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
     cnstrs[0] = &p_cnstrs;
-    status    = R3S_find_keys(cfg, cnstrs, &k);
+    status    = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
     
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_status_to_string(status));
@@ -36,7 +36,7 @@ int main () {
     if (status == R3S_STATUS_SUCCESS)
         printf("result:\n%s\n", R3S_key_to_string(k));
 
-    status = R3S_test_keys_agains_contraints(cfg, cnstrs, &k);
+    status = R3S_keys_test_cnstrs(cfg, cnstrs, &k);
     printf("valid keys: %s\n", R3S_status_to_string(status));
 
     R3S_cfg_delete(&cfg);

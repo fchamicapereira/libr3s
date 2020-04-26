@@ -227,7 +227,7 @@ void packetHandler(R3S_byte_t *user_data, const struct pcap_pkthdr* pkthdr, cons
     }
 }
 
-R3S_status_t R3S_parse_packets(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets)
+R3S_status_t R3S_packets_parse(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets)
 {
     R3S_parsed_packets_t pps;
     char                 errbuf[PCAP_ERRBUF_SIZE];

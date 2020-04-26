@@ -111,7 +111,7 @@ R3S_string_t R3S_key_to_string(R3S_key_t k)
     return result;
 }
 
-R3S_string_t R3S_hash_output_to_string(R3S_out_t output)
+R3S_string_t R3S_key_hash_output_to_string(R3S_key_hash_out_t output)
 {
     static char result[R3S_STRING_SZ];
     

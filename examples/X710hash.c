@@ -3,7 +3,7 @@
 void ipv4_1()
 {
     R3S_cfg_t     cfg;
-    R3S_out_t     o;
+    R3S_key_hash_out_t     o;
     R3S_packet_t  p;
     R3S_key_t     k = {
         0x6d, 0x5a, 0x56, 0xda, 0x25, 0x5b, 0x0e, 0xc2,
@@ -24,11 +24,11 @@ void ipv4_1()
     R3S_ipv4_t ipv4_dst = { 161, 142, 100,  80};
     R3S_packet_set_ipv4(cfg, ipv4_src, ipv4_dst, &p);
 
-    R3S_hash(cfg, k, p, &o);
+    R3S_key_hash(cfg, k, p, &o);
 
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_packet_to_string(p));
-    printf("%s\n", R3S_hash_output_to_string(o));
+    printf("%s\n", R3S_key_hash_output_to_string(o));
     
     R3S_cfg_delete(&cfg);
 }
@@ -36,7 +36,7 @@ void ipv4_1()
 void ipv4_2()
 {
     R3S_cfg_t     cfg;
-    R3S_out_t     o;
+    R3S_key_hash_out_t     o;
     R3S_packet_t  p;
     R3S_key_t     k = {
         0x6d, 0x5a, 0x56, 0xda, 0x25, 0x5b, 0x0e, 0xc2,
@@ -57,11 +57,11 @@ void ipv4_2()
     R3S_ipv4_t ipv4_dst = {  65,  69, 140,  83};
     R3S_packet_set_ipv4(cfg, ipv4_src, ipv4_dst, &p);
 
-    R3S_hash(cfg, k, p, &o);
+    R3S_key_hash(cfg, k, p, &o);
 
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_packet_to_string(p));
-    printf("%s\n", R3S_hash_output_to_string(o));
+    printf("%s\n", R3S_key_hash_output_to_string(o));
     
     R3S_cfg_delete(&cfg);
 }
@@ -69,7 +69,7 @@ void ipv4_2()
 void ipv4_tcp_1()
 {
     R3S_cfg_t     cfg;
-    R3S_out_t     o;
+    R3S_key_hash_out_t     o;
     R3S_packet_t  p;
     R3S_key_t     k = {
         0x6d, 0x5a, 0x56, 0xda, 0x25, 0x5b, 0x0e, 0xc2,
@@ -94,11 +94,11 @@ void ipv4_tcp_1()
     R3S_port_t tcp_dst  = { (1766 >> 8) & 0xff, (1766 >> 0) & 0xff };
     R3S_packet_set_tcp(cfg, tcp_src, tcp_dst, &p);
 
-    R3S_hash(cfg, k, p, &o);
+    R3S_key_hash(cfg, k, p, &o);
 
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_packet_to_string(p));
-    printf("%s\n", R3S_hash_output_to_string(o));
+    printf("%s\n", R3S_key_hash_output_to_string(o));
     
     R3S_cfg_delete(&cfg);
 }
@@ -106,7 +106,7 @@ void ipv4_tcp_1()
 void ipv6_tcp_1()
 {
     R3S_cfg_t     cfg;
-    R3S_out_t     o;
+    R3S_key_hash_out_t     o;
     R3S_packet_t  p;
     R3S_key_t     k = {
         0x6d, 0x5a, 0x56, 0xda, 0x25, 0x5b, 0x0e, 0xc2,
@@ -132,11 +132,11 @@ void ipv6_tcp_1()
     R3S_port_t tcp_dst  = { (1766 >> 8) & 0xff, (1766 >> 0) & 0xff };
     R3S_packet_set_tcp(cfg, tcp_src, tcp_dst, &p);
 
-    R3S_hash(cfg, k, p, &o);
+    R3S_key_hash(cfg, k, p, &o);
 
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_packet_to_string(p));
-    printf("%s\n", R3S_hash_output_to_string(o));
+    printf("%s\n", R3S_key_hash_output_to_string(o));
 
     R3S_cfg_delete(&cfg);
 }

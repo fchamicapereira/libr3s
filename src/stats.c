@@ -36,12 +36,12 @@ void R3S_stats_delete(out R3S_stats_t *stats)
 R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_stats_t *stats)
 {
     R3S_packet_t packet;
-    R3S_out_t    output;
+    R3S_key_hash_out_t    output;
     unsigned     deviation;
 
     for (unsigned ipacket = 0; ipacket < n_packets; ipacket++) {
         packet = packets[ipacket];
-        R3S_hash(stats->cfg, key, packet, &output);
+        R3S_key_hash(stats->cfg, key, packet, &output);
         stats->core_stats[HASH_TO_CORE(output, stats->n_cores)].n_packets++;
     }
 
@@ -82,7 +82,7 @@ bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats)
 
     if (cfg.key_fit_params.pcap_fname != NULL)
     {
-        status = R3S_parse_packets(cfg, cfg.key_fit_params.pcap_fname, &packets, &n_packets);
+        status = R3S_packets_parse(cfg, cfg.key_fit_params.pcap_fname, &packets, &n_packets);
         if (status != R3S_STATUS_SUCCESS)
         {
             DEBUG_PLOG("Key evaluation failed: %s\n", R3S_status_to_string(status));
@@ -92,7 +92,7 @@ bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats)
     } else
     {
         n_packets = STATS;
-        status = R3S_rand_packets(cfg, n_packets, &packets);
+        status = R3S_packets_rand(cfg, n_packets, &packets);
         if (status != R3S_STATUS_SUCCESS)
         {
             DEBUG_PLOG("Key evaluation failed: %s\n", R3S_status_to_string(status));
@@ -121,7 +121,7 @@ bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats)
     } else if (cfg.key_fit_params.std_dev_threshold < 0)
     {
         R3S_stats_init(cfg, n_cores, &rand_key_stats);
-        R3S_rand_key(cfg, rand_key);
+        R3S_key_rand(cfg, rand_key);
         status = R3S_stats_from_packets(rand_key, packets, n_packets, &rand_key_stats);
         
         if (status != R3S_STATUS_SUCCESS)
