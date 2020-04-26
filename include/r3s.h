@@ -631,16 +631,16 @@ void R3S_key_rand(R3S_cfg_t cfg, out R3S_key_t key);
  * 
  *  index  | keys | description
  * ------- | -------------|-------------
- *    0    | k[0] | Constraints for the first key
- *    1    | k[1] | Constraints for the second key
- *   ...   | ...  | ...
+ *    0    | k[0]         | Constraints for the first key
+ *    1    | k[1]         | Constraints for the second key
+ *   ...   | ...          | ...
  *   n-1   | k[n-1]       | Constraints for the last key
  *    n    | k[0], k[1]   | Constraints for the first and second keys
  *   n+1   | k[0], k[2]   | Constraints for the first and third keys
- *   ...   | ...  | ...
+ *   ...   | ...          | ...
  *  2n-1   | k[0], k[n-1] | Constraints for the first and last keys
  *   2n    | k[1], k[2]   | Constraints for the second and third keys
- *   ...   | ...  | ...
+ *   ...   | ...          | ...
  *   
  * 
  * Considering \f$ \binom{n}{m} \f$ as combinations of \f$ n \f$, \f$ m \f$
