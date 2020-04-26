@@ -264,223 +264,121 @@ typedef enum
 } R3S_status_t;
 
 /**
- * \struct R3S_h_ipv4_t
- * \brief IPv4 header.
- * \see R3S_packet_t
- * 
- * \var R3S_h_ipv4_t::src
- * Source address.
- * 
- * \var R3S_h_ipv4_t::dst
- * Destination address.
- */
-typedef struct {
-    R3S_ipv4_t src;
-    R3S_ipv4_t dst;
-} R3S_h_ipv4_t;
-
-/**
- * \struct R3S_h_ipv6_t
- * \brief IPv6 header.
- * \see R3S_packet_t
- * 
- * \var R3S_h_ipv6_t::src
- * Source address.
- * 
- * \var R3S_h_ipv6_t::dst
- * Destination address.
- */
-typedef struct {
-    R3S_ipv6_t src;
-    R3S_ipv6_t dst;
-} R3S_h_ipv6_t;
-
-/**
- * \struct R3S_h_tcp_t
- * \brief TCP header.
- * \see R3S_packet_t
- * 
- * \var R3S_h_tcp_t::src
- * Source port.
- * 
- * \var R3S_h_tcp_t::dst
- * Destination port.
- */
-typedef struct {
-    R3S_port_t src;
-    R3S_port_t dst;
-} R3S_h_tcp_t;
-
-/**
- * \struct R3S_h_udp_t
- * \brief UDP header.
- * \see R3S_packet_t
- * 
- * \var R3S_h_udp_t::src
- * Source port.
- * 
- * \var R3S_h_udp_t::dst
- * Destination port.
- */
-typedef struct {
-    R3S_port_t src;
-    R3S_port_t dst;
-} R3S_h_udp_t;
-
-/**
- * \struct R3S_h_sctp_t
- * \brief SCTP header.
- * \see R3S_packet_t
- * 
- * \var R3S_h_sctp_t::src
- * Source port.
- * 
- * \var R3S_h_sctp_t::dst
- * Destination port.
- * 
- * \var R3S_h_sctp_t::tag
- * Verification tag.
- */
-typedef struct {
-    R3S_port_t  src;
-    R3S_port_t  dst;
-    R3S_v_tag_t tag;
-} R3S_h_sctp_t;
-
-/**
- * \struct R3S_h_vxlan_t
- * \brief VXLAN header.
- * \see R3S_packet_t
- * 
- * \var R3S_h_vxlan_t::outer
- * Outer UDP port.
- * 
- * \var R3S_h_vxlan_t::vni
- * VXLAN network identifier.
- */
-typedef struct {
-    R3S_port_t outer;
-    R3S_vni_t  vni;
-} R3S_h_vxlan_t;
-
-/**
  * \struct R3S_packet_t
  * \brief Packet associated with an RSS configuration.
- * 
- * \var R3S_packet_t::cfg
- * Packet field configuration, i.e., which packet fields
- * are being used.
- * 
- * \var R3S_packet_t::ethertype
- * L2 protocol.
- * 
- * \var R3S_packet_t::ipv4
- * IPv4 header
- * 
- * \var R3S_packet_t::ipv6
- * IPv6 header
- * 
- * \var R3S_packet_t::tcp
- * TCP header
- * 
- * \var R3S_packet_t::udp
- * UDP header
- * 
- * \var R3S_packet_t::sctp
- * SCTP header
- * 
- * \var R3S_packet_t::vxlan
- * VXLAN header
  */
-typedef struct {
-    R3S_in_cfg_t cfg;
+typedef struct
+{
+    R3S_in_cfg_t cfg; //!< Packet field configuration, i.e., which packet fields are being used.
 
-    union {
+    union
+    {
         //! \unnamed{union}
-        R3S_ethertype_t ethertype;
+        R3S_ethertype_t ethertype; //!< L2 protocol.
     };
 
-    union {
-        //! \unnamed{union}
-        R3S_h_ipv4_t ipv4;
+    union
+    {
+        struct
+        {
+            //! \unnamed{union/struct:2}
+            R3S_ipv4_t src;
+            R3S_ipv4_t dst;
+        } ipv4; //!< IPv4 header.
         
-        //! \unnamed{union}
-        R3S_h_ipv6_t ipv6;
+        struct
+        {
+            //! \unnamed{union/struct:2}
+            R3S_ipv6_t src;
+            R3S_ipv6_t dst;
+        } ipv6; //!< IPv6 header.
     };
 
-    union {
-        //! \unnamed{union}
-        R3S_h_tcp_t  tcp;
+    union
+    {
+        struct
+        {
+            //! \unnamed{union/struct:2}
+            R3S_port_t src;
+            R3S_port_t dst;
+        } tcp; //!< TCP header.
         
-        //! \unnamed{union}
-        R3S_h_udp_t  udp;
+        struct
+        {
+            //! \unnamed{union/struct:2}
+            R3S_port_t src;
+            R3S_port_t dst;
+        } udp; //!< UDP header.
 
-        //! \unnamed{union}
-        R3S_h_sctp_t sctp;
+        struct
+        {
+            //! \unnamed{union/struct:3}
+            R3S_port_t  src;
+            R3S_port_t  dst;
+            R3S_v_tag_t tag;
+        } sctp; //!< SCTP header.
     };
 
-    union {
-        //! \unnamed{union}
-        R3S_h_vxlan_t vxlan;
+    union
+    {
+        struct
+        {
+            //! \unnamed{union/struct:2}
+            R3S_port_t outer;
+            R3S_vni_t  vni;
+        } vxlan; //!< VXLAN header.
     };
-
 } R3S_packet_t;
 
 /**
  * \struct R3S_loaded_opt_t
  * \brief Information regarding loaded option and consequently the associated
  * packet fields and the size of the hash input.
- * 
- * \var R3S_loaded_opt_t::opt
- * Loaded option.
- * 
- * \var R3S_loaded_opt_t::pfs
- * Hash input configuration, i.e., chosen packet fields associated
- * with this option.
- * 
- * \var R3S_loaded_opt_t::sz
- * Size of the hash input.
  */
 typedef struct {
-    R3S_opt_t opt;
-    R3S_in_cfg_t pfs;
-    unsigned     sz; 
+    R3S_opt_t opt;      //!< Loaded option.
+    R3S_in_cfg_t pfs;   //!< Hash input configuration, i.e., chosen packet fields associated with this option.
+    unsigned     sz;    //!< Size of the hash input.
 } R3S_loaded_opt_t;
 
 /**
  * \struct R3S_cfg_t
  * \brief R3S configuration used to store information useful
  * throughout the API.
- * 
- * \var R3S_cfg_t::loaded_opts
- * Options loaded in this configuration.
- * \see R3S_opt_t
- * 
- * \var R3S_cfg_t::n_loaded_opts
- * Number of loaded configurations. Stores the size of
- * the R3S_cfg_t::loaded_opts array.
- * 
- * \var R3S_cfg_t::n_procs
- * Number of processes to be used by the R3S_find_keys().
- * If this value is <= 0, then the number of processes
- * used will be equal to the number of available cores.
- * 
- * \var R3S_cfg_t::n_keys
- * Number of keys to take into consideration.
- * This is useful when there are constraints needed to be
- * considered between multiple NICs/ports in NICs.
  */
 typedef struct {
+
+    /**
+     *Options loaded in this configuration.
+     * \see R3S_opt_t
+     */
     R3S_loaded_opt_t *loaded_opts;
-    unsigned    n_loaded_opts;
-    int         n_procs;
-    unsigned    n_keys;
+    
+    /**
+     * Number of loaded configurations. Stores the size of
+     * the R3S_cfg_t::loaded_opts array. 
+     */
+    unsigned         n_loaded_opts;
+
+    /**
+     * Number of processes to be used by the R3S_find_keys().
+     * If this value is <= 0, then the number of processes
+     * used will be equal to the number of available cores.
+     */
+    int              n_procs;
+
+    /**
+     * Number of keys to take into consideration.
+     * This is useful when there are constraints needed to be
+     * considered between multiple NICs/ports in NICs.
+     */
+    unsigned         n_keys;
 
     struct {
-        char     *pcap_fname;
-        float    std_dev_threshold;
-        int      time_limit;
-        unsigned n_cores;
+        char         *pcap_fname;
+        float        std_dev_threshold;
+        int          time_limit;
+        unsigned     n_cores;
     } key_fit_params;
 } R3S_cfg_t;
 
@@ -527,45 +425,23 @@ typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_context ctx,Z3_
 /**
  * \struct R3S_core_stats_t
  * \brief Number of packets redirected to a single core, and its percentage.
- * 
- * \var R3S_core_stats_t::n_packets
- * Total number of packets redirected to a single core.
- * 
- * \var R3S_core_stats_t::percentage
- * Percentage of the total number of packets that was redirected to a single core.
  */
-typedef struct {
-    unsigned n_packets;
-    float percentage;
+typedef struct
+{
+    unsigned n_packets; //!< Total number of packets redirected to a single core.
+    float percentage;   //!< Percentage of the total number of packets that was redirected to a single core.
 } R3S_core_stats_t;
 
 /**
  * \struct R3S_stats_t
  * \brief Key statistics.
- * 
- * \var R3S_stats_t::cfg
- * R3S configuration.
- * 
- * \var R3S_stats_t::core_stats
- * Statistics related to each core.
- * 
- * \var R3S_stats_t::n_cores
- * Total number of cores to be considered.
- * 
- * \var R3S_stats_t::avg_dist
- * Average distribution of packets per core (in percentage).
- * 
- * \var R3S_stats_t::std_dev
- * Standard deviation of the distribution of packets per core (in percentage).
  */
 typedef struct {
-    R3S_cfg_t cfg;
-    
-    R3S_core_stats_t *core_stats;
-    unsigned n_cores;
-
-    float avg_dist;
-    float std_dev;
+    R3S_cfg_t           cfg;         //!< R3S configuration.
+    R3S_core_stats_t    *core_stats; //!< Statistics related to each core.
+    unsigned            n_cores;     //!< Total number of cores to be considered.
+    float               avg_dist;    //!< Average distribution of packets per core (in percentage).
+    float               std_dev;     //!< Standard deviation of the distribution of packets per core (in percentage).
 
 } R3S_stats_t;
 
@@ -581,7 +457,7 @@ typedef char* R3S_string_t;
 /// \{
 
 /**
- * Get the string representation of a key.
+ * \brief Get the string representation of a key.
  * 
  * \param k Key
  * \return ::R3S_string_t String representation of \p k.
@@ -589,7 +465,7 @@ typedef char* R3S_string_t;
 R3S_string_t R3S_key_to_string(R3S_key_t k);
 
 /**
- * Get the string representation of a packet.
+ * \brief Get the string representation of a packet.
  * 
  * \param p Packet
  * \return ::R3S_string_t String representation of \p p.
@@ -597,7 +473,7 @@ R3S_string_t R3S_key_to_string(R3S_key_t k);
 R3S_string_t R3S_packet_to_string(R3S_packet_t p);
 
 /**
- * Get the string representation of a hash output.
+ * \brief Get the string representation of a hash output.
  * 
  * \param o Hash output
  * \return ::R3S_string_t String representation of \p o.
@@ -605,7 +481,7 @@ R3S_string_t R3S_packet_to_string(R3S_packet_t p);
 R3S_string_t R3S_hash_output_to_string(R3S_out_t o);
 
 /**
- * Get the string representation of a status code.
+ * \brief Get the string representation of a status code.
  * 
  * \param s Status
  * \return ::R3S_string_t String representation of \p s.
@@ -613,7 +489,7 @@ R3S_string_t R3S_hash_output_to_string(R3S_out_t o);
 R3S_string_t R3S_status_to_string(R3S_status_t s);
 
 /**
- * Get the string representation of a configuration option.
+ * \brief Get the string representation of a configuration option.
  * 
  * \param opt Option
  * \return ::R3S_string_t String representation of \p opt.
@@ -621,7 +497,7 @@ R3S_string_t R3S_status_to_string(R3S_status_t s);
 R3S_string_t R3S_opt_to_string(R3S_opt_t opt);
 
 /**
- * Get the string representation of a packet field.
+ * \brief Get the string representation of a packet field.
  * 
  * \param pf Packet field
  * \return ::R3S_string_t String representation of \p pf.
@@ -629,7 +505,7 @@ R3S_string_t R3S_opt_to_string(R3S_opt_t opt);
 R3S_string_t R3S_pf_to_string(R3S_pf_t pf);
 
 /**
- * Get the string representation of a configuration.
+ * \brief Get the string representation of a configuration.
  * 
  * \param cfg Configuration
  * \return ::R3S_string_t String representation of \p cfg.
@@ -637,7 +513,7 @@ R3S_string_t R3S_pf_to_string(R3S_pf_t pf);
 R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg);
 
 /**
- * Get the string representation of key statistics.
+ * \brief Get the string representation of key statistics.
  * 
  * \param stats Statistics.
  * \return ::R3S_string_t String representation of \p stats.
@@ -646,7 +522,7 @@ R3S_string_t R3S_stats_to_string(R3S_stats_t stats);
 
 /// \}
 
-/** \name Configuration conversion */
+/** \name Configuration */
 /// \{
 
 /**
@@ -676,7 +552,7 @@ R3S_status_t R3S_cfg_load_opt(out R3S_cfg_t *cfg, R3S_opt_t opt);
 
 /// \}
 
-/** \name Packet API*/
+/** \name Packet*/
 /// \{
 
 /**
