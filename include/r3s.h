@@ -1,6 +1,10 @@
 #ifndef __R3S_API_H__
 #define __R3S_API_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** \file */ 
 
 #include <stdint.h>
@@ -723,5 +727,9 @@ Z3_ast R3S_cnstr_symmetric_tcp_ip(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context c
 
 /// \}
 /// \}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
