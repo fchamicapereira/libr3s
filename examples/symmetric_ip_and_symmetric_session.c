@@ -1,10 +1,10 @@
 #include <r3s.h>
 
-Z3_ast p_cnstrs(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
+Z3_ast p_cnstrs(R3S_cfg_t cfg, unsigned iopt, Z3_ast p1, Z3_ast p2)
 {
     return iopt == 0
-        ? R3S_cnstr_symmetric_ip(r3s_cfg, iopt, ctx, p1, p2)
-        : R3S_cnstr_symmetric_tcp_ip(r3s_cfg, iopt, ctx, p1, p2);
+        ? R3S_cnstr_symmetric_ip(cfg, iopt, p1, p2)
+        : R3S_cnstr_symmetric_tcp_ip(cfg, iopt, p1, p2);
 }
 
 int validate(R3S_cfg_t cfg, R3S_key_t k)

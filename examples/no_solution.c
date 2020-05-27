@@ -1,17 +1,17 @@
 #include <r3s.h>
 #include <assert.h>
 
-Z3_ast mk_p_cnstrs(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_context ctx, Z3_ast p1, Z3_ast p2)
+Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, unsigned iopt, Z3_ast p1, Z3_ast p2)
 {
     R3S_status_t status;
     Z3_ast       p1_ipv4_src;
     Z3_ast       eq_ipv4;
 
-    status = R3S_packet_extract_pf(r3s_cfg, iopt, ctx, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
+    status = R3S_packet_extract_pf(cfg, iopt, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
 
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    eq_ipv4  = Z3_mk_eq(ctx, p1_ipv4_src, p1_ipv4_src);
+    eq_ipv4  = Z3_mk_eq(cfg.ctx, p1_ipv4_src, p1_ipv4_src);
 
     return eq_ipv4;
 }
