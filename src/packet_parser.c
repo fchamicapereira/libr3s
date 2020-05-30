@@ -37,11 +37,12 @@ struct sctphdr
 
 void parse_packet_with_opt(
     R3S_cfg_t cfg,
-    unsigned iopt,
+    R3S_loaded_opt_t opt,
     const struct pcap_pkthdr *pkthdr,
     const R3S_byte_t *packet,
-    out R3S_packet_t *pp) {
-    
+    out R3S_packet_t *pp
+)
+{
     R3S_status_t               status;
 
     const R3S_byte_t           *l3_hdr;
@@ -71,10 +72,10 @@ void parse_packet_with_opt(
     switch (ntohs(ether_hdr->ether_type))
     {
         case ETHERTYPE_IP:
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_IPV4_SRC);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_IPV4_SRC);
             if (status != R3S_STATUS_PF_LOADED) break;
 
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_IPV4_DST);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_IPV4_DST);
             if (status != R3S_STATUS_PF_LOADED) break;
 
             ip_hdr = (struct ip*) l3_hdr;
@@ -102,10 +103,10 @@ void parse_packet_with_opt(
             break;
 
         case ETHERTYPE_IPV6:
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_IPV6_SRC);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_IPV6_SRC);
             if (status != R3S_STATUS_PF_LOADED) break;
 
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_IPV6_DST);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_IPV6_DST);
             if (status != R3S_STATUS_PF_LOADED) break;
 
             ip6_hdr = (struct ip6_hdr*) l3_hdr;
@@ -133,10 +134,10 @@ void parse_packet_with_opt(
     switch (ip_hdr->ip_p)
     {
         case IPPROTO_TCP:
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_TCP_SRC);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_TCP_SRC);
             if (status != R3S_STATUS_PF_LOADED) break;
 
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_TCP_DST);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_TCP_DST);
             if (status != R3S_STATUS_PF_LOADED) break;
 
             tcp_hdr    = (struct tcphdr*) l4_hdr;
@@ -157,10 +158,10 @@ void parse_packet_with_opt(
             break;
 
         case IPPROTO_UDP:
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_UDP_SRC);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_UDP_SRC);
             if (status != R3S_STATUS_PF_LOADED) break;
 
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_UDP_DST);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_UDP_DST);
             if (status != R3S_STATUS_PF_LOADED) break;
 
             udp_hdr    = (struct udphdr*) l4_hdr;
@@ -181,13 +182,13 @@ void parse_packet_with_opt(
             break;
 
         case IPPROTO_SCTP:
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_SCTP_SRC);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_SCTP_SRC);
             if (status != R3S_STATUS_PF_LOADED) break;
 
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_SCTP_DST);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_SCTP_DST);
             if (status != R3S_STATUS_PF_LOADED) break;
 
-            status = R3S_cfg_check_pf(cfg, iopt, R3S_PF_SCTP_V_TAG);
+            status = R3S_cfg_check_pf(cfg, opt, R3S_PF_SCTP_V_TAG);
             if (status != R3S_STATUS_PF_LOADED) break;
 
             sctp_hdr   = (struct sctphdr*) l4_hdr;
@@ -211,7 +212,7 @@ void packetHandler(R3S_byte_t *user_data, const struct pcap_pkthdr* pkthdr, cons
 
     for (unsigned iopt = 0; iopt < pps->cfg.n_loaded_opts; iopt++)
     {
-        parse_packet_with_opt(pps->cfg, iopt, pkthdr, packet, &pp);
+        parse_packet_with_opt(pps->cfg, pps->cfg.loaded_opts[iopt] , pkthdr, packet, &pp);
         
         if (pp.cfg != 0)
         {

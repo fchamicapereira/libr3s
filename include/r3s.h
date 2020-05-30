@@ -340,7 +340,7 @@ typedef struct
  * packet fields and the size of the hash input.
  */
 typedef struct {
-    R3S_opt_t opt;      //!< Loaded option.
+    R3S_opt_t    opt;   //!< Loaded option.
     R3S_in_cfg_t pfs;   //!< Hash input configuration, i.e., chosen packet fields associated with this option.
     unsigned     sz;    //!< Size of the hash input.
 } R3S_loaded_opt_t;
@@ -394,6 +394,15 @@ typedef struct {
 } R3S_cfg_t;
 
 /**
+ * \struct R3S_packet_ast_t
+ * \brief Packet used by the Z3 solver matching a specific loaded configuration option.
+ */
+typedef struct {
+    R3S_loaded_opt_t opt; //!< Matched RSS option loaded in R3S_cfg_t.
+    Z3_ast           ast; //!< Z3 solver packet.
+} R3S_packet_ast_t;
+
+/**
  * \brief Definition of the function used to represent constraints between packets.
  * 
  * \param cfg R3S configuration
@@ -430,7 +439,7 @@ typedef struct {
  * }
  * \endcode
  */
-typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_ast p1,Z3_ast p2);
+typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,R3S_packet_ast_t p1,R3S_packet_ast_t p2);
 
 
 /**
@@ -439,8 +448,8 @@ typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,unsigned iopt,Z3_ast p1,Z3_ast p
  */
 typedef struct
 {
-    unsigned n_packets; //!< Total number of packets redirected to a single core.
-    float percentage;   //!< Percentage of the total number of packets that was redirected to a single core.
+    unsigned n_packets;  //!< Total number of packets redirected to a single core.
+    float    percentage; //!< Percentage of the total number of packets that was redirected to a single core.
 } R3S_core_stats_t;
 
 /**
@@ -448,11 +457,11 @@ typedef struct
  * \brief Key statistics.
  */
 typedef struct {
-    R3S_cfg_t           cfg;         //!< R3S configuration.
-    R3S_core_stats_t    *core_stats; //!< Statistics related to each core.
-    unsigned            n_cores;     //!< Total number of cores to be considered.
-    float               avg_dist;    //!< Average distribution of packets per core (in percentage).
-    float               std_dev;     //!< Standard deviation of the distribution of packets per core (in percentage).
+    R3S_cfg_t        cfg;         //!< R3S configuration.
+    R3S_core_stats_t *core_stats; //!< Statistics related to each core.
+    unsigned         n_cores;     //!< Total number of cores to be considered.
+    float            avg_dist;    //!< Average distribution of packets per core (in percentage).
+    float            std_dev;     //!< Standard deviation of the distribution of packets per core (in percentage).
 } R3S_stats_t;
 
 /**
@@ -595,8 +604,8 @@ R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, o
 R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
 R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
 
-R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t r3s_cfg, R3S_packet_t p, R3S_cnstrs_func mk_p_cnstrs, out R3S_packet_t *result);
-R3S_status_t R3S_packet_extract_pf(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_ast p, R3S_pf_t pf, out Z3_ast *result);
+R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t cfg, R3S_packet_t p, R3S_cnstrs_func mk_p_cnstrs, out R3S_packet_t *result);
+R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t pf, out Z3_ast *result);
 R3S_status_t R3S_packets_parse(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
 R3S_status_t R3S_packet_rand(R3S_cfg_t cfg, out R3S_packet_t *p);
 R3S_status_t R3S_packets_rand(R3S_cfg_t cfg, unsigned n_packets, out R3S_packet_t **p);
@@ -726,10 +735,9 @@ R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_ke
 /** \name Constraints */
 /// \{
 
-//void R3S_cnstrs_test(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t h1, R3S_packet_t h2);
-Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_ast p1, Z3_ast p2);
-Z3_ast R3S_cnstr_symmetric_tcp(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_ast p1, Z3_ast p2);
-Z3_ast R3S_cnstr_symmetric_tcp_ip(R3S_cfg_t r3s_cfg, unsigned iopt, Z3_ast p1, Z3_ast p2);
+Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2);
+Z3_ast R3S_cnstr_symmetric_tcp(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2);
+Z3_ast R3S_cnstr_symmetric_tcp_ip(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2);
 
 /// \}
 /// \}

@@ -263,7 +263,7 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg)
         APPEND(result, "\tpfs:\n");
 
         for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
-            if (R3S_cfg_check_pf(cfg, iopt, (R3S_pf_t) ipf) == R3S_STATUS_PF_LOADED)
+            if (R3S_cfg_check_pf(cfg, cfg.loaded_opts[iopt], (R3S_pf_t) ipf) == R3S_STATUS_PF_LOADED)
                 APPEND(result, "\t\t* %s\n", R3S_pf_to_string((R3S_pf_t) ipf));
     }
 

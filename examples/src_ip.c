@@ -1,16 +1,16 @@
 #include <r3s.h>
 
-Z3_ast p_cnstrs(R3S_cfg_t cfg, unsigned iopt, Z3_ast p1, Z3_ast p2)
+Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
     R3S_status_t status;
     Z3_ast       p1_ipv4_src;
     Z3_ast       p2_ipv4_src;
     Z3_ast       eq_src_ip;
 
-    status = R3S_packet_extract_pf(cfg, iopt, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
+    status = R3S_packet_extract_pf(cfg, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    status = R3S_packet_extract_pf(cfg, iopt, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
+    status = R3S_packet_extract_pf(cfg, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
     eq_src_ip = Z3_mk_eq(cfg.ctx, p1_ipv4_src, p2_ipv4_src);
@@ -27,7 +27,7 @@ int main () {
     R3S_cfg_init(&cfg);
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
-    cnstrs[0] = &p_cnstrs;
+    cnstrs[0] = &mk_p_cnstrs;
     status    = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
     
     printf("%s\n", R3S_cfg_to_string(cfg));

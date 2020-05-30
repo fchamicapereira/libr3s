@@ -265,7 +265,7 @@ R3S_status_t R3S_cfg_load_pf(R3S_cfg_t *cfg, unsigned iopt, R3S_pf_t pf)
 {
     R3S_status_t status;
 
-    status = R3S_cfg_check_pf(*cfg, iopt, pf);
+    status = R3S_cfg_check_pf(*cfg, cfg->loaded_opts[iopt], pf);
 
     if (status == R3S_STATUS_PF_NOT_LOADED)
     {
@@ -278,12 +278,11 @@ R3S_status_t R3S_cfg_load_pf(R3S_cfg_t *cfg, unsigned iopt, R3S_pf_t pf)
     return status;
 }
 
-R3S_status_t R3S_cfg_check_pf(R3S_cfg_t cfg, unsigned iopt, R3S_pf_t pf)
+R3S_status_t R3S_cfg_check_pf(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_pf_t pf)
 {
-    if (!is_valid_pf(pf))         return R3S_STATUS_PF_UNKNOWN;
-    if (iopt > cfg.n_loaded_opts) return R3S_STATUS_INVALID_IOPT;
+    if (!is_valid_pf(pf)) return R3S_STATUS_PF_UNKNOWN;
     
-    return ((cfg.loaded_opts[iopt].pfs >> pf) & 1)
+    return ((opt.pfs >> pf) & 1)
         ? R3S_STATUS_PF_LOADED
         : R3S_STATUS_PF_NOT_LOADED;
 }

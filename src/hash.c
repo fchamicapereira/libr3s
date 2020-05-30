@@ -32,14 +32,14 @@ bool R3S_is_zero_key(R3S_key_t key)
     return true;
 }
 
-R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_packet_t p)
+R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_packet_t p)
 {
-    R3S_key_hash_in_t   hi;
-    unsigned     sz, offset;
-    R3S_byte_t *field;
-    R3S_pf_t   pf;
+    R3S_key_hash_in_t hi;
+    unsigned          sz, offset;
+    R3S_byte_t        *field;
+    R3S_pf_t          pf;
 
-    hi     = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * (cfg.loaded_opts[iopt].sz / 8));
+    hi     = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * (opt.sz / 8));
     offset = 0;
     sz     = 0;
 
@@ -47,7 +47,7 @@ R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_pac
     {   
         pf = (R3S_pf_t) ipf;
 
-        if (R3S_cfg_check_pf(cfg, iopt, pf) != R3S_STATUS_PF_LOADED)
+        if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
         if (!R3S_packet_has_pf(p, pf)) continue;
@@ -64,10 +64,10 @@ R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, unsigned iopt, R3S_pac
     return hi;
 }
 
-R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_key_hash_in_t hi, R3S_in_cfg_t p_cfg)
+R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_key_hash_in_t hi, R3S_in_cfg_t p_cfg)
 {
     R3S_packet_t p;
-    unsigned       sz, offset;
+    unsigned     sz, offset;
     R3S_byte_t   *field;
     R3S_pf_t     pf;
 
@@ -79,7 +79,7 @@ R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, unsigned iopt, R3S_key_has
     {   
         pf = (R3S_pf_t) ipf;
 
-        if (R3S_cfg_check_pf(cfg, iopt, pf) != R3S_STATUS_PF_LOADED)
+        if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
         if (!R3S_packet_has_pf(p, pf)) continue;
@@ -112,21 +112,22 @@ void lshift(R3S_key_t k)
 
 R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_key_hash_out_t *o)
 {
-    R3S_key_t    k_copy;
-    R3S_key_hash_in_t     hi;
-    R3S_status_t status;
-    unsigned     ipot;
+    R3S_key_t         k_copy;
+    R3S_key_hash_in_t hi;
+    R3S_status_t      status;
+    R3S_loaded_opt_t  loaded_opt;
+    R3S_packet_ast_t  packet_ast;
 
-    status = R3S_packet_to_opt(cfg, p, &ipot);
+    status = R3S_packet_to_loaded_opt(cfg, p, &loaded_opt);
 
     if (status != R3S_STATUS_SUCCESS) return status;
 
     *o = 0;
-    hi = R3S_packet_to_hash_input(cfg, ipot, p);
+    hi = R3S_packet_to_hash_input(cfg, loaded_opt, p);
     
     memcpy(k_copy, k, sizeof(R3S_byte_t) * KEY_SIZE);
 
-    for (unsigned i = 0; i < cfg.loaded_opts[ipot].sz / 8; i++)
+    for (unsigned i = 0; i < loaded_opt.sz / 8; i++)
     {
         // iterate every bit
         for (int shift = 7; shift >= 0; shift--)
