@@ -66,7 +66,7 @@ void p_ast_to_hash_input(R3S_cfg_t cfg, R3S_packet_ast_t p_ast, R3S_key_hash_in_
     while (p_sz != ast_sz) {
         assert(str_long_int_div(divisor, 16, res) == 0);
         sprintf(divisor, "%s", res);
-        ast_sz -= 4; // 1 byte
+        ast_sz -= 4;
     }
 
     for (unsigned byte_idx = 0; byte_idx < p_sz / 8; byte_idx++)
