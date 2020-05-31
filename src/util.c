@@ -73,3 +73,24 @@ unsigned combinations(unsigned n, unsigned r)
 
     return f_n / (f_r * f_d);
 }
+
+void shuffle(void *arr, unsigned arr_sz, unsigned el_sz) {
+    unsigned j;
+    void     *tmp;
+
+    tmp = malloc(el_sz);
+
+    if (arr_sz == 0) return;
+
+    init_rand();
+
+    for (unsigned i = 0; i < arr_sz; i++) {
+        j = rand() % arr_sz;
+
+        memcpy(tmp, arr + el_sz * j, el_sz);
+        memcpy(arr + el_sz * j, arr + el_sz * i, el_sz);
+        memcpy(arr + el_sz * i, tmp, el_sz);
+    }
+
+    free(tmp);
+}

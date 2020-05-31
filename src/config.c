@@ -59,13 +59,24 @@ void R3S_cfg_init(R3S_cfg_t *cfg)
     cfg->n_loaded_opts = 0;
     cfg->n_procs       = 0;
     cfg->n_keys        = 1;
+    cfg->ctx           = NULL;
 
     cfg->key_fit_params.pcap_fname        = NULL;
     cfg->key_fit_params.std_dev_threshold = -1;
     cfg->key_fit_params.time_limit        = -1;
     cfg->key_fit_params.n_cores           = 0;
 
-    cfg->ctx           = mk_context();
+    R3S_cfg_reset_ctx(cfg);
+}
+
+void cfg_del_ctx(R3S_cfg_t *cfg) {
+    if (cfg->ctx != NULL) Z3_del_context(cfg->ctx);
+    cfg->ctx = NULL;
+}
+
+void R3S_cfg_reset_ctx(R3S_cfg_t *cfg) {
+    cfg_del_ctx(cfg);
+    cfg->ctx = mk_context();
 }
 
 void R3S_cfg_reset(R3S_cfg_t *cfg)
@@ -76,6 +87,8 @@ void R3S_cfg_reset(R3S_cfg_t *cfg)
 
 void R3S_cfg_delete(R3S_cfg_t *cfg)
 {
+    cfg_del_ctx(cfg);
+
     free(cfg->loaded_opts);
 
     if (cfg->key_fit_params.pcap_fname != NULL)

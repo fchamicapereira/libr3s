@@ -64,14 +64,14 @@ R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, R3S_loaded_opt_t opt, 
     return hi;
 }
 
-R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_key_hash_in_t hi, R3S_in_cfg_t p_cfg)
+R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_key_hash_in_t hi)
 {
     R3S_packet_t p;
     unsigned     sz, offset;
     R3S_byte_t   *field;
     R3S_pf_t     pf;
 
-    p.cfg  = p_cfg;
+    p.cfg  = 0;
     offset = 0;
     sz     = 0;
 
@@ -82,13 +82,10 @@ R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_
         if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
-        if (!R3S_packet_has_pf(p, pf)) continue;
-
         field = R3S_packet_get_field(&p, pf);
         sz    = R3S_pf_sz(pf);
 
-        for (unsigned byte = 0; byte < sz; byte++, field++)
-            (*field) = hi[offset + byte];
+        assert(R3S_packet_set_pf(cfg, pf, (R3S_bytes_t) &(hi[offset]), &p) == R3S_STATUS_SUCCESS);
         
         offset += sz;
     }

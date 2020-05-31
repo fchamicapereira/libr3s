@@ -31,9 +31,9 @@ Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast
 Z3_ast R3S_cnstr_symmetric_tcp(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
     R3S_status_t status;
-    Z3_ast         p1_tcp_src, p1_tcp_dst;
-    Z3_ast         p2_tcp_src, p2_tcp_dst;
-    Z3_ast         and_args[2];
+    Z3_ast       p1_tcp_src, p1_tcp_dst;
+    Z3_ast       p2_tcp_src, p2_tcp_dst;
+    Z3_ast       and_args[2];
 
     status = R3S_packet_extract_pf(cfg, p1, R3S_PF_TCP_SRC, &p1_tcp_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;

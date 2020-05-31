@@ -2,9 +2,17 @@
 
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
-    return p1.opt.opt == R3S_OPT_FRAG_IPV4
-        ? R3S_cnstr_symmetric_ip(cfg, p1, p2)
-        : R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
+    if (
+        p1.opt.opt == R3S_OPT_NON_FRAG_IPV4 && 
+        p2.opt.opt == R3S_OPT_NON_FRAG_IPV4
+    ) return R3S_cnstr_symmetric_ip(cfg, p1, p2);
+    
+    if (
+        p1.opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP &&
+        p2.opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP
+    ) return R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
+    
+    return NULL;
 }
 
 int validate(R3S_cfg_t cfg, R3S_key_t k)
@@ -25,7 +33,7 @@ int validate(R3S_cfg_t cfg, R3S_key_t k)
         printf("%s\n", R3S_packet_to_string(p1));
         printf("%s\n", R3S_key_hash_output_to_string(o1));
 
-        printf("%s\n", R3S_packet_to_string(p1));
+        printf("%s\n", R3S_packet_to_string(p2));
         printf("%s\n", R3S_key_hash_output_to_string(o2));;
 
         if (o1 != o2)

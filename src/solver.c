@@ -48,16 +48,26 @@ void p_ast_to_hash_input(R3S_cfg_t cfg, R3S_packet_ast_t p_ast, R3S_key_hash_in_
     char         *divisor, *res;
     size_t       p_string_sz;
     unsigned     p_sz;
+    unsigned     ast_sz;
 
     int          digit1, digit2;
 
     p_sz        = p_ast.opt.sz;
+    ast_sz      = Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p_ast.ast));
     p_string    = Z3_get_numeral_string(cfg.ctx, p_ast.ast);
     p_string_sz = strlen(p_string);
+
     divisor     = (char*) malloc(sizeof(char) * p_string_sz + 1);
     res         = (char*) malloc(sizeof(char) * p_string_sz + 1);
     
-    sprintf(divisor, "%s", p_string);
+    snprintf(divisor, p_string_sz + 1, "%s", p_string);
+
+    // ast size is always bigger than (or equal to) p size
+    while (p_sz != ast_sz) {
+        assert(str_long_int_div(divisor, 16, res) == 0);
+        sprintf(divisor, "%s", res);
+        ast_sz -= 4; // 1 byte
+    }
 
     for (unsigned byte_idx = 0; byte_idx < p_sz / 8; byte_idx++)
     {
@@ -341,7 +351,7 @@ R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t p
 
     if (input_sz != Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p.ast)))
     {
-        DEBUG_PLOG("[R3S_packet_extract_pf] ERROR: input_sz (%u) != p_sz (%u)\n",
+        DEBUG_PLOG("[R3S_packet_extract_pf] ERROR: opt input size (%u) != packet ast size (%u)\n",
             input_sz, Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p.ast)));
         return R3S_STATUS_PF_NOT_LOADED;
     }
@@ -385,7 +395,7 @@ Z3_ast mk_key_byte_const(Z3_context ctx, Z3_ast key, unsigned byte, R3S_byte_t v
     Z3_ast  key_slice;
     Z3_sort byte_sort;
 
-    byte_sort = Z3_mk_bv_sort(ctx, 8);
+    byte_sort   = Z3_mk_bv_sort(ctx, 8);
 
     value_const = Z3_mk_int(ctx, (int) value, byte_sort);
     key_slice   = Z3_mk_extract(ctx, byte * 8 + 7, byte * 8, key);
@@ -401,94 +411,6 @@ Z3_ast mk_key_const(Z3_context ctx, Z3_ast key, R3S_key_t k)
         and_args[b] = mk_key_byte_const(ctx, key, b, k[KEY_SIZE - b - 1]);
 
     return Z3_mk_and(ctx, KEY_SIZE, and_args);
-}
-
-R3S_status_t R3S_packet_from_cnstrs(
-    R3S_cfg_t        cfg,
-    R3S_packet_t     p_in,
-    R3S_cnstrs_func  mk_p_cnstrs,
-    out R3S_packet_t *p_out
-)
-{
-    Z3_context     ctx;
-    Z3_solver      s;
-    Z3_lbool       result;
-    Z3_model       m;
-
-    Z3_symbol      p2_symbol;
-    Z3_func_decl   p2_decl;
-
-    Z3_sort        p_sort;
-    Z3_ast         p1, p2, p2_model;
-    
-    Z3_ast         p_const;
-    Z3_ast         stmt;
-
-    R3S_key_hash_in_t hi2;
-
-    R3S_status_t     status;
-    R3S_loaded_opt_t loaded_opt;
-    R3S_packet_ast_t p1_ast, p2_ast, p2_model_ast;
-
-    status    = R3S_packet_to_loaded_opt(cfg, p_in, &loaded_opt);
-
-    if (status != R3S_STATUS_SUCCESS) return status;
-
-    s          = mk_solver(cfg.ctx);
-    
-    p_sort     = Z3_mk_bv_sort(cfg.ctx, loaded_opt.sz);
-
-    p1         = mk_var(cfg.ctx, "p1", p_sort);
-
-    p2_symbol  = Z3_mk_string_symbol(ctx, "p2"); 
-    p2_decl    = Z3_mk_func_decl(ctx, p2_symbol, 0, 0, p_sort);
-    p2         = Z3_mk_app(ctx, p2_decl, 0, 0);
-
-    p_const    = mk_d_const(cfg, p1, p_in);
-
-    p1_ast.ast = p1;
-    p1_ast.opt = loaded_opt;
-
-    p2_ast.ast = p2;
-    p2_ast.opt = loaded_opt;
-
-    stmt       = mk_p_cnstrs(cfg, p1_ast, p2_ast);
-
-    Z3_solver_assert(cfg.ctx, s, p_const);
-    Z3_solver_assert(cfg.ctx, s, stmt);
-
-    result     = Z3_solver_check(cfg.ctx, s);
-
-    switch (result)
-    {
-        case Z3_L_FALSE:
-        case Z3_L_UNDEF: return R3S_STATUS_NO_SOLUTION;
-        case Z3_L_TRUE:
-            m = Z3_solver_get_model(cfg.ctx, s);
-            
-            if (!m)
-            {
-                del_solver(cfg.ctx, s);
-                return R3S_STATUS_FAILURE;
-            }
-    }
-
-    Z3_model_inc_ref(cfg.ctx, m);
-
-    p2_model_ast.ast = Z3_model_get_const_interp(cfg.ctx, m, p2_decl);
-    p2_model_ast.opt = loaded_opt;
-
-    hi2              = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * loaded_opt.sz);
-
-    p_ast_to_hash_input(cfg, p2_model_ast, hi2);
-
-    *p_out   = R3S_key_hash_in_to_packet(cfg, p2_model_ast.opt, hi2, p_in.cfg);
-    
-    free(hi2);
-    Z3_model_dec_ref(ctx, m);
-    del_solver(ctx, s);
-
-    return R3S_STATUS_SUCCESS;
 }
 
 Z3_ast mk_key_bit_const(Z3_context ctx, Z3_ast key, unsigned bit, unsigned value)
@@ -586,7 +508,7 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, Z3_ast *keys)
 
     n_loaded_opts  = cfg.n_loaded_opts;
     n_key_pairs    = combinations(cfg.n_keys, 2);
-    n_cnstrs       = (cfg.n_keys + n_key_pairs) * n_loaded_opts;
+    n_cnstrs       = (cfg.n_keys + n_key_pairs) * (n_loaded_opts * n_loaded_opts);
     n_implies      = 0;
 
     implies        = (Z3_ast*) malloc(sizeof(Z3_ast) * n_cnstrs);
@@ -684,6 +606,123 @@ Z3_ast mk_binary_or(Z3_context ctx, Z3_ast in_1, Z3_ast in_2)
 {
     Z3_ast args[2] = { in_1, in_2 };
     return Z3_mk_or(ctx, 2, args);
+}
+
+R3S_status_t R3S_packet_from_cnstrs(
+    R3S_cfg_t        cfg,
+    R3S_packet_t     p_in,
+    R3S_cnstrs_func  mk_p_cnstrs,
+    out R3S_packet_t *p_out
+)
+{
+    Z3_solver      s;
+    Z3_lbool       result;
+    Z3_model       m;
+
+    Z3_symbol      p2_symbol;
+    Z3_func_decl   p2_decl;
+
+    Z3_sort        p1_sort, p2_sort;
+    Z3_ast         p1, p2, *p2_types, p2_model;
+    
+    Z3_ast         p_const;
+    Z3_ast         stmt;
+
+    R3S_key_hash_in_t hi2;
+
+    R3S_status_t     status;
+    R3S_loaded_opt_t loaded_opt;
+    R3S_packet_ast_t *shuffled_packet_ast;
+    R3S_packet_ast_t p1_ast, p2_ast, p2_model_ast;
+
+    status     = R3S_packet_to_loaded_opt(cfg, p_in, &loaded_opt);
+
+    if (status != R3S_STATUS_SUCCESS) return status;
+
+    s          = mk_solver(cfg.ctx);
+    
+    p1_sort    = Z3_mk_bv_sort(cfg.ctx, loaded_opt.sz);
+    p1         = mk_var(cfg.ctx, "p1", p1_sort);
+    p_const    = mk_d_const(cfg, p1, p_in);
+
+    p2_sort    = mk_d_sort(cfg);
+    p2_symbol  = Z3_mk_string_symbol(cfg.ctx, "p2");
+    p2_decl    = Z3_mk_func_decl(cfg.ctx, p2_symbol, 0, 0, p2_sort);
+    
+    p2         = Z3_mk_app(cfg.ctx, p2_decl, 0, 0);
+    p2_types   = mk_p(cfg, p2);
+
+    p1_ast.ast = p1;
+    p1_ast.opt = loaded_opt;
+
+    // Now choosing a matching loaded option.
+    // This can be done more efficiently, but honestly it doesnt really bother me
+    // to leave it like this.
+    shuffled_packet_ast = (R3S_packet_ast_t*) malloc(
+        sizeof(R3S_packet_ast_t) * cfg.n_loaded_opts
+    );
+
+    for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++) {
+        shuffled_packet_ast[iopt].ast = p2_types[iopt];
+        shuffled_packet_ast[iopt].opt = cfg.loaded_opts[iopt];
+    }
+
+    shuffle(
+        (void*) shuffled_packet_ast,
+        cfg.n_loaded_opts,
+        sizeof(R3S_packet_ast_t)
+    );
+
+    stmt = NULL;
+    for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++) {
+        p2_ast = shuffled_packet_ast[iopt];
+        stmt   = mk_p_cnstrs(cfg, p1_ast, p2_ast);
+
+        if (stmt != NULL) break;
+    }
+
+    if (stmt == NULL) {
+        assert(false && "No constraint matched for this packet.\n");
+    }
+
+    Z3_solver_assert(cfg.ctx, s, p_const);
+    Z3_solver_assert(cfg.ctx, s, stmt);
+
+    result = Z3_solver_check(cfg.ctx, s);
+
+    switch (result)
+    {
+        case Z3_L_FALSE:
+        case Z3_L_UNDEF: return R3S_STATUS_NO_SOLUTION;
+        case Z3_L_TRUE:
+            m = Z3_solver_get_model(cfg.ctx, s);
+            
+            if (!m)
+            {
+                del_solver(cfg.ctx, s);
+                return R3S_STATUS_FAILURE;
+            }
+    }
+
+    Z3_model_inc_ref(cfg.ctx, m);
+
+    p2_model_ast.ast = Z3_model_get_const_interp(cfg.ctx, m, p2_decl);
+    p2_model_ast.opt = p2_ast.opt;
+
+    hi2              = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * loaded_opt.sz);
+
+    p_ast_to_hash_input(cfg, p2_model_ast, hi2);
+
+    *p_out   = R3S_key_hash_in_to_packet(cfg, p2_model_ast.opt, hi2);
+    
+    free(hi2);
+    free(shuffled_packet_ast);
+    free(p2_types);
+
+    Z3_model_dec_ref(cfg.ctx, m);
+    del_solver(cfg.ctx, s);
+
+    return R3S_STATUS_SUCCESS;
 }
 
 Z3_ast * assert_soft_constraints(Z3_context ctx, Z3_solver s, unsigned num_cnstrs, Z3_ast * cnstrs) 
@@ -837,7 +876,6 @@ R3S_setup_t mk_setup(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs)
     not_zero_keys   = (Z3_ast*)       malloc(sizeof(Z3_ast)       * cfg.n_keys);
 
     setup.s         = mk_solver(cfg.ctx);
-
     key_sort        = Z3_mk_bv_sort(cfg.ctx, KEY_SIZE_BITS);
 
     for (unsigned ikey = 0; ikey < cfg.n_keys; ikey++)
@@ -1139,48 +1177,3 @@ R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, o
 
     return R3S_STATUS_SUCCESS;
 }
-
-/*
-void R3S_cnstrs_test(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_packet_t p1, R3S_packet_t p2)
-{
-    Z3_context ctx;
-    Z3_solver  s;
-    Z3_ast     d1, d2;
-
-    Z3_sort    d_sort;
-    Z3_ast     d1_const, d2_const;
-    Z3_ast     d_constr;
-
-    ctx           = mk_context();
-    s             = mk_solver(ctx);
-
-    d_sort       = Z3_mk_bv_sort(ctx, r3s_cfg.in_sz);
-     
-    d1            = mk_var(ctx, "d1", d_sort);
-    d2            = mk_var(ctx, "d2", d_sort);
-  
-    d1_const      = mk_d_const(r3s_cfg, ctx, d1, p1);
-    d2_const      = mk_d_const(r3s_cfg, ctx, d2, p2);
-
-    d_constr      = mk_p_cnstrs(r3s_cfg, ctx, d1, d2);
-
-    Z3_solver_assert(ctx, s, d1_const);
-    Z3_solver_assert(ctx, s, d2_const);
-    Z3_solver_assert(ctx, s, d_constr);
-
-    #if DEBUG
-        FILE *f_ast = fopen(CHECK_K_AST_FILE, "w");
-        fprintf(f_ast, "%s", Z3_solver_to_string(ctx, s));
-        fclose(f_ast);
-
-        puts("\n==========================================\n");
-        puts("               Z3 solver");
-        puts("\n==========================================\n");
-    #endif
-
-    check(ctx, s);
-
-    del_solver(ctx, s);
-    Z3_del_context(ctx);
-}
-*/

@@ -10,8 +10,9 @@
     ( (((uint32_t) bytes[3]) <<  0) & 0xff       ) \
 )
 
-int      str_long_int_div(const char* n, int divisor, char* res);
-void     init_rand();
-unsigned combinations(unsigned n, unsigned r);
+int       str_long_int_div(const char* n, int divisor, char* res);
+void      init_rand();
+unsigned  combinations(unsigned n, unsigned r);
+void shuffle(void *arr, unsigned arr_sz, unsigned el_sz);
 
 #endif
