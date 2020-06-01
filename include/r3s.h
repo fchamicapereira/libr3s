@@ -398,8 +398,8 @@ typedef struct {
  * \brief Packet used by the Z3 solver matching a specific loaded configuration option.
  */
 typedef struct {
-    R3S_loaded_opt_t opt; //!< Matched RSS option loaded in R3S_cfg_t.
-    Z3_ast           ast; //!< Z3 solver packet.
+    R3S_loaded_opt_t loaded_opt; //!< Matched loaded RSS option loaded in R3S_cfg_t.
+    Z3_ast           ast;        //!< Z3 solver packet.
 } R3S_packet_ast_t;
 
 /**

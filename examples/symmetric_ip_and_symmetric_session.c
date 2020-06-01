@@ -3,13 +3,13 @@
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
     if (
-        p1.opt.opt == R3S_OPT_NON_FRAG_IPV4 && 
-        p2.opt.opt == R3S_OPT_NON_FRAG_IPV4
+        p1.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4 && 
+        p2.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4
     ) return R3S_cnstr_symmetric_ip(cfg, p1, p2);
     
     if (
-        p1.opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP &&
-        p2.opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP
+        p1.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP &&
+        p2.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP
     ) return R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
     
     return NULL;

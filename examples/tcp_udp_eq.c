@@ -8,8 +8,8 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
     Z3_ast       and_args[2];
 
     if (
-        p1.opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP && 
-        p2.opt.opt == R3S_OPT_NON_FRAG_IPV4_UDP
+        p1.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP && 
+        p2.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_UDP
     ) {
         status = R3S_packet_extract_pf(cfg, p1, R3S_PF_TCP_SRC, &p1_src_port);
         if (status != R3S_STATUS_SUCCESS) return NULL;
@@ -28,8 +28,8 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 
         return Z3_mk_and(cfg.ctx, 2, and_args);        
     } else if (
-        p1.opt.opt == R3S_OPT_NON_FRAG_IPV4_UDP &&
-        p2.opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP
+        p1.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_UDP &&
+        p2.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP
     ) {
         status = R3S_packet_extract_pf(cfg, p1, R3S_PF_UDP_SRC, &p1_src_port);
         if (status != R3S_STATUS_SUCCESS) return NULL;

@@ -52,7 +52,7 @@ void p_ast_to_hash_input(R3S_cfg_t cfg, R3S_packet_ast_t p_ast, R3S_key_hash_in_
 
     int          digit1, digit2;
 
-    p_sz        = p_ast.opt.sz;
+    p_sz        = p_ast.loaded_opt.sz;
     ast_sz      = Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p_ast.ast));
     p_string    = Z3_get_numeral_string(cfg.ctx, p_ast.ast);
     p_string_sz = strlen(p_string);
@@ -196,8 +196,8 @@ Z3_ast mk_hash_eq(R3S_cfg_t cfg, Z3_ast key, R3S_packet_ast_t p1, R3S_packet_ast
     unsigned k_high, k_low;
     unsigned p1_sz, p2_sz, sz;
 
-    p1_sz = p1.opt.sz;
-    p2_sz = p2.opt.sz;
+    p1_sz = p1.loaded_opt.sz;
+    p2_sz = p2.loaded_opt.sz;
 
     if (p1_sz > p2_sz) {
         p2.ast = Z3_mk_zero_ext(cfg.ctx, p1_sz - p2_sz, p2.ast);
@@ -240,8 +240,8 @@ Z3_ast mk_hash_eq_two_keys(R3S_cfg_t cfg, Z3_ast key1, Z3_ast key2, R3S_packet_a
     unsigned k_high, k_low;
     unsigned p1_sz, p2_sz, sz;
 
-    p1_sz = p1.opt.sz;
-    p2_sz = p2.opt.sz;
+    p1_sz = p1.loaded_opt.sz;
+    p2_sz = p2.loaded_opt.sz;
 
     if (p1_sz > p2_sz) {
         p2.ast = Z3_mk_zero_ext(cfg.ctx, p1_sz - p2_sz, p2.ast);
@@ -345,7 +345,7 @@ R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t p
     unsigned input_sz, sz;
     unsigned high, low;
     
-    input_sz = p.opt.sz;
+    input_sz = p.loaded_opt.sz;
     offset   = 0;
     sz       = 0;
 
@@ -356,7 +356,7 @@ R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t p
         return R3S_STATUS_PF_NOT_LOADED;
     }
 
-    status   = R3S_cfg_check_pf(cfg, p.opt, pf);
+    status   = R3S_cfg_check_pf(cfg, p.loaded_opt, pf);
 
     if (status != R3S_STATUS_PF_LOADED)
     {
@@ -367,7 +367,7 @@ R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t p
     for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {
         current_pf = (R3S_pf_t) ipf;
-        status     = R3S_cfg_check_pf(cfg, p.opt, current_pf);
+        status     = R3S_cfg_check_pf(cfg, p.loaded_opt, current_pf);
 
         if (status == R3S_STATUS_PF_UNKNOWN) return status;
         if (status != R3S_STATUS_PF_LOADED)  continue;
@@ -520,13 +520,13 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, Z3_ast *keys)
         
         for (unsigned p1_iopt = 0; p1_iopt < n_loaded_opts; p1_iopt++)
         {
-            p1_ast.opt = cfg.loaded_opts[p1_iopt];
-            p1_ast.ast = p1[p1_iopt];
+            p1_ast.loaded_opt = cfg.loaded_opts[p1_iopt];
+            p1_ast.ast        = p1[p1_iopt];
 
             for (unsigned p2_iopt = 0; p2_iopt < n_loaded_opts; p2_iopt++)
             {
-                p2_ast.opt = cfg.loaded_opts[p2_iopt];
-                p2_ast.ast = p2[p2_iopt];
+                p2_ast.loaded_opt = cfg.loaded_opts[p2_iopt];
+                p2_ast.ast        = p2[p2_iopt];
 
                 p_cnstrs = mk_p_cnstrs[cnstr](cfg, p1_ast, p2_ast);
 
@@ -550,13 +550,13 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, Z3_ast *keys)
 
             for (unsigned p1_iopt = 0; p1_iopt < n_loaded_opts; p1_iopt++)
             {
-                p1_ast.opt = cfg.loaded_opts[p1_iopt];
-                p1_ast.ast = p1[p1_iopt];
+                p1_ast.loaded_opt = cfg.loaded_opts[p1_iopt];
+                p1_ast.ast        = p1[p1_iopt];
 
                 for (unsigned p2_iopt = 0; p2_iopt < n_loaded_opts; p2_iopt++)
                 {
-                    p2_ast.opt = cfg.loaded_opts[p2_iopt];
-                    p2_ast.ast = p2[p2_iopt];
+                    p2_ast.loaded_opt = cfg.loaded_opts[p2_iopt];
+                    p2_ast.ast        = p2[p2_iopt];
 
                     p_cnstrs = mk_p_cnstrs[cnstr](cfg, p1_ast, p2_ast);
 
@@ -652,8 +652,8 @@ R3S_status_t R3S_packet_from_cnstrs(
     p2         = Z3_mk_app(cfg.ctx, p2_decl, 0, 0);
     p2_types   = mk_p(cfg, p2);
 
-    p1_ast.ast = p1;
-    p1_ast.opt = loaded_opt;
+    p1_ast.ast        = p1;
+    p1_ast.loaded_opt = loaded_opt;
 
     // Now choosing a matching loaded option.
     // This can be done more efficiently, but honestly it doesnt really bother me
@@ -663,8 +663,8 @@ R3S_status_t R3S_packet_from_cnstrs(
     );
 
     for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++) {
-        shuffled_packet_ast[iopt].ast = p2_types[iopt];
-        shuffled_packet_ast[iopt].opt = cfg.loaded_opts[iopt];
+        shuffled_packet_ast[iopt].ast        = p2_types[iopt];
+        shuffled_packet_ast[iopt].loaded_opt = cfg.loaded_opts[iopt];
     }
 
     shuffle(
@@ -706,14 +706,14 @@ R3S_status_t R3S_packet_from_cnstrs(
 
     Z3_model_inc_ref(cfg.ctx, m);
 
-    p2_model_ast.ast = Z3_model_get_const_interp(cfg.ctx, m, p2_decl);
-    p2_model_ast.opt = p2_ast.opt;
+    p2_model_ast.ast        = Z3_model_get_const_interp(cfg.ctx, m, p2_decl);
+    p2_model_ast.loaded_opt = p2_ast.loaded_opt;
 
     hi2              = (R3S_key_hash_in_t) malloc(sizeof(R3S_byte_t) * loaded_opt.sz);
 
     p_ast_to_hash_input(cfg, p2_model_ast, hi2);
 
-    *p_out   = R3S_key_hash_in_to_packet(cfg, p2_model_ast.opt, hi2);
+    *p_out   = R3S_key_hash_in_to_packet(cfg, p2_model_ast.loaded_opt, hi2);
     
     free(hi2);
     free(shuffled_packet_ast);
