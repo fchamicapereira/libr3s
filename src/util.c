@@ -94,3 +94,18 @@ void shuffle(void *arr, unsigned arr_sz, unsigned el_sz) {
 
     free(tmp);
 }
+
+bool arr_eq(void *a1, size_t a1_sz, void *a2, size_t a2_sz, size_t el_sz) {
+    if (a1_sz != a2_sz) return false;
+    for (unsigned i = 0; i < a1_sz; i++)
+        if (memcmp(a1 + el_sz * i, a2 + el_sz * i, el_sz) != 0)
+            return false;
+    return true;
+}
+
+bool find(void* el, void *arr, size_t arr_sz, size_t el_sz) {
+    for (unsigned i = 0; i < arr_sz; i++)
+        if (memcmp(arr + el_sz * i, el, el_sz) == 0)
+            return true;
+    return false;
+}

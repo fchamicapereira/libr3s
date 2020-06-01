@@ -9,4 +9,5 @@ set(EXAMPLES_SOURCES ${EXAMPLES_SOURCES}
     ${PROJECT_SOURCE_DIR}/examples/X710hash.c
     ${PROJECT_SOURCE_DIR}/examples/pcap.c
     ${PROJECT_SOURCE_DIR}/examples/tcp_udp_eq.c
+    ${PROJECT_SOURCE_DIR}/examples/auto_opts.c
 )

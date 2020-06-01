@@ -9,6 +9,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include <z3.h>
 
@@ -540,6 +541,15 @@ void R3S_cfg_delete(out R3S_cfg_t *cfg);
  * \param opt Option to load.
  */
 R3S_status_t R3S_cfg_load_opt(out R3S_cfg_t *cfg, R3S_opt_t opt);
+
+/**
+ * \brief Get array of options matching the given list of packet fields.
+ * \param pfs     List of packet fields.
+ * \param pfs_sz  Size of the given list of packet fields.
+ * \param opts    List of RSS options matching the given packet fields.
+ * \param opts_sz Size of the generated array of RSS options.
+ */
+R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opts, out size_t *opts_sz);
 
 /// \}
 
