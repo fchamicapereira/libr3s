@@ -1,4 +1,5 @@
 #include "util.h"
+#include "printer.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -44,7 +45,11 @@ void init_rand()
     pid     = getpid();
     urandom = fopen("/dev/urandom", "r");
 
-    fread(&seed, sizeof(int), 1, urandom);
+    if (fread(&seed, sizeof(int), 1, urandom) <= 0) {
+        DEBUG_PLOG("IO ERROR: unable to read from urandom\n");
+        return;
+    }
+
     fclose(urandom);
 
     seed    += pid;

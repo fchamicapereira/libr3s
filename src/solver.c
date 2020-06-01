@@ -957,7 +957,9 @@ void alarm_handler(int sig)
     R3S_key_t key;
 
     R3S_zero_key(key);
-    write(wp, key, KEY_SIZE);
+    if (write(wp, key, KEY_SIZE) == -1) {
+        DEBUG_PLOG("IO ERROR: unable to communicate key to manager\n");
+    }
 
     DEBUG_PLOG("terminated (timeout)\n");
 
@@ -984,9 +986,13 @@ void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs)
 
     if (status == R3S_STATUS_NO_SOLUTION)
     {
-        write(wp, &status, sizeof(R3S_status_t));
+        if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
+            DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
+        }
+        
         free(keys);
         R3S_stats_delete(&stats);
+
         exit(0);
     }
 
@@ -999,18 +1005,25 @@ void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs)
             DEBUG_PLOG("test failed\n");
 
             status = R3S_STATUS_BAD_SOLUTION;
-            write(wp, &status, sizeof(R3S_status_t));
+            if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
+                DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
+            }
+
             free(keys);
             R3S_stats_delete(&stats);
+
             exit(0);
         }
     }
 
     status = R3S_STATUS_SUCCESS;
-    write(wp, &status, sizeof(R3S_status_t));
+    if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
+        DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");   
+    }
 
     for (unsigned ikey = 0; ikey < cfg.n_keys; ikey++)
-        write(wp, keys[ikey], KEY_SIZE);
+        if (write(wp, keys[ikey], KEY_SIZE) == -1)
+            DEBUG_PLOG("IO ERROR: unable to communicate key to manager\n");
 
     DEBUG_PLOG("terminated\n");
 
@@ -1029,7 +1042,9 @@ void worker_sat_checker(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs)
 
     DEBUG_PLOG("%s\n", R3S_status_to_string(status));
 
-    write(wp, &status, sizeof(R3S_status_t));
+    if (write(wp, &status, sizeof(R3S_status_t)) == -1)
+        DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
+
     exit(0);
 }
 
@@ -1073,7 +1088,10 @@ R3S_status_t master(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, int np, comm_t 
         {
             if (!FD_ISSET(comm.rpipe[p], &fds)) continue;
             
-            read(comm.rpipe[p], &status, sizeof(R3S_status_t));
+            if (read(comm.rpipe[p], &status, sizeof(R3S_status_t)) == -1) {
+                DEBUG_PLOG("IO ERROR: unable to read status from worker\n");
+                continue; // FIXME: should I be reacting this way? Or should I retry?
+            }
 
             switch (status)
             {
@@ -1092,7 +1110,11 @@ R3S_status_t master(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, int np, comm_t 
                 case R3S_STATUS_SUCCESS:
                     for (unsigned ikey = 0; ikey < cfg.n_keys; ikey++)
                     {
-                        read(comm.rpipe[p], keys[ikey], KEY_SIZE);
+                        if (read(comm.rpipe[p], keys[ikey], KEY_SIZE) == -1) {
+                            DEBUG_PLOG("IO ERROR: unable to read status from worker\n");
+                            continue; // FIXME: should I be reacting this way? Or should I retry?
+                        }
+
                         DEBUG_PLOG("received key %u\n%s\n", ikey, R3S_key_to_string(keys[ikey]));
                     }
 
@@ -1129,7 +1151,10 @@ R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, ou
     for (int p = 0; p < nworkers; p++) {
         int pipefd[2];
 
-        pipe(pipefd);
+        if (pipe(pipefd) == -1) {
+            DEBUG_PLOG("IO ERROR: unable to create pipe\n");
+            exit(1);
+        }
 
         comm.rpipe[p] = pipefd[0];
         comm.wpipe[p] = pipefd[1];
