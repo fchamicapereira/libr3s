@@ -406,38 +406,10 @@ typedef struct {
  * \brief Definition of the function used to represent constraints between packets.
  * 
  * \param cfg R3S configuration
- * \param iopt Index of the option 
  * \param ctx Z3 context
  * \param p1 A packet
  * \param p2 Another packet
  * \see R3S_keys_fit_cnstrs()
- * 
- * \code
- * Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t cfg, unsigned iopt, Z3_ast p1, Z3_ast p2)
- * {
- *     R3S_status_t status;
- *     Z3_ast       p1_ipv4_src, p1_ipv4_dst;
- *     Z3_ast       p2_ipv4_src, p2_ipv4_dst;
- *     Z3_ast       and_args[2];
- *     
- *     status = R3S_packet_extract_pf(cfg, iopt, p1, R3S_PF_IPV4_SRC, &p1_ipv4_src);
- *     if (status != R3S_STATUS_SUCCESS) return NULL;
- *     
- *     status = R3S_packet_extract_pf(cfg, iopt, p1, R3S_PF_IPV4_DST, &p1_ipv4_dst);
- *     if (status != R3S_STATUS_SUCCESS) return NULL;
- *     
- *     status = R3S_packet_extract_pf(cfg, iopt, p2, R3S_PF_IPV4_SRC, &p2_ipv4_src);
- *     if (status != R3S_STATUS_SUCCESS) return NULL;
- *     
- *     status = R3S_packet_extract_pf(cfg, iopt, p2, R3S_PF_IPV4_DST, &p2_ipv4_dst);
- *     if (status != R3S_STATUS_SUCCESS) return NULL;
- *     
- *     and_args[0] = Z3_mk_eq(cfg.ctx, p1_ipv4_src, p2_ipv4_dst);
- *     and_args[1] = Z3_mk_eq(cfg.ctx, p1_ipv4_dst, p2_ipv4_src);
- *     
- *     return Z3_mk_and(cfg.ctx, 2, and_args);
- * }
- * \endcode
  */
 typedef Z3_ast (*R3S_cnstrs_func)(R3S_cfg_t cfg,R3S_packet_ast_t p1,R3S_packet_ast_t p2);
 
