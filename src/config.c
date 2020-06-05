@@ -472,3 +472,11 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
 
     return status;
 }
+
+void R3S_set_user_data(out R3S_cfg_t *cfg, void* data) {
+    cfg->user_data = data;
+}
+
+void R3S_get_user_data(R3S_cfg_t cfg, out void** data) {
+    *data = cfg.user_data;
+}

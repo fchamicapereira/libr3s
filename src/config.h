@@ -9,4 +9,5 @@ unsigned     R3S_cfg_max_in_sz(R3S_cfg_t cfg);
 R3S_status_t R3S_opt_to_pfs(R3S_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs);
 bool         R3S_cfg_are_compatible_pfs(R3S_cfg_t cfg, R3S_in_cfg_t pfs);
 void         R3S_cfg_reset_ctx(R3S_cfg_t *cfg);
+
 #endif

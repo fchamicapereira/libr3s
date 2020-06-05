@@ -392,6 +392,12 @@ typedef struct {
      * fit the given constraints.
      */
     Z3_context ctx;
+
+    /**
+     * Configuration field completely controlled by the user.
+     * This can be used to pass information to R3S_cnstrs_func function.
+     */
+    void *user_data;
 } R3S_cfg_t;
 
 /**
@@ -550,6 +556,20 @@ R3S_status_t R3S_cfg_load_opt(out R3S_cfg_t *cfg, R3S_opt_t opt);
  * \param opts_sz Size of the generated array of RSS options.
  */
 R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opts, out size_t *opts_sz);
+
+/**
+ * \brief Set the user_data field on the given configuration.
+ * \param cfg Configuration to modify.
+ * \param data Data to be given to the configuration.
+ */
+void R3S_set_user_data(out R3S_cfg_t *cfg, void* data);
+
+/**
+ * \brief Retrieve the previously set user_data field on the given configuration.
+ * \param cfg Configuration to modify.
+ * \param data Data to be retrieved to the configuration.
+ */
+void R3S_get_user_data(R3S_cfg_t cfg, out void** data);
 
 /// \}
 
