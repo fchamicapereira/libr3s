@@ -114,3 +114,36 @@ bool find(void* el, void *arr, size_t arr_sz, size_t el_sz) {
             return true;
     return false;
 }
+
+void remove_dup(void **arr, size_t *arr_sz, size_t el_sz) {
+    void *el1;
+    void *el2;
+    void *tail;
+    void *tmp;
+
+    tmp = malloc(el_sz);
+
+    for (unsigned i = 0; i < *arr_sz - 1; i++) {
+        el1 = (*arr) + el_sz * i;
+
+        unsigned j = i + 1;
+        while (j < *arr_sz) {
+            el2 = (*arr) + el_sz * j;
+
+            if (memcmp(el1, el2, el_sz) == 0) {
+                tail = (*arr) + el_sz * ((*arr_sz) - 1);
+
+                memcpy(tmp, tail, el_sz);
+                memcpy(tail, el2, el_sz);
+                memcpy(el2, tmp, el_sz);
+
+                (*arr_sz)--;
+            } else {
+                j++;
+            }
+
+        }
+    }
+
+    free(tmp);
+}

@@ -18,4 +18,6 @@ unsigned combinations(unsigned n, unsigned r);
 void     shuffle(void *arr, unsigned arr_sz, unsigned el_sz);
 bool     find(void* el, void *arr, size_t arr_sz, size_t el_sz);
 bool     arr_eq(void *a1, size_t a1_sz, void *a2, size_t a2_sz, size_t el_sz);
+void     remove_dup(void **arr, size_t *arr_sz, size_t el_sz);
+
 #endif

@@ -390,9 +390,12 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
     reports_sz = R3S_LAST_OPT - R3S_FIRST_OPT + 1;
     reports    = (opt_pfs_match_t*) malloc(sizeof(opt_pfs_match_t) * reports_sz);
 
+    remove_dup((void**) &pfs, &pfs_sz, sizeof(R3S_pf_t));
+
     for (unsigned ipf = 0; ipf < pfs_sz; ipf++) {
         if (!is_valid_pf(pfs[ipf])) return R3S_STATUS_PF_UNKNOWN;
     }
+
 
     for (unsigned iopt = R3S_FIRST_OPT; iopt <= R3S_LAST_OPT; iopt++) {
         opt = (R3S_opt_t) iopt;
