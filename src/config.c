@@ -322,6 +322,18 @@ typedef struct {
     size_t    excess_sz;
 } opt_pfs_match_t;
 
+opt_pfs_match_t build_opt_pfs_match() {
+    opt_pfs_match_t report;
+
+    report.excess    = NULL;
+    report.excess_sz = 0;
+
+    report.missing    = NULL;
+    report.missing_sz = 0;
+
+    return report;
+}
+
 int cmp_opt_pfs_match(opt_pfs_match_t opm1, opt_pfs_match_t opm2) {
 
     if (opm1.missing_sz < opm2.missing_sz) return 1;
@@ -343,12 +355,9 @@ void opt_cmp_pfs(R3S_opt_t opt, R3S_pf_t *pfs, size_t pfs_sz, opt_pfs_match_t *r
 
     if (report->missing_sz > 0) free(report->missing);
     if (report->excess_sz > 0)  free(report->excess);
-    
+
+    *report = build_opt_pfs_match();
     report->opt        = opt;
-    report->missing_sz = 0;
-    report->missing    = NULL;
-    report->excess_sz  = 0;
-    report->excess     = NULL;
 
     if (pfs_sz == 0) return;
 
@@ -396,10 +405,10 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
         if (!is_valid_pf(pfs[ipf])) return R3S_STATUS_PF_UNKNOWN;
     }
 
-
     for (unsigned iopt = R3S_FIRST_OPT; iopt <= R3S_LAST_OPT; iopt++) {
         opt = (R3S_opt_t) iopt;
-        opt_cmp_pfs(opt, pfs, pfs_sz, reports+iopt);
+        reports[iopt - R3S_FIRST_OPT] = build_opt_pfs_match();
+        opt_cmp_pfs(opt, pfs, pfs_sz, reports+iopt-R3S_FIRST_OPT);
     }
 
     // bubble sort yay!
