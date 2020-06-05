@@ -19,6 +19,8 @@ void exitf(const char *message)
 void error_handler(Z3_context c, Z3_error_code e)
 {
     printf("Error code: %d\n", e);
+    if (e == Z3_EXCEPTION)
+        printf("Error msg : %s\n", Z3_get_error_msg(c, e));
     exitf("incorrect use of Z3");
 }
 
