@@ -567,9 +567,9 @@ void R3S_set_user_data(out R3S_cfg_t *cfg, void* data);
 /**
  * \brief Retrieve the previously set user_data field on the given configuration.
  * \param cfg Configuration to modify.
- * \param data Data to be retrieved to the configuration.
+ * \return Retrieved data.
  */
-void R3S_get_user_data(R3S_cfg_t cfg, out void** data);
+void* R3S_get_user_data(R3S_cfg_t cfg);
 
 /// \}
 
