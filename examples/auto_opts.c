@@ -1,4 +1,5 @@
 #include <r3s.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 int main() {
