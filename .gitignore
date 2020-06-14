@@ -1,4 +1,5 @@
 .vscode
+.kdev*
 *.o
 *.so
 main
