@@ -68,12 +68,11 @@ R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_
 {
     R3S_packet_t p;
     unsigned     sz, offset;
-    R3S_byte_t   *field;
     R3S_pf_t     pf;
 
-    p.cfg  = 0;
+    R3S_packet_init(&p);
+
     offset = 0;
-    sz     = 0;
 
     for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {   
@@ -82,12 +81,10 @@ R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_
         if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
-        field = R3S_packet_get_field(&p, pf);
-        sz    = R3S_pf_sz(pf);
+        R3S_status_t status = R3S_packet_set_pf(cfg, pf, (R3S_bytes_t) &(hi[offset]), &p);
+        assert(status == R3S_STATUS_SUCCESS);
 
-        assert(R3S_packet_set_pf(cfg, pf, (R3S_bytes_t) &(hi[offset]), &p) == R3S_STATUS_SUCCESS);
-        
-        offset += sz;
+        offset += R3S_pf_sz(pf);
     }
 
     return p;

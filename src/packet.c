@@ -70,7 +70,10 @@ R3S_status_t R3S_packet_set_pf(R3S_cfg_t cfg, R3S_pf_t pf, R3S_bytes_t v, R3S_pa
     bool        compatible_pf;
 
     test_cfg = p->cfg | (1 << pf);
-    if (!R3S_cfg_are_compatible_pfs(cfg, test_cfg)) return R3S_STATUS_PF_INCOMPATIBLE;
+
+    if (!R3S_cfg_are_compatible_pfs(cfg, test_cfg))
+        return R3S_STATUS_PF_INCOMPATIBLE;
+
     p->cfg   = test_cfg;
     field = R3S_packet_get_field(p, pf);
 
