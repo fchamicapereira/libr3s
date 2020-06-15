@@ -50,7 +50,7 @@ void p_ast_to_hash_input(R3S_cfg_t cfg, R3S_packet_ast_t p_ast, R3S_key_hash_in_
     unsigned     p_sz;
     unsigned     ast_sz;
 
-    int          digit1, digit2;
+    int          digit1, digit2, remainder;
 
     p_sz        = p_ast.loaded_opt.sz;
     ast_sz      = Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p_ast.ast));
@@ -64,7 +64,8 @@ void p_ast_to_hash_input(R3S_cfg_t cfg, R3S_packet_ast_t p_ast, R3S_key_hash_in_
 
     // ast size is always bigger than (or equal to) p size
     while (p_sz != ast_sz) {
-        assert(str_long_int_div(divisor, 16, res) == 0);
+        remainder = str_long_int_div(divisor, 16, res);
+        assert(remainder == 0);
         sprintf(divisor, "%s", res);
         ast_sz -= 4;
     }

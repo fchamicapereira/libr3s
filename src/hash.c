@@ -74,13 +74,15 @@ R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_
 
     offset = 0;
 
+    // This requires the order of R3S_pf_t to be the order that each packet field
+    // appears on a packet.
     for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {   
         pf = (R3S_pf_t) ipf;
 
         if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
-        
+
         R3S_status_t status = R3S_packet_set_pf(cfg, pf, (R3S_bytes_t) &(hi[offset]), &p);
         assert(status == R3S_STATUS_SUCCESS);
 
