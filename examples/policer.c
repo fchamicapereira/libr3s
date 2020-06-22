@@ -36,10 +36,6 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 
     eq_src_ip = Z3_mk_eq(cfg.ctx, p1_ipv4_src, p2_ipv4_src);
     
-    printf("\np1 option: %s\n", R3S_opt_to_string(p1.loaded_opt.opt));
-    printf("\np2 option: %s\n", R3S_opt_to_string(p2.loaded_opt.opt));
-    printf("\nConstraint:\n%s\n", Z3_ast_to_string(cfg.ctx, eq_src_ip));
-    printf("\nSimplified:\n%s\n", Z3_ast_to_string(cfg.ctx, Z3_simplify(cfg.ctx, eq_src_ip)));
     return Z3_simplify(cfg.ctx, eq_src_ip);
 }
 
@@ -61,6 +57,37 @@ int generate_packets(R3S_cfg_t cfg)
     return 1;
 }
 
+int validate(R3S_cfg_t cfg, R3S_key_t k)
+{
+    R3S_packet_t p1, p2;
+    R3S_key_hash_out_t    o1, o2;
+
+    for (int i = 0; i < 25; i++)
+    {
+        R3S_packet_rand(cfg, &p1);
+        R3S_packet_from_cnstrs(cfg, p1, &mk_p_cnstrs, &p2);
+
+        R3S_key_hash(cfg, k, p1, &o1);
+        R3S_key_hash(cfg, k, p2, &o2);
+
+        printf("\n===== iteration %d =====\n", i);
+
+        printf("%s\n", R3S_packet_to_string(p1));
+        printf("%s\n", R3S_key_hash_output_to_string(o1));
+
+        printf("%s\n", R3S_packet_to_string(p2));
+        printf("%s\n", R3S_key_hash_output_to_string(o2));;
+
+        if (o1 != o2)
+        {
+            printf("Failed! %u != %u. Exiting.\n", o1, o2);
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 int main() {
     R3S_cfg_t cfg;
     R3S_key_t k;
@@ -73,20 +100,24 @@ int main() {
     R3S_cfg_init(&cfg);
     R3S_opts_from_pfs(pfs, 1, &opts, &opts_sz);
 
-    /*
+    /**
+     *  OPT     TIME
+     *  1       < 3:00  non frag ipv4
+     *  2       < 3:00  frag ipv4
+     *  3               non frag TCP/ipv4
+     */
+
     printf("Resulting options:\n");
+    opts_sz = 5;
     for (unsigned i = 0; i < opts_sz; i++) {
         printf("%s\n", R3S_opt_to_string(opts[i]));
         R3S_cfg_load_opt(&cfg, opts[i]);
     }
-    */
-    
-    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
     
     printf("\nConfiguration:\n%s\n", R3S_cfg_to_string(cfg));
 
     cnstrs[0] = &mk_p_cnstrs;
-    /*
+    
     status = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
     
     printf("%s\n", R3S_status_to_string(status));
@@ -94,11 +125,7 @@ int main() {
     if (status == R3S_STATUS_SUCCESS)
         printf("result:\n%s\n", R3S_key_to_string(k));
 
-    status = R3S_keys_test_cnstrs(cfg, cnstrs, &k);
-    printf("valid keys: %s\n", R3S_status_to_string(status));
-    */
-    
-    generate_packets(cfg);
+    validate(cfg, k);
 
     R3S_cfg_delete(&cfg);
 

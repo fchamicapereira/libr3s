@@ -163,7 +163,7 @@ R3S_status_t R3S_opt_to_pfs(R3S_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
             (*pfs)[1] = R3S_PF_IPV4_DST;
             (*pfs)[2] = R3S_PF_SCTP_SRC;
             (*pfs)[3] = R3S_PF_SCTP_DST;
-            (*pfs)[3] = R3S_PF_SCTP_V_TAG;
+            (*pfs)[4] = R3S_PF_SCTP_V_TAG;
 
             break;
         case R3S_OPT_NON_FRAG_IPV4:
@@ -203,7 +203,7 @@ R3S_status_t R3S_opt_to_pfs(R3S_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
             (*pfs)[1] = R3S_PF_IPV6_DST;
             (*pfs)[2] = R3S_PF_SCTP_SRC;
             (*pfs)[3] = R3S_PF_SCTP_DST;
-            (*pfs)[3] = R3S_PF_SCTP_V_TAG;
+            (*pfs)[4] = R3S_PF_SCTP_V_TAG;
 
             break;
         case R3S_OPT_NON_FRAG_IPV6:

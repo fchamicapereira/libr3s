@@ -184,6 +184,16 @@ Z3_ast mk_hash_func(R3S_cfg_t cfg, unsigned iopt, Z3_ast p, Z3_ast key, Z3_ast o
     return Z3_mk_and(cfg.ctx, HASH_OUTPUT_SIZE_BITS, args);
 }
 
+Z3_ast pad_ast(R3S_cfg_t cfg, Z3_ast ast, unsigned new_size) {
+    unsigned size = Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, ast));
+    if (new_size <= size) return ast;
+
+    unsigned pad_size = new_size - size;
+
+    Z3_ast padded = Z3_mk_zero_ext(cfg.ctx, pad_size, ast);
+    return Z3_mk_rotate_left(cfg.ctx, pad_size, padded);
+}
+
 Z3_ast mk_hash_eq(R3S_cfg_t cfg, Z3_ast key, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
     Z3_ast k;
@@ -199,16 +209,10 @@ Z3_ast mk_hash_eq(R3S_cfg_t cfg, Z3_ast key, R3S_packet_ast_t p1, R3S_packet_ast
 
     p1_sz = p1.loaded_opt.sz;
     p2_sz = p2.loaded_opt.sz;
+    sz    = p1_sz > p2_sz ? p1_sz : p2_sz;
 
-    if (p1_sz > p2_sz) {
-        p2.ast = Z3_mk_zero_ext(cfg.ctx, p1_sz - p2_sz, p2.ast);
-        sz = p1_sz;
-    } else if (p2_sz > p1_sz) {
-        p1.ast = Z3_mk_zero_ext(cfg.ctx, p2_sz - p1_sz, p1.ast);
-        sz = p2_sz;
-    } else {
-        sz = p1_sz;
-    }
+    p2.ast = pad_ast(cfg, p2.ast, sz);
+    p1.ast = pad_ast(cfg, p1.ast, sz);
 
     // p1_sz is now equal to p2_sz
     for (int bit = 0; bit < HASH_OUTPUT_SIZE_BITS; bit++)
@@ -1001,7 +1005,7 @@ void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs)
 
     for (unsigned ikey = 0; ikey < cfg.n_keys; ikey++)
     {
-        DEBUG_PLOG("testing key %u\n", ikey);
+        DEBUG_PLOG("testing key %u:\n", ikey);
 
         if (!R3S_stats_eval(cfg, keys[ikey], &stats))
         {
