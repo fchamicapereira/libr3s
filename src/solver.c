@@ -202,13 +202,15 @@ Z3_ast mk_hash_eq(R3S_cfg_t cfg, Z3_ast key, R3S_packet_ast_t p1, R3S_packet_ast
 
     if (p1_sz > p2_sz) {
         p2.ast = Z3_mk_zero_ext(cfg.ctx, p1_sz - p2_sz, p2.ast);
+        sz = p1_sz;
     } else if (p2_sz > p1_sz) {
         p1.ast = Z3_mk_zero_ext(cfg.ctx, p2_sz - p1_sz, p1.ast);
+        sz = p2_sz;
+    } else {
+        sz = p1_sz;
     }
 
     // p1_sz is now equal to p2_sz
-    sz = p1_sz;
-
     for (int bit = 0; bit < HASH_OUTPUT_SIZE_BITS; bit++)
     {
         k_high       = (KEY_SIZE_BITS - 1) - bit;
@@ -223,6 +225,7 @@ Z3_ast mk_hash_eq(R3S_cfg_t cfg, Z3_ast key, R3S_packet_ast_t p1, R3S_packet_ast
 
         args[bit]    = Z3_mk_eq(cfg.ctx, p1_and_k_xor, p2_and_k_xor);
     }
+
 
     return Z3_mk_and(cfg.ctx, HASH_OUTPUT_SIZE_BITS, args);
 }
@@ -528,7 +531,6 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs, Z3_ast *keys)
             {
                 p2_ast.loaded_opt = cfg.loaded_opts[p2_iopt];
                 p2_ast.ast        = p2[p2_iopt];
-
                 p_cnstrs = mk_p_cnstrs[cnstr](cfg, p1_ast, p2_ast);
 
                 if (p_cnstrs == NULL) continue;
