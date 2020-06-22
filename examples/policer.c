@@ -73,10 +73,10 @@ int validate(R3S_cfg_t cfg, R3S_key_t k)
         printf("\n===== iteration %d =====\n", i);
 
         printf("%s\n", R3S_packet_to_string(p1));
-        printf("%s\n", R3S_key_hash_output_to_string(o1));
+        printf("hash: %s\n\n", R3S_key_hash_output_to_string(o1));
 
         printf("%s\n", R3S_packet_to_string(p2));
-        printf("%s\n", R3S_key_hash_output_to_string(o2));;
+        printf("hash: %s\n\n", R3S_key_hash_output_to_string(o2));;
 
         if (o1 != o2)
         {
@@ -92,7 +92,6 @@ int main() {
     R3S_cfg_t cfg;
     R3S_key_t k;
     R3S_cnstrs_func cnstrs[1];
-    R3S_status_t status;
     R3S_opt_t* opts;
     size_t opts_sz;
     R3S_pf_t pfs[1] = { R3S_PF_IPV4_DST };
@@ -100,15 +99,7 @@ int main() {
     R3S_cfg_init(&cfg);
     R3S_opts_from_pfs(pfs, 1, &opts, &opts_sz);
 
-    /**
-     *  OPT     TIME
-     *  1       < 3:00  non frag ipv4
-     *  2       < 3:00  frag ipv4
-     *  3               non frag TCP/ipv4
-     */
-
     printf("Resulting options:\n");
-    opts_sz = 5;
     for (unsigned i = 0; i < opts_sz; i++) {
         printf("%s\n", R3S_opt_to_string(opts[i]));
         R3S_cfg_load_opt(&cfg, opts[i]);
@@ -118,12 +109,9 @@ int main() {
 
     cnstrs[0] = &mk_p_cnstrs;
     
-    status = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
+    R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
     
-    printf("%s\n", R3S_status_to_string(status));
-
-    if (status == R3S_STATUS_SUCCESS)
-        printf("result:\n%s\n", R3S_key_to_string(k));
+    printf("result:\n%s\n", R3S_key_to_string(k));
 
     validate(cfg, k);
 

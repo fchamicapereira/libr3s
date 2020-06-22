@@ -1005,7 +1005,7 @@ void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func *mk_p_cnstrs)
 
     for (unsigned ikey = 0; ikey < cfg.n_keys; ikey++)
     {
-        DEBUG_PLOG("testing key %u:\n", ikey);
+        DEBUG_PLOG("testing key number %u\n", ikey);
 
         if (!R3S_stats_eval(cfg, keys[ikey], &stats))
         {
