@@ -434,18 +434,15 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
         status = R3S_STATUS_BAD_SOLUTION;
     } else {
         for (unsigned i = 0; i < reports_sz; i++) {
-            if (arr_eq(
-                (void*) reports[0].missing, reports[0].missing_sz,
-                (void*) reports[i].missing, reports[i].missing_sz,
-                sizeof(R3S_pf_t)
-            )) {
-                (*opts_sz)++;
-                *opts = (R3S_opt_t*) realloc(
-                    *opts,
-                    sizeof(R3S_opt_t) * (*opts_sz)
-                );
-                (*opts)[(*opts_sz) - 1] = reports[i].opt;
-            }
+            if (cmp_opt_pfs_match(reports[0], reports[i]) != 0)
+                continue;
+
+            (*opts_sz)++;
+            *opts = (R3S_opt_t*) realloc(
+                *opts,
+                sizeof(R3S_opt_t) * (*opts_sz)
+            );
+            (*opts)[(*opts_sz) - 1] = reports[i].opt;
         }
 
         if (reports[0].missing_sz == 0) {
