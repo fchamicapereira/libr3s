@@ -388,6 +388,12 @@ void opt_cmp_pfs(R3S_opt_t opt, R3S_pf_t *pfs, size_t pfs_sz, opt_pfs_match_t *r
     }
 }
 
+bool opt_array_constains(R3S_opt_t* arr, size_t sz, R3S_opt_t opt) {
+    for (unsigned i = 0; i < sz; i++)
+        if (arr[i] == opt) return true;
+    return false;
+}
+
 R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opts, out size_t *opts_sz) {
     R3S_status_t     status;
     R3S_opt_t        opt;
@@ -434,9 +440,12 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
         status = R3S_STATUS_BAD_SOLUTION;
     } else {
         for (unsigned i = 0; i < reports_sz; i++) {
-            if (cmp_opt_pfs_match(reports[0], reports[i]) != 0)
+            if (
+                (cmp_opt_pfs_match(reports[0], reports[i]) != 0) ||
+                (opt_array_constains(*opts, *opts_sz, reports[i].opt))
+            )
                 continue;
-
+            
             (*opts_sz)++;
             *opts = (R3S_opt_t*) realloc(
                 *opts,
@@ -459,6 +468,9 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
             );
 
             for (unsigned i = 0; i < missing_opts_sz; i++) {
+                if (opt_array_constains(*opts, *opts_sz, reports[i].opt))
+                    continue;
+
                 (*opts_sz)++;
                 *opts = (R3S_opt_t*) realloc(
                     *opts,
