@@ -19,6 +19,7 @@ RELEASE_BUILD="$BUILD_TYPES_DIR/release"
 R3S_LIBS_DIR="$BUILD_DIR/libs"
 R3S_INCLUDE_DIR="$BUILD_DIR/include"
 R3S_EXAMPLES_DIR="$BUILD_DIR/examples"
+R3S_DOCS_DIR="$BUILD_DIR/docs"
 
 if [[ -z "${Z3_DIR}" ]]; then
     echo "This project is dependent on the Z3 project."
@@ -36,12 +37,13 @@ cd $DEBUG_BUILD
 CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXAMPLES=ON $R3S_DIR
 make
 
-# Build release
+# Build release and generate documentation
 
 mkdir -p $RELEASE_BUILD
 cd $RELEASE_BUILD
 CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Release $R3S_DIR
 make
+make docs
 
 # Symlink results
 
@@ -53,3 +55,4 @@ mkdir -p $R3S_INCLUDE_DIR
 link $R3S_INCLUDE_DIR/r3s.h $R3S_DIR/include/r3s.h
 
 link $R3S_EXAMPLES_DIR $DEBUG_BUILD/bin/
+link $R3S_DOCS_DIR $RELEASE_BUILD/docs/html
