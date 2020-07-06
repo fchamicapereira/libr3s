@@ -39,33 +39,22 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
     return Z3_simplify(cfg.ctx, eq_src_ip);
 }
 
-int generate_packets(R3S_cfg_t cfg)
-{
-    R3S_packet_t p1, p2;
-
-    for (int i = 0; i < 25; i++)
-    {
-        R3S_packet_rand(cfg, &p1);
-        R3S_packet_from_cnstrs(cfg, p1, &mk_p_cnstrs, &p2);
-
-        printf("\n===== iteration %d =====\n", i);
-
-        printf("%s\n", R3S_packet_to_string(p1));
-        printf("%s\n", R3S_packet_to_string(p2));
-    }
-
-    return 1;
-}
-
 int validate(R3S_cfg_t cfg, R3S_key_t k)
 {
     R3S_packet_t p1, p2;
-    R3S_key_hash_out_t    o1, o2;
+    R3S_key_hash_out_t o1, o2;
+    R3S_packet_from_cnstrs_data_t data;
 
     for (int i = 0; i < 25; i++)
     {
         R3S_packet_rand(cfg, &p1);
-        R3S_packet_from_cnstrs(cfg, p1, &mk_p_cnstrs, &p2);
+
+        data.constraints = &mk_p_cnstrs;
+        data.packet_in   = p1;
+        data.key_id_in   = 0;
+        data.key_id_out  = 0;
+
+        R3S_packet_from_cnstrs(cfg, data, &p2);
 
         R3S_key_hash(cfg, k, p1, &o1);
         R3S_key_hash(cfg, k, p2, &o2);
@@ -91,7 +80,6 @@ int validate(R3S_cfg_t cfg, R3S_key_t k)
 int main() {
     R3S_cfg_t cfg;
     R3S_key_t k;
-    R3S_cnstrs_func cnstrs[1];
     R3S_opt_t* opts;
     size_t opts_sz;
     R3S_pf_t pfs[1] = { R3S_PF_IPV4_DST };
@@ -106,15 +94,12 @@ int main() {
     }
     
     printf("\nConfiguration:\n%s\n", R3S_cfg_to_string(cfg));
-
-    cnstrs[0] = &mk_p_cnstrs;
     
-    R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
+    R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, &k);
     
     printf("result:\n%s\n", R3S_key_to_string(k));
 
     validate(cfg, k);
-
     R3S_cfg_delete(&cfg);
 
     free(opts);

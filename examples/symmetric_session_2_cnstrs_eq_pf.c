@@ -1,17 +1,40 @@
 #include <r3s.h>
 
+Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
+
+    // no constraints on the second key alone
+    if (p1.key_id == 1 && p2.key_id == 1) {
+        return NULL;
+    }
+
+    // symmetric TCP/IP between the first and the second keys (devices)
+    return R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
+}
+
 int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
 {
     R3S_packet_t p1_1, p1_2, p12_1, p12_2;
-    R3S_key_hash_out_t    o1_1, o1_2, o12_1, o12_2;
+    R3S_key_hash_out_t o1_1, o1_2, o12_1, o12_2;
+    R3S_packet_from_cnstrs_data_t data;
 
     for (int i = 0; i < 25; i++)
     {
         R3S_packet_rand(cfg, &p1_1);
         R3S_packet_rand(cfg, &p12_1);
-        
-        R3S_packet_from_cnstrs(cfg, p1_1,  &R3S_cnstr_symmetric_tcp_ip, &p1_2);
-        R3S_packet_from_cnstrs(cfg, p12_1, &R3S_cnstr_symmetric_tcp_ip, &p12_2);
+
+        data.constraints = &mk_p_cnstrs;
+        data.packet_in   = p1_1;
+        data.key_id_in   = 0;
+        data.key_id_out  = 0;
+
+        R3S_packet_from_cnstrs(cfg, data, &p1_2);
+
+        data.constraints = &mk_p_cnstrs;
+        data.packet_in   = p12_1;
+        data.key_id_in   = 0;
+        data.key_id_out  = 1;
+
+        R3S_packet_from_cnstrs(cfg, data, &p12_2);
 
         R3S_key_hash(cfg, k1, p1_1, &o1_1);
         R3S_key_hash(cfg, k2, p1_2, &o1_2);
@@ -55,17 +78,13 @@ int main () {
     R3S_status_t    status;
     R3S_cfg_t       cfg;
     R3S_key_t       keys[2];
-    R3S_cnstrs_func cnstrs[3];
 
     R3S_cfg_init(&cfg);
     cfg.n_keys = 2;
     
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
 
-    cnstrs[0] = &R3S_cnstr_symmetric_tcp_ip;
-    cnstrs[1] = NULL;
-    cnstrs[2] = &R3S_cnstr_symmetric_tcp_ip;
-    status    = R3S_keys_fit_cnstrs(cfg, cnstrs, keys);
+    status = R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, keys);
 
     validate(cfg, keys[0], keys[1]);
     

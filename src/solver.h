@@ -11,6 +11,6 @@ typedef struct {
     int *wpipe;
 } comm_t;
 
-typedef void (*R3S_worker)(R3S_cfg_t,R3S_cnstrs_func*);
+typedef void (*R3S_worker)(R3S_cfg_t,R3S_cnstrs_func);
 
 #endif

@@ -143,6 +143,8 @@ R3S_string_t R3S_status_to_string(R3S_status_t status)
             sprintf(result, "bad solution"); break;
         case R3S_STATUS_HAS_SOLUTION:
             sprintf(result, "has solution"); break;
+        case R3S_STATUS_TIMEOUT:
+            sprintf(result, "timeout"); break;
         case R3S_STATUS_PF_UNKNOWN:
             sprintf(result, "unknown packet field"); break;
         case R3S_STATUS_PF_LOADED:

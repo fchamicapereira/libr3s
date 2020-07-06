@@ -254,6 +254,7 @@ typedef enum
     R3S_STATUS_NO_SOLUTION,     /*!< No solution was found. */
     R3S_STATUS_BAD_SOLUTION,    /*!< A solution was found, but it doesn't fill the requirements. */
     R3S_STATUS_HAS_SOLUTION,    /*!< Confirmation that a solution exists. */
+    R3S_STATUS_TIMEOUT,         /*!< Timeout. */
     
     R3S_STATUS_PF_UNKNOWN,      /*!< Unknown packet field. */
     R3S_STATUS_PF_LOADED,       /*!< Packet field loaded into configuration. */
@@ -407,6 +408,7 @@ typedef struct {
 typedef struct {
     R3S_loaded_opt_t loaded_opt; //!< Matched loaded RSS option loaded in R3S_cfg_t.
     Z3_ast           ast;        //!< Z3 solver packet.
+    unsigned         key_id;     //!< Packet associated with key with this index in the configuration structure.
 } R3S_packet_ast_t;
 
 /**
@@ -442,6 +444,18 @@ typedef struct {
     float            avg_dist;    //!< Average distribution of packets per core (in percentage).
     float            std_dev;     //!< Standard deviation of the distribution of packets per core (in percentage).
 } R3S_stats_t;
+
+/**
+ * \struct R3S_packet_from_cnstrs_data_t
+ * \brief Data used in R3S_packet_from_cnstrs.
+ * \see R3S_packet_from_cnstrs()
+ */
+typedef struct {
+    R3S_packet_t     packet_in;   //!< Input packet
+    R3S_cnstrs_func  constraints; //!< Constraints between the input and output packets
+    unsigned         key_id_in;   //!< Key id from configuration related to the input packet
+    unsigned         key_id_out;  //!< Key id from configuration related to the output packet
+} R3S_packet_from_cnstrs_data_t;
 
 /**
  * \brief R3S boilerplate string.
@@ -606,7 +620,7 @@ R3S_status_t R3S_packet_set_udp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, o
 R3S_status_t R3S_packet_set_sctp(R3S_cfg_t cfg, R3S_port_t src, R3S_port_t dst, R3S_v_tag_t tag, out R3S_packet_t *p);
 R3S_status_t R3S_packet_set_vxlan(R3S_cfg_t cfg, R3S_port_t outer, R3S_vni_t vni, out R3S_packet_t *p);
 
-R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t cfg, R3S_packet_t p, R3S_cnstrs_func mk_p_cnstrs, out R3S_packet_t *result);
+R3S_status_t R3S_packet_from_cnstrs(R3S_cfg_t cfg, R3S_packet_from_cnstrs_data_t data, out R3S_packet_t *result);
 R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t pf, out Z3_ast *result);
 R3S_status_t R3S_packets_parse(R3S_cfg_t cfg, char* filename, out R3S_packet_t **packets, int *n_packets);
 R3S_status_t R3S_packet_rand(R3S_cfg_t cfg, out R3S_packet_t *p);
@@ -692,7 +706,7 @@ void R3S_key_rand(R3S_cfg_t cfg, out R3S_key_t key);
  * 
  * \return Status code.
  */
-R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
+R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func k_p_cnstrs, out R3S_key_t *keys);
 /** 
  * \example no_solution.c
  * Consider the following scenario:
@@ -728,7 +742,7 @@ R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs
  * \todo explanation
  */
 
-R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func *mk_p_cnstrs, out R3S_key_t *keys);
+R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, out R3S_key_t *keys);
 
 R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_key_hash_out_t *result);
 

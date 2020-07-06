@@ -21,14 +21,12 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 int main () {
     R3S_cfg_t       cfg;
     R3S_key_t       k;
-    R3S_cnstrs_func cnstrs[1];
     R3S_status_t    status;
 
     R3S_cfg_init(&cfg);
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
-    cnstrs[0] = &mk_p_cnstrs;
-    status    = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
+    status = R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, &k);
     
     printf("%s\n", R3S_cfg_to_string(cfg));
     printf("%s\n", R3S_status_to_string(status));
@@ -36,7 +34,7 @@ int main () {
     if (status == R3S_STATUS_SUCCESS)
         printf("result:\n%s\n", R3S_key_to_string(k));
 
-    status = R3S_keys_test_cnstrs(cfg, cnstrs, &k);
+    status = R3S_keys_test_cnstrs(cfg, &mk_p_cnstrs, &k);
     printf("valid keys: %s\n", R3S_status_to_string(status));
 
     R3S_cfg_delete(&cfg);

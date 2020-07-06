@@ -18,12 +18,19 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 int validate(R3S_cfg_t cfg, R3S_key_t k)
 {
     R3S_packet_t p1, p2;
-    R3S_key_hash_out_t    o1, o2;
+    R3S_key_hash_out_t o1, o2;
+    R3S_packet_from_cnstrs_data_t data;
 
     for (int i = 0; i < 25; i++)
     {
         R3S_packet_rand(cfg, &p1);
-        R3S_packet_from_cnstrs(cfg, p1, &mk_p_cnstrs, &p2);
+
+        data.constraints = &mk_p_cnstrs;
+        data.packet_in   = p1;
+        data.key_id_in   = 0;
+        data.key_id_out  = 0;
+
+        R3S_packet_from_cnstrs(cfg, data, &p2);
 
         R3S_key_hash(cfg, k, p1, &o1);
         R3S_key_hash(cfg, k, p2, &o2);
@@ -49,15 +56,13 @@ int validate(R3S_cfg_t cfg, R3S_key_t k)
 int main () {
     R3S_cfg_t       cfg;
     R3S_key_t       k;
-    R3S_cnstrs_func cnstrs[1];
     R3S_status_t    status;
 
     R3S_cfg_init(&cfg);
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
 
-    cnstrs[0] = &mk_p_cnstrs;
-    status    = R3S_keys_fit_cnstrs(cfg, cnstrs, &k);
+    status = R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, &k);
 
     validate(cfg, k);
     
