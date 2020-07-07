@@ -318,19 +318,12 @@ R3S_status_t R3S_packet_extract_pf(R3S_cfg_t cfg, R3S_packet_ast_t p, R3S_pf_t p
     sz       = 0;
 
     if (input_sz != Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p.ast)))
-    {
-        DEBUG_PLOG("[R3S_packet_extract_pf] ERROR: opt input size (%u) != packet ast size (%u)\n",
-            input_sz, Z3_get_bv_sort_size(cfg.ctx, Z3_get_sort(cfg.ctx, p.ast)));
         return R3S_STATUS_PF_NOT_LOADED;
-    }
 
     status   = R3S_cfg_check_pf(cfg, p.loaded_opt, pf);
 
     if (status != R3S_STATUS_PF_LOADED)
-    {
-        DEBUG_PLOG("[R3S_packet_extract_pf] ERROR: %u\n", status);
         return status;
-    }
 
     for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {
