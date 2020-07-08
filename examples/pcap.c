@@ -13,9 +13,9 @@ int main() {
 
     sprintf(pcap, "/home/fcp/libr3s/pcap/zipf.pcap");
 
-    R3S_cfg_init(&cfg);
+    R3S_cfg_init(&cfg, 1);
     
-    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
+    R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4);
 
     status = R3S_packets_parse(cfg, pcap, &packets, &n_packets);
 
@@ -37,5 +37,5 @@ int main() {
 
     free(packets);
 
-    R3S_cfg_delete(&cfg);
+    R3S_cfg_delete(cfg);
 }

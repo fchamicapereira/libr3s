@@ -23,10 +23,10 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
         status = R3S_packet_extract_pf(cfg, p2, R3S_PF_UDP_DST, &p2_dst_port);
         if (status != R3S_STATUS_SUCCESS) return NULL;
 
-        and_args[0] = Z3_mk_eq(cfg.ctx, p1_src_port, p2_src_port);
-        and_args[1] = Z3_mk_eq(cfg.ctx, p1_dst_port, p2_dst_port);
+        and_args[0] = Z3_mk_eq(cfg->ctx, p1_src_port, p2_src_port);
+        and_args[1] = Z3_mk_eq(cfg->ctx, p1_dst_port, p2_dst_port);
 
-        return Z3_mk_and(cfg.ctx, 2, and_args);        
+        return Z3_mk_and(cfg->ctx, 2, and_args);        
     } else if (
         p1.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_UDP &&
         p2.loaded_opt.opt == R3S_OPT_NON_FRAG_IPV4_TCP
@@ -43,10 +43,10 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
         status = R3S_packet_extract_pf(cfg, p2, R3S_PF_TCP_DST, &p2_dst_port);
         if (status != R3S_STATUS_SUCCESS) return NULL;
 
-        and_args[0] = Z3_mk_eq(cfg.ctx, p1_src_port, p2_src_port);
-        and_args[1] = Z3_mk_eq(cfg.ctx, p1_dst_port, p2_dst_port);
+        and_args[0] = Z3_mk_eq(cfg->ctx, p1_src_port, p2_src_port);
+        and_args[1] = Z3_mk_eq(cfg->ctx, p1_dst_port, p2_dst_port);
 
-        return Z3_mk_and(cfg.ctx, 2, and_args);
+        return Z3_mk_and(cfg->ctx, 2, and_args);
     }
 
 
@@ -92,14 +92,14 @@ int validate(R3S_cfg_t cfg, R3S_key_t k)
 }
 
 int main () {
-    R3S_cfg_t       cfg;
-    R3S_key_t       k;
-    R3S_status_t    status;
+    R3S_cfg_t    cfg;
+    R3S_key_t    k;
+    R3S_status_t status;
 
-    R3S_cfg_init(&cfg);
+    R3S_cfg_init(&cfg, 1);
 
-    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
-    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4_UDP);
+    R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
+    R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_UDP);
 
     status    = R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, &k);
     
@@ -111,5 +111,5 @@ int main () {
     
     validate(cfg, k);
 
-    R3S_cfg_delete(&cfg);
+    R3S_cfg_delete(cfg);
 }

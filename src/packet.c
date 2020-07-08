@@ -168,13 +168,13 @@ R3S_status_t R3S_packet_rand(R3S_cfg_t cfg, out R3S_packet_t *p)
     init_rand();
 
     v          = NULL;
-    chosen_opt = rand() % cfg.n_loaded_opts;
+    chosen_opt = rand() % cfg->n_loaded_opts;
 
     for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
     {   
         pf = (R3S_pf_t) ipf;
         
-        if (R3S_cfg_check_pf(cfg, cfg.loaded_opts[chosen_opt], pf) != R3S_STATUS_PF_LOADED)
+        if (R3S_loaded_opt_check_pf(cfg->loaded_opts[chosen_opt], pf) != R3S_STATUS_PF_LOADED)
             continue;
 
         sz = R3S_pf_sz(pf);
@@ -211,7 +211,7 @@ R3S_status_t R3S_packet_to_loaded_opt(R3S_cfg_t cfg, R3S_packet_t p, R3S_loaded_
 
     max_match   = 0;
     chosen_iopt = -1;
-    n_opts      = cfg.n_loaded_opts;
+    n_opts      = cfg->n_loaded_opts;
     
     for (unsigned iopt = 0; iopt < n_opts; iopt++)
     {
@@ -219,7 +219,7 @@ R3S_status_t R3S_packet_to_loaded_opt(R3S_cfg_t cfg, R3S_packet_t p, R3S_loaded_
 
         for (unsigned ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
         {
-            if (R3S_cfg_check_pf(cfg, cfg.loaded_opts[iopt], (R3S_pf_t) ipf) == R3S_STATUS_PF_NOT_LOADED)
+            if (R3S_loaded_opt_check_pf(cfg->loaded_opts[iopt], (R3S_pf_t) ipf) == R3S_STATUS_PF_NOT_LOADED)
                 continue;
 
             if (!R3S_packet_has_pf(p, (R3S_pf_t) ipf)) { match = 0; break; }
@@ -236,7 +236,7 @@ R3S_status_t R3S_packet_to_loaded_opt(R3S_cfg_t cfg, R3S_packet_t p, R3S_loaded_
 
     if (chosen_iopt == -1) return R3S_STATUS_NO_SOLUTION;
     
-    *loaded_opt = cfg.loaded_opts[chosen_iopt];
+    *loaded_opt = cfg->loaded_opts[chosen_iopt];
 
     return R3S_STATUS_SUCCESS;
 }

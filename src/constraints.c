@@ -19,10 +19,10 @@ Z3_ast R3S_cnstr_symmetric_ip(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast
     status = R3S_packet_extract_pf(cfg, p2, R3S_PF_IPV4_DST, &p2_ipv4_dst);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    and_args[0] = Z3_mk_eq(cfg.ctx, p1_ipv4_src, p2_ipv4_dst);
-    and_args[1] = Z3_mk_eq(cfg.ctx, p1_ipv4_dst, p2_ipv4_src);
+    and_args[0] = Z3_mk_eq(cfg->ctx, p1_ipv4_src, p2_ipv4_dst);
+    and_args[1] = Z3_mk_eq(cfg->ctx, p1_ipv4_dst, p2_ipv4_src);
 
-    return Z3_mk_and(cfg.ctx, 2, and_args);
+    return Z3_mk_and(cfg->ctx, 2, and_args);
 }
 
 /**
@@ -47,10 +47,10 @@ Z3_ast R3S_cnstr_symmetric_tcp(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_as
     status = R3S_packet_extract_pf(cfg, p2, R3S_PF_TCP_DST, &p2_tcp_dst);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    and_args[0] = Z3_mk_eq(cfg.ctx, p1_tcp_src, p2_tcp_dst);
-    and_args[1] = Z3_mk_eq(cfg.ctx, p1_tcp_dst, p2_tcp_src);
+    and_args[0] = Z3_mk_eq(cfg->ctx, p1_tcp_src, p2_tcp_dst);
+    and_args[1] = Z3_mk_eq(cfg->ctx, p1_tcp_dst, p2_tcp_src);
 
-    return Z3_mk_and(cfg.ctx, 2, and_args);
+    return Z3_mk_and(cfg->ctx, 2, and_args);
 }
 
 /**
@@ -71,5 +71,5 @@ Z3_ast R3S_cnstr_symmetric_tcp_ip(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet
     and_args[0] = symmetric_ip;
     and_args[1] = symmetric_tcp;
 
-    return Z3_mk_and(cfg.ctx, 2, and_args);
+    return Z3_mk_and(cfg->ctx, 2, and_args);
 }

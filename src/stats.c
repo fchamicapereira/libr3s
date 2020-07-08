@@ -75,14 +75,14 @@ bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats)
     int          n_packets;
     unsigned     n_cores;
 
-    n_cores = cfg.key_fit_params.n_cores == 0 ?
-        get_nprocs() : cfg.key_fit_params.n_cores;
+    n_cores = cfg->skew_analysis_params.n_cores == 0 ?
+        get_nprocs() : cfg->skew_analysis_params.n_cores;
     
     R3S_stats_reset(cfg, n_cores, stats);
 
-    if (cfg.key_fit_params.pcap_fname != NULL)
+    if (cfg->skew_analysis_params.pcap_fname != NULL)
     {
-        status = R3S_packets_parse(cfg, cfg.key_fit_params.pcap_fname, &packets, &n_packets);
+        status = R3S_packets_parse(cfg, cfg->skew_analysis_params.pcap_fname, &packets, &n_packets);
         if (status != R3S_STATUS_SUCCESS)
         {
             DEBUG_PLOG("Key evaluation failed: %s\n", R3S_status_to_string(status));
@@ -113,12 +113,12 @@ bool R3S_stats_eval(R3S_cfg_t cfg, R3S_key_t key, out R3S_stats_t *stats)
         R3S_key_to_string(key),
         R3S_stats_to_string(*stats));
 
-    if (cfg.key_fit_params.std_dev_threshold > 0
-        && stats->std_dev < cfg.key_fit_params.std_dev_threshold)
+    if (cfg->skew_analysis_params.std_dev_threshold > 0
+        && stats->std_dev < cfg->skew_analysis_params.std_dev_threshold)
     {
         free(packets);
         return false;
-    } else if (cfg.key_fit_params.std_dev_threshold < 0)
+    } else if (cfg->skew_analysis_params.std_dev_threshold < 0)
     {
         R3S_stats_init(cfg, n_cores, &rand_key_stats);
         R3S_key_rand(cfg, rand_key);

@@ -5,6 +5,7 @@
 #include "packet.h"
 #include "config.h"
 
+#include <unistd.h>
 #include <stdlib.h>
 
 #define MAX(x,y) ((x) >= (y) ? (x) : (y))
@@ -55,47 +56,39 @@ Z3_context mk_context()
     return ctx;
 }
 
-void R3S_cfg_init(R3S_cfg_t *cfg)
+void R3S_cfg_init(R3S_cfg_t *cfg, unsigned n_keys)
 {
-    cfg->loaded_opts   = NULL;
-    cfg->n_loaded_opts = 0;
-    cfg->fit_key       = true;
-    cfg->n_procs       = 0;
-    cfg->n_keys        = 1;
-    cfg->ctx           = NULL;
+    *cfg = (R3S_cfg_t) malloc(sizeof(__R3S_cfg_t));
 
-    cfg->key_fit_params.pcap_fname        = NULL;
-    cfg->key_fit_params.std_dev_threshold = -1;
-    cfg->key_fit_params.time_limit        = -1;
-    cfg->key_fit_params.n_cores           = 0;
+    (*cfg)->loaded_opts   = NULL;
+    (*cfg)->n_loaded_opts = 0;
+    (*cfg)->skew_analysis = true;
+    (*cfg)->n_procs       = 0;
+    (*cfg)->ctx           = mk_context();
 
-    R3S_cfg_reset_ctx(cfg);
+    (*cfg)->skew_analysis_params.pcap_fname        = NULL;
+    (*cfg)->skew_analysis_params.std_dev_threshold = -1;
+    (*cfg)->skew_analysis_params.time_limit        = -1;
+    (*cfg)->skew_analysis_params.n_cores           = 0;
+
+    (*cfg)->n_keys = n_keys;
 }
 
-void cfg_del_ctx(R3S_cfg_t *cfg) {
+void cfg_del_ctx(R3S_cfg_t cfg) {
     if (cfg->ctx != NULL) Z3_del_context(cfg->ctx);
     cfg->ctx = NULL;
 }
 
-void R3S_cfg_reset_ctx(R3S_cfg_t *cfg) {
-    cfg_del_ctx(cfg);
-    cfg->ctx = mk_context();
-}
-
-void R3S_cfg_reset(R3S_cfg_t *cfg)
-{
-    R3S_cfg_delete(cfg);
-    R3S_cfg_init(cfg);
-}
-
-void R3S_cfg_delete(R3S_cfg_t *cfg)
+void R3S_cfg_delete(R3S_cfg_t cfg)
 {
     cfg_del_ctx(cfg);
 
     free(cfg->loaded_opts);
 
-    if (cfg->key_fit_params.pcap_fname != NULL)
-        free(cfg->key_fit_params.pcap_fname);
+    if (cfg->skew_analysis_params.pcap_fname != NULL)
+        free(cfg->skew_analysis_params.pcap_fname);
+
+    free(cfg);
 }
 
 bool is_valid_opt(R3S_opt_t opt)
@@ -228,28 +221,30 @@ R3S_status_t R3S_opt_to_pfs(R3S_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
 
 bool R3S_cfg_are_compatible_pfs(R3S_cfg_t cfg, R3S_in_cfg_t pfs)
 {
-    for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++) {
-        if ((pfs & cfg.loaded_opts[iopt].pfs) != 0) return true;
+    for (unsigned iopt = 0; iopt < cfg->n_loaded_opts; iopt++) {
+        if ((pfs & cfg->loaded_opts[iopt].pfs) != 0) return true;
     }
     return false;
 }
 
-R3S_status_t R3S_cfg_load_opt(R3S_cfg_t *cfg, R3S_opt_t opt)
+R3S_status_t R3S_cfg_load_opt(R3S_cfg_t cfg, R3S_opt_t opt)
 {
     R3S_status_t s;
     R3S_pf_t     *pfs;
     unsigned     n_pfs;
     unsigned     iopt;
 
-    if (!is_valid_opt(opt)) return R3S_STATUS_OPT_UNKNOWN;
+    if (!is_valid_opt(opt))
+        return R3S_STATUS_OPT_UNKNOWN;
 
     iopt = cfg->n_loaded_opts;
 
     cfg->n_loaded_opts++;
     cfg->loaded_opts = (R3S_loaded_opt_t*) realloc(
         cfg->loaded_opts,
-        sizeof(R3S_loaded_opt_t) * cfg->n_loaded_opts);
-    
+        sizeof(R3S_loaded_opt_t) * cfg->n_loaded_opts
+    );
+
     cfg->loaded_opts[iopt].opt = opt;
     cfg->loaded_opts[iopt].pfs = 0;
     cfg->loaded_opts[iopt].sz  = 0;
@@ -277,11 +272,11 @@ bool is_valid_pf(R3S_pf_t pf)
     return pf >= R3S_FIRST_PF && pf <= R3S_LAST_PF;
 }
 
-R3S_status_t R3S_cfg_load_pf(R3S_cfg_t *cfg, unsigned iopt, R3S_pf_t pf)
+R3S_status_t R3S_cfg_load_pf(R3S_cfg_t cfg, unsigned iopt, R3S_pf_t pf)
 {
     R3S_status_t status;
 
-    status = R3S_cfg_check_pf(*cfg, cfg->loaded_opts[iopt], pf);
+    status = R3S_loaded_opt_check_pf(cfg->loaded_opts[iopt], pf);
 
     if (status == R3S_STATUS_PF_NOT_LOADED)
     {
@@ -294,10 +289,10 @@ R3S_status_t R3S_cfg_load_pf(R3S_cfg_t *cfg, unsigned iopt, R3S_pf_t pf)
     return status;
 }
 
-R3S_status_t R3S_cfg_check_pf(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_pf_t pf)
+R3S_status_t R3S_loaded_opt_check_pf(R3S_loaded_opt_t opt, R3S_pf_t pf)
 {
     if (!is_valid_pf(pf)) return R3S_STATUS_PF_UNKNOWN;
-    
+
     return ((opt.pfs >> pf) & 1)
         ? R3S_STATUS_PF_LOADED
         : R3S_STATUS_PF_NOT_LOADED;
@@ -309,8 +304,8 @@ unsigned R3S_cfg_max_in_sz(R3S_cfg_t cfg)
 
     max_sz = 0;
 
-    for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++)
-        max_sz = MAX(max_sz, cfg.loaded_opts[iopt].sz);
+    for (unsigned iopt = 0; iopt < cfg->n_loaded_opts; iopt++)
+        max_sz = MAX(max_sz, cfg->loaded_opts[iopt].sz);
     
     return max_sz;
 }
@@ -494,10 +489,48 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
     return status;
 }
 
-void R3S_set_user_data(out R3S_cfg_t *cfg, void* data) {
+void R3S_cfg_set_user_data(out R3S_cfg_t cfg, void* data) {
     cfg->user_data = data;
 }
 
-void* R3S_get_user_data(R3S_cfg_t cfg) {
-    return cfg.user_data;
+void* R3S_cfg_get_user_data(R3S_cfg_t cfg) {
+    return cfg->user_data;
+}
+
+Z3_context R3S_cfg_get_z3_context(R3S_cfg_t cfg) {
+    return cfg->ctx;
+}
+
+R3S_status_t R3S_cfg_set_skew_analysis(out R3S_cfg_t cfg, bool skew_analysis) {
+    cfg->skew_analysis = skew_analysis;
+
+    if (!skew_analysis) {
+        cfg->n_procs = 1;
+    }
+
+    return R3S_STATUS_SUCCESS;
+}
+
+R3S_status_t R3S_cfg_set_number_of_processes(out R3S_cfg_t cfg, int n_procs) {
+    if (!cfg->skew_analysis) {
+        return R3S_STATUS_NOP;
+    }
+
+    cfg->n_procs = n_procs;
+}
+
+unsigned R3S_cfg_get_number_of_keys(R3S_cfg_t cfg) {
+    return cfg->n_keys;
+}
+
+R3S_status_t R3S_cfg_set_skew_analysis_parameters(out R3S_cfg_t cfg, R3S_skew_analysis_params_t params) {
+    if (!cfg->skew_analysis) {
+        return R3S_STATUS_NOP;
+    }
+
+    if (params.pcap_fname != NULL && access(params.pcap_fname, F_OK) == -1) {
+        return R3S_STATUS_IO_ERROR;
+    }
+
+    cfg->skew_analysis_params = params;
 }

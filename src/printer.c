@@ -160,9 +160,13 @@ R3S_string_t R3S_status_to_string(R3S_status_t status)
         case R3S_STATUS_OPT_NOT_LOADED:
             sprintf(result, "option not loaded"); break;
         case R3S_STATUS_INVALID_IOPT:
-            sprintf(result, "option index invalid (must be < cfg.n_loaded_opts)"); break;
+            sprintf(result, "option index invalid (must be < cfg->n_loaded_opts)"); break;
+        case R3S_STATUS_IO_ERROR:
+            sprintf(result, "input/output error (maybe file not found)"); break;
         case R3S_STATUS_FAILURE:
             sprintf(result, "failure"); break;
+        case R3S_STATUS_NOP:
+            sprintf(result, "no operation made"); break;
     }
 
     return result;
@@ -254,18 +258,18 @@ R3S_string_t R3S_cfg_to_string(R3S_cfg_t cfg)
 
     result[0] = '\0';
 
-    APPEND(result, "cores: %d\n", cfg.n_procs);
-    APPEND(result, "keys : %d\n", cfg.n_keys);
+    APPEND(result, "cores: %d\n", cfg->n_procs);
+    APPEND(result, "keys : %d\n", cfg->n_keys);
     APPEND(result, "cfgs :\n");
 
-    for (unsigned iopt = 0; iopt < cfg.n_loaded_opts; iopt++)
+    for (unsigned iopt = 0; iopt < cfg->n_loaded_opts; iopt++)
     {
-        APPEND(result, "\topt: %s\n", R3S_opt_to_string(cfg.loaded_opts[iopt].opt));
-        APPEND(result, "\tsz : %u bits\n", cfg.loaded_opts[iopt].sz);
+        APPEND(result, "\topt: %s\n", R3S_opt_to_string(cfg->loaded_opts[iopt].opt));
+        APPEND(result, "\tsz : %u bits\n", cfg->loaded_opts[iopt].sz);
         APPEND(result, "\tpfs:\n");
 
         for (int ipf = R3S_FIRST_PF; ipf <= R3S_LAST_PF; ipf++)
-            if (R3S_cfg_check_pf(cfg, cfg.loaded_opts[iopt], (R3S_pf_t) ipf) == R3S_STATUS_PF_LOADED)
+            if (R3S_loaded_opt_check_pf(cfg->loaded_opts[iopt], (R3S_pf_t) ipf) == R3S_STATUS_PF_LOADED)
                 APPEND(result, "\t\t* %s\n", R3S_pf_to_string((R3S_pf_t) ipf));
     }
 

@@ -266,7 +266,9 @@ typedef enum
     R3S_STATUS_OPT_NOT_LOADED,  /*!< Option not loaded into configuration. */
     R3S_STATUS_INVALID_IOPT,    /*!< Invalid option index. This is typically returned if an used option index is bigger than the number of loaded options in a configuration. */
     
-    R3S_STATUS_FAILURE          /*!< Operation failed. */
+    R3S_STATUS_IO_ERROR,        /*!< Input/output error. Typically associated with a bad file. */
+    R3S_STATUS_FAILURE,         /*!< Operation failed. */
+    R3S_STATUS_NOP              /*!< No operation made. */
 } R3S_status_t;
 
 /**
@@ -347,11 +349,16 @@ typedef struct {
     unsigned     sz;    //!< Size of the hash input.
 } R3S_loaded_opt_t;
 
-/**
- * \struct R3S_cfg_t
- * \brief R3S configuration used to store information useful
- * throughout the API.
- */
+
+typedef struct {
+    char     *pcap_fname;
+    float    std_dev_threshold;
+    int      time_limit;
+    unsigned n_cores;
+} R3S_skew_analysis_params_t;
+
+// Implementation details
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 typedef struct {
 
     /**
@@ -359,10 +366,10 @@ typedef struct {
      * \see R3S_opt_t
      */
     R3S_loaded_opt_t *loaded_opts;
-    
+
     /**
      * Number of loaded configurations. Stores the size of
-     * the R3S_cfg_t::loaded_opts array. 
+     * the R3S_cfg_t::loaded_opts array.
      */
     unsigned         n_loaded_opts;
 
@@ -377,28 +384,23 @@ typedef struct {
      *
      * By default, this value is true.
      */
-    bool fit_key;
+    bool skew_analysis;
 
     /**
      * Number of processes to be used by the R3S_keys_fit_cnstrs().
      * If this value is <= 0, then the number of processes
      * used will be equal to the number of available cores.
      */
-    int              n_procs;
+    int n_procs;
 
     /**
      * Number of keys to take into consideration.
      * This is useful when there are constraints needed to be
      * considered between multiple NICs/ports in NICs.
      */
-    unsigned         n_keys;
+    unsigned n_keys;
 
-    struct {
-        char         *pcap_fname;
-        float        std_dev_threshold;
-        int          time_limit;
-        unsigned     n_cores;
-    } key_fit_params;
+    R3S_skew_analysis_params_t skew_analysis_params;
 
     /**
      * Z3 context.
@@ -412,7 +414,15 @@ typedef struct {
      * This can be used to pass information to R3S_cnstrs_func function.
      */
     void *user_data;
-} R3S_cfg_t;
+} __R3S_cfg_t;
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+/**
+ * \struct R3S_cfg_t
+ * \brief R3S configuration used to store information useful
+ * throughout the API.
+ */
+typedef __R3S_cfg_t *R3S_cfg_t;
 
 /**
  * \struct R3S_packet_ast_t
@@ -553,27 +563,22 @@ R3S_string_t R3S_stats_to_string(R3S_stats_t stats);
 /**
  * \brief Initialize a configuration.
  * \param cfg Configuration to initialize.
+ * \param n_keys Number of keys to be found by the solver (number of devices to be configured with RSS).
  */
-void R3S_cfg_init(out R3S_cfg_t *cfg);
-
-/**
- * \brief Reset a configuration.
- * \param cfg Configuration to reset.
- */
-void R3S_cfg_reset(out R3S_cfg_t *cfg);
+void R3S_cfg_init(out R3S_cfg_t *cfg, unsigned n_keys);
 
 /**
  * \brief Delete a configuration.
  * \param cfg Configuration to delete.
  */
-void R3S_cfg_delete(out R3S_cfg_t *cfg);
+void R3S_cfg_delete(out R3S_cfg_t cfg);
 
 /**
  * \brief Load option into configuration.
  * \param cfg Configuration to modify.
  * \param opt Option to load.
  */
-R3S_status_t R3S_cfg_load_opt(out R3S_cfg_t *cfg, R3S_opt_t opt);
+R3S_status_t R3S_cfg_load_opt(out R3S_cfg_t cfg, R3S_opt_t opt);
 
 /**
  * \brief Get array of options matching the given list of packet fields.
@@ -589,14 +594,88 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
  * \param cfg Configuration to modify.
  * \param data Data to be given to the configuration.
  */
-void R3S_set_user_data(out R3S_cfg_t *cfg, void* data);
+void R3S_cfg_set_user_data(out R3S_cfg_t cfg, void* data);
 
 /**
  * \brief Retrieve the previously set user_data field on the given configuration.
- * \param cfg Configuration to modify.
+ * \param cfg R3S configuration.
  * \return Retrieved data.
  */
-void* R3S_get_user_data(R3S_cfg_t cfg);
+void* R3S_cfg_get_user_data(R3S_cfg_t cfg);
+
+/**
+ * \brief Get Z3 context. This can be useful while generating packet constraints.
+ * \param cfg R3S configuration.
+ * \return Retrieved context.
+ */
+Z3_context R3S_cfg_get_z3_context(R3S_cfg_t cfg);
+
+/**
+ * \brief Indicate if the solver should try to find keys that provide a good distribution of packets among the cores.
+ * \param cfg R3S configuration to modify.
+ * \param skew_analysis Value indicating if skew analysis should be performed.
+ *
+ * \return ::R3S_STATUS_SUCCESS
+ * Configuration modified successfully.
+ */
+R3S_status_t R3S_cfg_set_skew_analysis(out R3S_cfg_t cfg, bool skew_analysis);
+
+/**
+ * \brief Set the number of processes to be used by the solver.
+ *
+ * If the solver is told to analyse packet skewing, then it will launch
+ * \p n_procs processes, all of them responsible of finding a key that
+ * passes the distribution test.
+ *
+ * If \p n_procs is negative, then one process per available core will
+ * be launched.
+ *
+ * If the solver is told _not_ to analyse packet skewing,
+ * this function will have no impact on the configuration, and returns
+ * ::R3S_STATUS_NOP.
+ *
+ * \param cfg R3S configuration to modify.
+ * \param n_procs Number of processes to be used by the solver.
+ *
+ * \return ::R3S_STATUS_SUCESS
+ * Configuration modified successfully.
+ *
+ * \return ::R3S_STATUS_NOP
+ * Configuration unchanged.
+ *
+ * \see R3S_cfg_set_skew_analysis()
+ */
+R3S_status_t R3S_cfg_set_number_of_processes(out R3S_cfg_t cfg, int n_procs);
+
+/**
+ * \brief Get number of keys (devices) associated with this configuration.
+ * \param cfg R3S configuration.
+ * \return Number of keys.
+ */
+unsigned R3S_cfg_get_number_of_keys(R3S_cfg_t cfg);
+
+/**
+ * \brief Configure the skew analysis options (i.e., the packet distribution test).
+ *
+ * If the solver is told _not_ to analyse packet skewing, then this function will
+ * have no impact on the configuration, and returns ::R3S_STATUS_NOP.
+ *
+ * If ::R3S_skew_analysis_params_t::pcap_fname is different than NULL, this function
+ * will check the existence of this file. If this file doesn't exist, it will return
+ * ::R3S_STATUS_IO_ERROR.
+ *
+ * \param cfg R3S configuration to modify.
+ * \param params Skew analysis configuration parameters.
+ *
+ * \return ::R3S_STATUS_SUCESS
+ * Configuration modified successfully.
+ *
+ * \return ::R3S_STATUS_IO_ERROR
+ * Unable to open file associated with the provided pcap filename .
+ *
+ * \see R3S_cfg_set_skew_analysis()
+ */
+R3S_status_t R3S_cfg_set_skew_analysis_parameters(out R3S_cfg_t cfg, R3S_skew_analysis_params_t params);
 
 /// \}
 

@@ -5,10 +5,10 @@ int main () {
     R3S_cfg_t       cfg;
     R3S_key_t       k;
 
-    R3S_cfg_init(&cfg);
-    R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
+    R3S_cfg_init(&cfg, 1);
 
-    cfg.fit_key = false;
+    R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4);
+    R3S_cfg_set_skew_analysis(cfg, false);
 
     status = R3S_keys_fit_cnstrs(cfg, &R3S_cnstr_symmetric_ip, &k);
     
@@ -18,5 +18,5 @@ int main () {
     if (status == R3S_STATUS_SUCCESS)
         printf("result:\n%s\n", R3S_key_to_string(k));
 
-    R3S_cfg_delete(&cfg);
+    R3S_cfg_delete(cfg);
 }

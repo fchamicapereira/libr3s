@@ -32,7 +32,7 @@ bool R3S_is_zero_key(R3S_key_t key)
     return true;
 }
 
-R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_packet_t p)
+R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_loaded_opt_t opt, R3S_packet_t p)
 {
     R3S_key_hash_in_t hi;
     unsigned          sz, offset;
@@ -47,7 +47,7 @@ R3S_key_hash_in_t R3S_packet_to_hash_input(R3S_cfg_t cfg, R3S_loaded_opt_t opt, 
     {   
         pf = (R3S_pf_t) ipf;
 
-        if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
+        if (R3S_loaded_opt_check_pf(opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
         
         if (!R3S_packet_has_pf(p, pf)) continue;
@@ -80,7 +80,7 @@ R3S_packet_t R3S_key_hash_in_to_packet(R3S_cfg_t cfg, R3S_loaded_opt_t opt, R3S_
     {   
         pf = (R3S_pf_t) ipf;
 
-        if (R3S_cfg_check_pf(cfg, opt, pf) != R3S_STATUS_PF_LOADED)
+        if (R3S_loaded_opt_check_pf(opt, pf) != R3S_STATUS_PF_LOADED)
             continue;
 
         R3S_status_t status = R3S_packet_set_pf(cfg, pf, (R3S_bytes_t) &(hi[offset]), &p);
@@ -119,7 +119,7 @@ R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_ke
     if (status != R3S_STATUS_SUCCESS) return status;
 
     *o = 0;
-    hi = R3S_packet_to_hash_input(cfg, loaded_opt, p);
+    hi = R3S_packet_to_hash_input(loaded_opt, p);
     
     memcpy(k_copy, k, sizeof(R3S_byte_t) * KEY_SIZE);
 

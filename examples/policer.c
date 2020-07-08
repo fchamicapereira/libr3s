@@ -34,9 +34,9 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
     status = R3S_packet_extract_pf(cfg, p2, R3S_PF_IPV4_DST, &p2_ipv4_src);
     if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    eq_src_ip = Z3_mk_eq(cfg.ctx, p1_ipv4_src, p2_ipv4_src);
+    eq_src_ip = Z3_mk_eq(cfg->ctx, p1_ipv4_src, p2_ipv4_src);
     
-    return Z3_simplify(cfg.ctx, eq_src_ip);
+    return Z3_simplify(cfg->ctx, eq_src_ip);
 }
 
 int validate(R3S_cfg_t cfg, R3S_key_t k)
@@ -84,13 +84,13 @@ int main() {
     size_t opts_sz;
     R3S_pf_t pfs[1] = { R3S_PF_IPV4_DST };
 
-    R3S_cfg_init(&cfg);
+    R3S_cfg_init(&cfg, 1);
     R3S_opts_from_pfs(pfs, 1, &opts, &opts_sz);
 
     printf("Resulting options:\n");
     for (unsigned i = 0; i < opts_sz; i++) {
         printf("%s\n", R3S_opt_to_string(opts[i]));
-        R3S_cfg_load_opt(&cfg, opts[i]);
+        R3S_cfg_load_opt(cfg, opts[i]);
     }
     
     printf("\nConfiguration:\n%s\n", R3S_cfg_to_string(cfg));
@@ -100,7 +100,7 @@ int main() {
     printf("result:\n%s\n", R3S_key_to_string(k));
 
     validate(cfg, k);
-    R3S_cfg_delete(&cfg);
+    R3S_cfg_delete(cfg);
 
     free(opts);
 }
