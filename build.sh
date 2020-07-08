@@ -51,6 +51,6 @@ mkdir -p $R3S_LIBS_DIR
 link $R3S_LIBS_DIR/libr3sd.so $DEBUG_BUILD/lib/libr3sd.so
 link $R3S_LIBS_DIR/libr3s.so $RELEASE_BUILD/lib/libr3s.so
 
-link $R3S_INCLUDE_DIR $R3S_DIR/include
+link $R3S_INCLUDE_DIR $R3S_DIR/include/
 link $R3S_EXAMPLES_DIR $DEBUG_BUILD/bin/
-link $R3S_DOCS_DIR $RELEASE_BUILD/docs/html
+link $R3S_DOCS_DIR $RELEASE_BUILD/docs/html/
