@@ -367,6 +367,19 @@ typedef struct {
     unsigned         n_loaded_opts;
 
     /**
+     * Try to find a key that distributes as evenly as possible
+     * the packets among all the available cores.
+     *
+     * By setting this field to false, the R3S_cfg_t::n_procs will
+     * be ignored (only a single process will be used to find the
+     * first key that matches the given constraints), as well as
+     * R3S_cfg_t::key_fit_params.
+     *
+     * By default, this value is true.
+     */
+    bool fit_key;
+
+    /**
      * Number of processes to be used by the R3S_keys_fit_cnstrs().
      * If this value is <= 0, then the number of processes
      * used will be equal to the number of available cores.

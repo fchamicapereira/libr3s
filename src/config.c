@@ -59,6 +59,7 @@ void R3S_cfg_init(R3S_cfg_t *cfg)
 {
     cfg->loaded_opts   = NULL;
     cfg->n_loaded_opts = 0;
+    cfg->fit_key       = true;
     cfg->n_procs       = 0;
     cfg->n_keys        = 1;
     cfg->ctx           = NULL;

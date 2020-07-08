@@ -710,12 +710,11 @@ void check_unsat_core(Z3_context ctx, Z3_solver s, unsigned num_soft_cnstrs, Z3_
 
 void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast *keys, R3S_key_t *keys_proposals)
 {
-    Z3_ast       key_constr[KEY_SIZE_BITS];
-
-    bool         core[KEY_SIZE_BITS];
-    unsigned     num_soft_cnstrs;
-    unsigned     num_soft_cnstrs_new;
-    unsigned     unsat_core_sz;
+    Z3_ast   key_constr[KEY_SIZE_BITS];
+    bool     core[KEY_SIZE_BITS];
+    unsigned num_soft_cnstrs;
+    unsigned num_soft_cnstrs_new;
+    unsigned unsat_core_sz;
 
     init_rand();
 
@@ -831,12 +830,24 @@ R3S_setup_t mk_setup(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
 R3S_status_t adjust_keys_to_cnstrs(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, R3S_key_t *keys_seeds)
 {
     R3S_setup_t setup;
-    Z3_model      m;
-    Z3_ast        key_model;
+    Z3_model    m;
+    Z3_ast      key_model;
 
     setup = mk_setup(cfg, mk_p_cnstrs);
 
-    pseudo_partial_maxsat(cfg.ctx, setup.s, setup.keys, keys_seeds);
+    if (cfg.fit_key) {
+        pseudo_partial_maxsat(cfg.ctx, setup.s, setup.keys, keys_seeds);
+    } else if (Z3_solver_check(cfg.ctx, setup.s) == Z3_L_FALSE) {
+        /*
+         * It is not possible to make the formula satisfiable
+         * even when ignoring all soft constraints.
+        */
+        del_solver(cfg.ctx, setup.s);
+        free(setup.keys_decl);
+        free(setup.keys);
+
+        return R3S_STATUS_NO_SOLUTION;
+    }
 
     m = Z3_solver_get_model(cfg.ctx, setup.s);
 
@@ -961,6 +972,46 @@ void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
     exit(0);
 }
 
+void worker_key_finder(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
+{
+    R3S_status_t status;
+    R3S_key_t    *keys;
+
+    keys    = (R3S_key_t*) malloc(sizeof(R3S_key_t) * cfg.n_keys);
+
+    DEBUG_PLOG("started\n");
+
+    signal(SIGALRM, alarm_handler);
+    alarm(SOLVER_TIMEOUT_SEC);
+
+    status = adjust_keys_to_cnstrs(cfg, mk_p_cnstrs, keys);
+
+    if (status == R3S_STATUS_NO_SOLUTION)
+    {
+        if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
+            DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
+        }
+
+        free(keys);
+
+        exit(0);
+    }
+
+    status = R3S_STATUS_SUCCESS;
+    if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
+        DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
+    }
+
+    for (unsigned ikey = 0; ikey < cfg.n_keys; ikey++)
+        if (write(wp, keys[ikey], KEY_SIZE) == -1)
+            DEBUG_PLOG("IO ERROR: unable to communicate key to manager\n");
+
+    DEBUG_PLOG("terminated\n");
+
+    free(keys);
+    exit(0);
+}
+
 void worker_sat_checker(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
 {
     R3S_status_t status;
@@ -1000,10 +1051,15 @@ R3S_status_t master(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, int np, comm_t c
     int            maxfd;
     fd_set         fds;
 
-    launch_worker(&worker_sat_checker, cfg, mk_p_cnstrs, 0, comm);
+    if (cfg.fit_key) {
+        launch_worker(&worker_sat_checker, cfg, mk_p_cnstrs, 0, comm);
 
-    for (int p = 1; p < np; p++)
-        launch_worker(&worker_key_adjuster, cfg, mk_p_cnstrs, p, comm);
+        for (int p = 1; p < np; p++)
+            launch_worker(&worker_key_adjuster, cfg, mk_p_cnstrs, p, comm);
+    } else {
+        cfg.n_procs = 1;
+        launch_worker(&worker_key_finder, cfg, mk_p_cnstrs, 1, comm);
+    }
     
     for (;;)
     {

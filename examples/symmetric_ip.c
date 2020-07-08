@@ -8,6 +8,8 @@ int main () {
     R3S_cfg_init(&cfg);
     R3S_cfg_load_opt(&cfg, R3S_OPT_NON_FRAG_IPV4);
 
+    cfg.fit_key = false;
+
     status = R3S_keys_fit_cnstrs(cfg, &R3S_cnstr_symmetric_ip, &k);
     
     printf("%s\n", R3S_cfg_to_string(cfg));
