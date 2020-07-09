@@ -11,5 +11,6 @@ set(EXAMPLES_SOURCES ${EXAMPLES_SOURCES}
     ${PROJECT_SOURCE_DIR}/examples/tcp_udp_eq.c
     ${PROJECT_SOURCE_DIR}/examples/auto_opts.c
     ${PROJECT_SOURCE_DIR}/examples/policer.c
+    ${PROJECT_SOURCE_DIR}/examples/firewall.c
     ${PROJECT_SOURCE_DIR}/examples/no_constraints.c
 )

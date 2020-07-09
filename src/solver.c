@@ -497,7 +497,7 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
 
                     n_implies++;
 
-                    assert(n_implies < n_cnstrs && "Number of elements in implication must be < number of constraints");
+                    assert(n_implies <= n_cnstrs && "Number of elements in implication must be <= number of constraints");
                 }
             }
         }

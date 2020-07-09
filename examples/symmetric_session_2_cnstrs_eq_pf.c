@@ -1,14 +1,11 @@
 #include <r3s.h>
 
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
-
-    // no constraints on the second key alone
-    if (p1.key_id == 1 && p2.key_id == 1) {
-        return NULL;
-    }
-
     // symmetric TCP/IP between the first and the second keys (devices)
-    return R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
+    if (p1.key_id == 0 && p2.key_id == 1)
+        return R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
+
+    return NULL;
 }
 
 int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
