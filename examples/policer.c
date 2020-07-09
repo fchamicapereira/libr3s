@@ -24,68 +24,79 @@
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
     R3S_status_t status;
-    Z3_ast       p1_ipv4_src;
-    Z3_ast       p2_ipv4_src;
-    Z3_ast       eq_src_ip;
 
-    status = R3S_packet_extract_pf(cfg, p1, R3S_PF_IPV4_DST, &p1_ipv4_src);
-    if (status != R3S_STATUS_SUCCESS) return NULL;
+    if (p1.key_id == 0 && p2.key_id == 0) {
+        Z3_ast       p1_ipv4_dst;
+        Z3_ast       p2_ipv4_dst;
+        Z3_ast       eq_dst_ip;
 
-    status = R3S_packet_extract_pf(cfg, p2, R3S_PF_IPV4_DST, &p2_ipv4_src);
-    if (status != R3S_STATUS_SUCCESS) return NULL;
+        status = R3S_packet_extract_pf(cfg, p1, R3S_PF_IPV4_DST, &p1_ipv4_dst);
+        if (status != R3S_STATUS_SUCCESS) return NULL;
 
-    eq_src_ip = Z3_mk_eq(cfg->ctx, p1_ipv4_src, p2_ipv4_src);
-    
-    return Z3_simplify(cfg->ctx, eq_src_ip);
+        status = R3S_packet_extract_pf(cfg, p2, R3S_PF_IPV4_DST, &p2_ipv4_dst);
+        if (status != R3S_STATUS_SUCCESS) return NULL;
+
+        eq_dst_ip = Z3_mk_eq(cfg->ctx, p1_ipv4_dst, p2_ipv4_dst);
+
+        return Z3_simplify(cfg->ctx, eq_dst_ip);
+    }
+
+    else if (p1.key_id == 1 && p2.key_id == 1) {
+        return Z3_mk_eq(cfg->ctx, p1.ast, p2.ast);
+    }
+
+    return NULL;
 }
 
-int validate(R3S_cfg_t cfg, R3S_key_t k)
+int validate(R3S_cfg_t cfg, R3S_key_t* keys, unsigned n_keys)
 {
     R3S_packet_t p1, p2;
     R3S_key_hash_out_t o1, o2;
     R3S_packet_from_cnstrs_data_t data;
 
-    for (int i = 0; i < 25; i++)
-    {
-        R3S_packet_rand(cfg, &p1);
-
-        data.constraints = &mk_p_cnstrs;
-        data.packet_in   = p1;
-        data.key_id_in   = 0;
-        data.key_id_out  = 0;
-
-        R3S_packet_from_cnstrs(cfg, data, &p2);
-
-        R3S_key_hash(cfg, k, p1, &o1);
-        R3S_key_hash(cfg, k, p2, &o2);
-
-        printf("\n===== iteration %d =====\n", i);
-
-        printf("%s\n", R3S_packet_to_string(p1));
-        printf("hash: %s\n\n", R3S_key_hash_output_to_string(o1));
-
-        printf("%s\n", R3S_packet_to_string(p2));
-        printf("hash: %s\n\n", R3S_key_hash_output_to_string(o2));;
-
-        if (o1 != o2)
+    for (int ik = 0; ik < n_keys; ik++)
+        for (int i = 0; i < 5; i++)
         {
-            printf("Failed! %u != %u. Exiting.\n", o1, o2);
-            return 0;
+            R3S_packet_rand(cfg, &p1);
+
+            data.constraints = &mk_p_cnstrs;
+            data.packet_in   = p1;
+            data.key_id_in   = ik;
+            data.key_id_out  = ik;
+
+            R3S_packet_from_cnstrs(cfg, data, &p2);
+
+            R3S_key_hash(cfg, keys[ik], p1, &o1);
+            R3S_key_hash(cfg, keys[ik], p2, &o2);
+
+            printf("\n===== iteration %d =====\n", i);
+
+            printf("%s\n", R3S_packet_to_string(p1));
+            printf("hash: %s\n\n", R3S_key_hash_output_to_string(o1));
+
+            printf("%s\n", R3S_packet_to_string(p2));
+            printf("hash: %s\n\n", R3S_key_hash_output_to_string(o2));;
+
+            if (o1 != o2)
+            {
+                printf("Failed! %u != %u. Exiting.\n", o1, o2);
+                return 0;
+            }
         }
-    }
 
     return 1;
 }
 
 int main() {
     R3S_cfg_t cfg;
-    R3S_key_t k;
+    R3S_key_t keys[2];
     R3S_opt_t* opts;
     size_t opts_sz;
     R3S_pf_t pfs[1] = { R3S_PF_IPV4_DST };
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg, 2);
     R3S_opts_from_pfs(pfs, 1, &opts, &opts_sz);
+    R3S_cfg_set_skew_analysis(cfg, false);
 
     printf("Resulting options:\n");
     for (unsigned i = 0; i < opts_sz; i++) {
@@ -95,11 +106,13 @@ int main() {
     
     printf("\nConfiguration:\n%s\n", R3S_cfg_to_string(cfg));
     
-    R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, &k);
-    
-    printf("result:\n%s\n", R3S_key_to_string(k));
+    R3S_keys_fit_cnstrs(cfg, &mk_p_cnstrs, keys);
 
-    validate(cfg, k);
+    printf("key 1:\n%s\n", R3S_key_to_string(keys[0]));
+    printf("key 2:\n%s\n", R3S_key_to_string(keys[1]));
+
+    validate(cfg, keys, 2);
+
     R3S_cfg_delete(cfg);
 
     free(opts);
