@@ -32,20 +32,28 @@ fi
 
 # Build debug
 
+echo "[*] Building debug and examples"
+
 mkdir -p $DEBUG_BUILD
 cd $DEBUG_BUILD
-CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXAMPLES=ON $R3S_DIR
-make
+CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXAMPLES=ON $R3S_DIR > /dev/null
+make > /dev/null
 
 # Build release and generate documentation
 
+echo "[*] Building release"
+
 mkdir -p $RELEASE_BUILD
 cd $RELEASE_BUILD
-CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Release $R3S_DIR
-make
-make docs
+CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Release $R3S_DIR > /dev/null
+make > /dev/null
+
+echo "[*] Generating documentation"
+make docs > /dev/null 2> /dev/null
 
 # Symlink results
+
+echo "[*] Symlinking"
 
 mkdir -p $R3S_LIBS_DIR
 link $R3S_LIBS_DIR/libr3sd.so $DEBUG_BUILD/lib/libr3sd.so

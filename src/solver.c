@@ -446,10 +446,10 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
     Z3_ast     left_implies;
     Z3_ast     right_implies;
     Z3_ast     *implies;
-    Z3_ast     and_implies;
 
     Z3_app     vars[2];
     Z3_ast     forall;
+    Z3_ast     forall_body;
 
     R3S_packet_ast_t p1_ast, p2_ast;
 
@@ -496,17 +496,23 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
                     implies[n_implies] = Z3_mk_implies(cfg->ctx, left_implies, right_implies);
 
                     n_implies++;
+
+                    assert(n_implies < n_cnstrs && "Number of elements in implication must be < number of constraints");
                 }
             }
         }
     }
 
-    and_implies = Z3_mk_and(cfg->ctx, n_implies, implies);
+    if (n_implies > 0) {
+        forall_body = Z3_mk_and(cfg->ctx, n_implies, implies);
+    } else {
+        forall_body = Z3_mk_eq(cfg->ctx, d1, d2);
+    }
 
     vars[0]     = Z3_to_app(cfg->ctx, d1);
     vars[1]     = Z3_to_app(cfg->ctx, d2);
  
-    forall      = Z3_mk_forall_const(cfg->ctx, 0, 2, vars, 0, 0, and_implies);
+    forall      = Z3_mk_forall_const(cfg->ctx, 0, 2, vars, 0, 0, forall_body);
 
     free(implies);
     free(p1);
