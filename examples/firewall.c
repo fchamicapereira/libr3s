@@ -151,7 +151,7 @@ int main() {
     };
 
     R3S_cfg_init(&cfg, 2);
-    // R3S_cfg_set_skew_analysis(cfg, false);
+    R3S_cfg_set_skew_analysis(cfg, false);
     R3S_opts_from_pfs(pfs, 6, &opts, &opts_sz);
 
     for (size_t i = 0; i < opts_sz; i++)
