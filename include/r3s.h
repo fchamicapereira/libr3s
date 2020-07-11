@@ -563,15 +563,21 @@ R3S_string_t R3S_stats_to_string(R3S_stats_t stats);
 /**
  * \brief Initialize a configuration.
  * \param cfg Configuration to initialize.
- * \param n_keys Number of keys to be found by the solver (number of devices to be configured with RSS).
  */
-void R3S_cfg_init(out R3S_cfg_t *cfg, unsigned n_keys);
+void R3S_cfg_init(out R3S_cfg_t *cfg);
 
 /**
  * \brief Delete a configuration.
  * \param cfg Configuration to delete.
  */
 void R3S_cfg_delete(out R3S_cfg_t cfg);
+
+/**
+ * \brief Set number of keys (devices) in configuration
+ * \param cfg Configuration to modify.
+ * \param opt Number of keys (devices)
+ */
+R3S_status_t R3S_cfg_set_number_of_keys(out R3S_cfg_t cfg, unsigned n_keys);
 
 /**
  * \brief Load option into configuration.

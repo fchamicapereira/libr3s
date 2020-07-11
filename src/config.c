@@ -56,7 +56,7 @@ Z3_context mk_context()
     return ctx;
 }
 
-void R3S_cfg_init(R3S_cfg_t *cfg, unsigned n_keys)
+void R3S_cfg_init(R3S_cfg_t *cfg)
 {
     *cfg = (R3S_cfg_t) malloc(sizeof(__R3S_cfg_t));
 
@@ -71,7 +71,11 @@ void R3S_cfg_init(R3S_cfg_t *cfg, unsigned n_keys)
     (*cfg)->skew_analysis_params.time_limit        = -1;
     (*cfg)->skew_analysis_params.n_cores           = 0;
 
-    (*cfg)->n_keys = n_keys;
+    (*cfg)->n_keys = 1;
+}
+
+R3S_status_t R3S_cfg_set_number_of_keys(out R3S_cfg_t cfg, unsigned n_keys) {
+    cfg->n_keys = n_keys;
 }
 
 void cfg_del_ctx(R3S_cfg_t cfg) {

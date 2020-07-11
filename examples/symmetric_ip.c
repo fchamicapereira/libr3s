@@ -5,7 +5,8 @@ int main () {
     R3S_cfg_t       cfg;
     R3S_key_t       k;
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 1);
 
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4);
     R3S_cfg_set_skew_analysis(cfg, false);

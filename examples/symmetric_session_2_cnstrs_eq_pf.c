@@ -76,7 +76,8 @@ int main () {
     R3S_cfg_t       cfg;
     R3S_key_t       keys[2];
 
-    R3S_cfg_init(&cfg, 2);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 2);
     
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
 

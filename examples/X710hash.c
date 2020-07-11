@@ -15,7 +15,8 @@ void ipv4_1()
         0x00, 0x00, 0x00, 0x00
     };
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 1);
     R3S_packet_init(&p);
     
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4);
@@ -48,7 +49,8 @@ void ipv4_2()
         0x00, 0x00, 0x00, 0x00
     };
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 1);
     R3S_packet_init(&p);
     
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4);
@@ -81,7 +83,8 @@ void ipv4_tcp_1()
         0x00, 0x00, 0x00, 0x00
     };
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 1);
     R3S_packet_init(&p);
     
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
@@ -118,7 +121,8 @@ void ipv6_tcp_1()
         0x00, 0x00, 0x00, 0x00
     };
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 1);
     R3S_packet_init(&p);
 
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV6_TCP);

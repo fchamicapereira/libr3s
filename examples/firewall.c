@@ -11,7 +11,7 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
     if (p1.key_id == 1 && p2.key_id == 1)
         return NULL;
 
-    // no constraint LAN => WAN
+    // LAN => WAN
     if (p1.key_id == 0 && p2.key_id == 1)
         return NULL;
 
@@ -64,8 +64,6 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
     };
 
     Z3_ast final = Z3_simplify(cfg->ctx, Z3_mk_and(cfg->ctx, 4, symmetric));
-
-    printf("Constraints:\n%s\n", Z3_ast_to_string(cfg->ctx, final));
 
     return final;
 }
@@ -150,7 +148,8 @@ int main() {
         R3S_PF_UDP_DST,
     };
 
-    R3S_cfg_init(&cfg, 2);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 2);
     R3S_cfg_set_skew_analysis(cfg, false);
     R3S_opts_from_pfs(pfs, 6, &opts, &opts_sz);
 

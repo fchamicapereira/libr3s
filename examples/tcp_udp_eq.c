@@ -96,7 +96,8 @@ int main () {
     R3S_key_t    k;
     R3S_status_t status;
 
-    R3S_cfg_init(&cfg, 1);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 1);
 
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_UDP);

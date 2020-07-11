@@ -94,7 +94,8 @@ int main() {
     size_t opts_sz;
     R3S_pf_t pfs[1] = { R3S_PF_IPV4_DST };
 
-    R3S_cfg_init(&cfg, 2);
+    R3S_cfg_init(&cfg);
+    R3S_cfg_set_number_of_keys(cfg, 2);
     R3S_opts_from_pfs(pfs, 1, &opts, &opts_sz);
     R3S_cfg_set_skew_analysis(cfg, false);
 
