@@ -92,19 +92,8 @@ int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
 
         R3S_packet_from_cnstrs(cfg, data, &p1_2);
 
-        R3S_packet_rand(cfg, &p12_1);
-        data.constraints = &mk_p_cnstrs;
-        data.packet_in   = p12_1;
-        data.key_id_in   = 1;
-        data.key_id_out  = 0;
-
-        R3S_packet_from_cnstrs(cfg, data, &p12_2);
-
         R3S_key_hash(cfg, k1, p1_1, &o1_1);
         R3S_key_hash(cfg, k1, p1_2, &o1_2);
-
-        R3S_key_hash(cfg, k2, p12_1, &o12_1);
-        R3S_key_hash(cfg, k1, p12_2, &o12_2);
 
         printf("\n===== iteration %d =====\n", i);
 
@@ -120,6 +109,18 @@ int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
             printf("Failed! %u != %u. Exiting.\n", o1_1, o1_2);
             return 0;
         }
+
+        R3S_packet_rand(cfg, &p12_1);
+
+        data.constraints = &mk_p_cnstrs;
+        data.packet_in   = p12_1;
+        data.key_id_in   = 1;
+        data.key_id_out  = 0;
+
+        R3S_packet_from_cnstrs(cfg, data, &p12_2);
+
+        R3S_key_hash(cfg, k1, p12_1, &o12_1);
+        R3S_key_hash(cfg, k2, p12_2, &o12_2);
 
         printf("\n*** port 1 (~ port 2)\n\n");
         printf("%s\n", R3S_packet_to_string(p12_1));

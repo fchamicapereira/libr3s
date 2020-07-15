@@ -511,17 +511,29 @@ int compare_extracts_top_idx(Z3_context ctx, Z3_ast e1, Z3_ast e2) {
     return idx1 - idx2;
 }
 
-void sort_extracts(Z3_context ctx, Z3_ast **extracts, unsigned sz) {
+struct extract_equalities {
+    Z3_ast *lhs;
+    Z3_ast *rhs;
+    unsigned sz;
+};
+
+void sort_extract_equalities(Z3_context ctx, struct extract_equalities *equalities) {
     bool change = true;
 
     while (change) {
         change = false;
 
-        for (unsigned i = 0; i < sz - 1; i++) {
-            if (compare_extracts_top_idx(ctx, (*extracts)[i], (*extracts)[i+1]) < 0) {
-                Z3_ast tmp = (*extracts)[i];
-                (*extracts)[i] = (*extracts)[i+1];
-                (*extracts)[i+1] = tmp;
+        for (unsigned i = 0; i < equalities->sz - 1; i++) {
+            if (compare_extracts_top_idx(ctx, equalities->lhs[i], equalities->lhs[i+1]) < 0) {
+                Z3_ast tmp;
+
+                tmp = equalities->lhs[i];
+                equalities->lhs[i] = equalities->lhs[i+1];
+                equalities->lhs[i+1] = tmp;
+
+                tmp = equalities->rhs[i];
+                equalities->rhs[i] = equalities->rhs[i+1];
+                equalities->rhs[i+1] = tmp;
 
                 change = true;
             }
@@ -554,9 +566,10 @@ Z3_ast try_convert_extract_equalities_to_concat(Z3_context ctx, Z3_ast root) {
 
     unsigned updated_args_sz = 0;
 
-    Z3_ast *extracts_lhs = (Z3_ast *) malloc(sizeof(Z3_ast) * num_fields);
-    Z3_ast *extracts_rhs = (Z3_ast *) malloc(sizeof(Z3_ast) * num_fields);
-    unsigned extracts_sz = 0;
+    struct extract_equalities equalities;
+    equalities.lhs = (Z3_ast *) malloc(sizeof(Z3_ast) * num_fields);
+    equalities.rhs = (Z3_ast *) malloc(sizeof(Z3_ast) * num_fields);
+    equalities.sz = 0;
 
     for (unsigned i = 0; i < num_fields; i++) {
         Z3_ast arg = Z3_get_app_arg(ctx, app, i);
@@ -564,10 +577,10 @@ Z3_ast try_convert_extract_equalities_to_concat(Z3_context ctx, Z3_ast root) {
         if (is_equality_of_extracts(ctx, arg)) {
             Z3_app equals = Z3_to_app(ctx, arg);
 
-            extracts_lhs[extracts_sz] = Z3_get_app_arg(ctx, equals, 0);
-            extracts_rhs[extracts_sz] = Z3_get_app_arg(ctx, equals, 1);
+            equalities.lhs[equalities.sz] = Z3_get_app_arg(ctx, equals, 0);
+            equalities.rhs[equalities.sz] = Z3_get_app_arg(ctx, equals, 1);
 
-            extracts_sz++;
+            equalities.sz++;
         }
 
         else {
@@ -576,16 +589,15 @@ Z3_ast try_convert_extract_equalities_to_concat(Z3_context ctx, Z3_ast root) {
         }
     }
 
-    if (extracts_sz > 0) {
-        sort_extracts(ctx, &extracts_lhs, extracts_sz);
-        sort_extracts(ctx, &extracts_rhs, extracts_sz);
+    if (equalities.sz > 0) {
+        sort_extract_equalities(ctx, &equalities);
 
-        Z3_ast equals_lhs = extracts_lhs[0];
-        Z3_ast equals_rhs = extracts_rhs[0];
+        Z3_ast equals_lhs = equalities.lhs[0];
+        Z3_ast equals_rhs = equalities.rhs[0];
 
-        for (unsigned i = 1; i < extracts_sz; i++) {
-            equals_lhs = Z3_mk_concat(ctx, equals_lhs, extracts_lhs[i]);
-            equals_rhs = Z3_mk_concat(ctx, equals_rhs, extracts_rhs[i]);
+        for (unsigned i = 1; i < equalities.sz; i++) {
+            equals_lhs = Z3_mk_concat(ctx, equals_lhs, equalities.lhs[i]);
+            equals_rhs = Z3_mk_concat(ctx, equals_rhs, equalities.rhs[i]);
         }
 
         updated_args[updated_args_sz] = Z3_mk_eq(ctx, equals_lhs, equals_rhs);
@@ -593,6 +605,9 @@ Z3_ast try_convert_extract_equalities_to_concat(Z3_context ctx, Z3_ast root) {
     }
 
     root = Z3_mk_and(ctx, updated_args_sz, updated_args);
+
+    free(equalities.lhs);
+    free(equalities.rhs);
 
     free(updated_args);
     return root;
@@ -609,7 +624,7 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
     Z3_ast     p_cnstrs;
 
     Z3_ast     left_implies;
-    Z3_ast     left_implies_and[2];
+    Z3_ast     left_implies_and[3];
     Z3_ast     right_implies;
     Z3_ast     *implies;
 
@@ -657,13 +672,14 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
 
                     if (p_cnstrs == NULL) continue;
 
-                    left_implies_and[0] = p_cnstrs;
+                    left_implies_and[0] = p_cnstrs;;
                     left_implies_and[0] = try_convert_extract_equalities_to_concat(cfg->ctx, left_implies_and[0]);
                     left_implies_and[0] = Z3_simplify(cfg->ctx, left_implies_and[0]);
 
                     left_implies_and[1] = Z3_mk_not(cfg->ctx, Z3_mk_eq(cfg->ctx, p1_ast.ast, p2_ast.ast));
 
                     left_implies       = Z3_mk_and(cfg->ctx, 2, left_implies_and);
+                    //left_implies = left_implies_and[0];
                     right_implies      = mk_hash_eq(cfg, keys, p1_ast, p2_ast);
                     implies[n_implies] = Z3_mk_implies(cfg->ctx, left_implies, right_implies);
 

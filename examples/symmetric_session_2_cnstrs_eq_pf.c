@@ -1,6 +1,11 @@
 #include <r3s.h>
+#include <stdlib.h>
 
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
+    // TCP/IP for the first key
+    if (p1.key_id == 0 && p2.key_id == 0)
+        return Z3_mk_eq(cfg->ctx, p1.ast, p2.ast);
+
     // symmetric TCP/IP between the first and the second keys (devices)
     if (p1.key_id == 0 && p2.key_id == 1)
         return R3S_cnstr_symmetric_tcp_ip(cfg, p1, p2);
@@ -8,7 +13,7 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
     return NULL;
 }
 
-int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
+void validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
 {
     R3S_packet_t p1_1, p1_2, p12_1, p12_2;
     R3S_key_hash_out_t o1_1, o1_2, o12_1, o12_2;
@@ -34,9 +39,9 @@ int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
         R3S_packet_from_cnstrs(cfg, data, &p12_2);
 
         R3S_key_hash(cfg, k1, p1_1, &o1_1);
-        R3S_key_hash(cfg, k2, p1_2, &o1_2);
-        R3S_key_hash(cfg, k1, p12_1, &o12_1);
-        R3S_key_hash(cfg, k2, p12_2, &o12_2);
+        R3S_key_hash(cfg, k1, p1_2, &o1_2);
+        R3S_key_hash(cfg, k2, p12_1, &o12_1);
+        R3S_key_hash(cfg, k1, p12_2, &o12_2);
 
         printf("\n===== iteration %d =====\n", i);
 
@@ -50,7 +55,7 @@ int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
         if (o1_1 != o1_2)
         {
             printf("Failed! %u != %u. Exiting.\n", o1_1, o1_2);
-            return 0;
+            exit(1);
         }
 
         printf("\n*** port 1 (~ port 2)\n\n");
@@ -64,11 +69,9 @@ int validate(R3S_cfg_t cfg, R3S_key_t k1, R3S_key_t k2)
         if (o12_1 != o12_2)
         {
             printf("Failed! %u != %u. Exiting.\n", o12_1, o12_2);
-            return 0;
+            exit(1);
         }
     }
-
-    return 1;
 }
 
 int main () {

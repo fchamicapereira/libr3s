@@ -3,7 +3,7 @@
 
 #include "../include/r3s.h"
 
-#define STATS                   1000000
+#define STATS                   100000
 #define DIST_THRESHOLD          0.1
 
 typedef unsigned packet_fields_t;
