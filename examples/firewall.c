@@ -2,19 +2,11 @@
 
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
 
-    // constraints for LAN device exclusively,
-    if (p1.key_id == 0 && p2.key_id == 0) {
-        return Z3_mk_eq(cfg->ctx, p1.ast, p2.ast);
-    }
-
-    // no constraints exclusively for WAN device
-    if (p1.key_id == 1 && p2.key_id == 1)
-        return NULL;
-
     // LAN => WAN
     if (p1.key_id == 0 && p2.key_id == 1)
         return NULL;
 
+    // constraints for LAN and WAN devices exclusively,
     // constraints WAN => LAN
     Z3_ast p1_l3_src, p1_l3_dst;
     Z3_ast p2_l3_src, p2_l3_dst;
@@ -56,14 +48,29 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2) {
         return NULL;
     }
 
-    Z3_ast symmetric[4] = {
-        Z3_mk_eq(cfg->ctx, p1_l3_src, p2_l3_dst),
-        Z3_mk_eq(cfg->ctx, p1_l3_dst, p2_l3_src),
-        Z3_mk_eq(cfg->ctx, p1_l4_src, p2_l4_dst),
-        Z3_mk_eq(cfg->ctx, p1_l4_dst, p2_l4_src)
-    };
+    Z3_ast final;
 
-    Z3_ast final = Z3_simplify(cfg->ctx, Z3_mk_and(cfg->ctx, 4, symmetric));
+    if (p1.key_id == p2.key_id) {
+        Z3_ast _and_args[4] = {
+            Z3_mk_eq(cfg->ctx, p1_l3_src, p2_l3_src),
+            Z3_mk_eq(cfg->ctx, p1_l3_dst, p2_l3_dst),
+            Z3_mk_eq(cfg->ctx, p1_l4_src, p2_l4_src),
+            Z3_mk_eq(cfg->ctx, p1_l4_dst, p2_l4_dst)
+        };
+
+        final = Z3_simplify(cfg->ctx, Z3_mk_and(cfg->ctx, 4, _and_args));
+    }
+
+    else {
+        Z3_ast symmetric[4] = {
+            Z3_mk_eq(cfg->ctx, p1_l3_src, p2_l3_dst),
+            Z3_mk_eq(cfg->ctx, p1_l3_dst, p2_l3_src),
+            Z3_mk_eq(cfg->ctx, p1_l4_src, p2_l4_dst),
+            Z3_mk_eq(cfg->ctx, p1_l4_dst, p2_l4_src)
+        };
+
+        final = Z3_simplify(cfg->ctx, Z3_mk_and(cfg->ctx, 4, symmetric));
+    }
 
     return final;
 }

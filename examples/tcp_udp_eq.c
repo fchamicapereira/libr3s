@@ -2,6 +2,7 @@
 
 Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
 {
+    return Z3_mk_eq(cfg->ctx, p1.ast, p2.ast);
     R3S_status_t status;
     Z3_ast       p1_src_port, p1_dst_port;
     Z3_ast       p2_src_port, p2_dst_port;
@@ -98,6 +99,7 @@ int main () {
 
     R3S_cfg_init(&cfg);
     R3S_cfg_set_number_of_keys(cfg, 1);
+    R3S_cfg_set_skew_analysis(cfg, false);
 
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_TCP);
     R3S_cfg_load_opt(cfg, R3S_OPT_NON_FRAG_IPV4_UDP);
