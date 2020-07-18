@@ -672,7 +672,7 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
 
                     if (p_cnstrs == NULL) continue;
 
-                    left_implies_and[0] = p_cnstrs;;
+                    left_implies_and[0] = p_cnstrs;
                     left_implies_and[0] = try_convert_extract_equalities_to_concat(cfg->ctx, left_implies_and[0]);
                     left_implies_and[0] = Z3_simplify(cfg->ctx, left_implies_and[0]);
 

@@ -758,7 +758,7 @@ void R3S_key_rand(R3S_cfg_t cfg, out R3S_key_t key);
  * The constraints are represented using a function with the definition
  * R3S_cnstrs_func (check its documentation).
  * 
- * The first n = r3s_cfg.n_keys elements of \p mk_p_cnstrs relate to
+ * The first n = cfg.n_keys elements of \p mk_p_cnstrs relate to
  * constraints on each key independently. The remaining elements
  * correspond to the constraints related to combinations of keys.
  * 
@@ -804,7 +804,7 @@ void R3S_key_rand(R3S_cfg_t cfg, out R3S_key_t key);
  * 
  * \return Status code.
  */
-R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func k_p_cnstrs, out R3S_key_t *keys);
+R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, out R3S_key_t *keys);
 /** 
  * \example no_solution.c
  * Consider the following scenario:
@@ -840,9 +840,9 @@ R3S_status_t R3S_keys_fit_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func k_p_cnstrs, 
  * \todo explanation
  */
 
-R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t r3s_cfg, R3S_cnstrs_func mk_p_cnstrs, out R3S_key_t *keys);
+R3S_status_t R3S_keys_test_cnstrs(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, out R3S_key_t *keys);
 
-R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t h, out R3S_key_hash_out_t *result);
+R3S_status_t R3S_key_hash(R3S_cfg_t cfg, R3S_key_t k, R3S_packet_t p, out R3S_key_hash_out_t *result);
 
 /// \}
 
