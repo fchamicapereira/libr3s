@@ -1316,8 +1316,6 @@ R3S_status_t master(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, int np, comm_t c
                             DEBUG_PLOG("IO ERROR: unable to read status from worker\n");
                             continue; // FIXME: should I be reacting this way? Or should I retry?
                         }
-
-                        DEBUG_PLOG("received key %u\n%s\n", ikey, R3S_key_to_string(keys[ikey]));
                     }
 
                     for (p = 0; p < np; p++)
