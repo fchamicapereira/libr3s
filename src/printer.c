@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define _4_R3S_BYTE_T_TO_UINT32_T(v) ((uint32_t) (\
     ((BYTE_FROM_BYTES((v), 0)) << 24) + ((BYTE_FROM_BYTES((v), 1)) << 16) + \
@@ -17,10 +18,13 @@
 #define _2_R3S_BYTE_T_TO_UINT32_T(v) ((uint16_t) (\
     ((BYTE_FROM_BYTES((v), 0)) <<  8) + ((BYTE_FROM_BYTES((v), 1)) <<  0) ))
 
-#define APPEND(dst, f_, ...)                 {\
-        char buffer[100];                     \
-        sprintf(buffer, (f_), ##__VA_ARGS__); \
-        strcat((dst), (buffer));              \
+#define APPEND(dst, f_, ...)                 {                     \
+        char buffer[R3S_STRING_SZ];                                \
+        snprintf(buffer, R3S_STRING_SZ - 1, (f_), ##__VA_ARGS__);  \
+        size_t current_size = strlen(dst);                         \
+        size_t to_append_size = strlen(buffer);                    \
+        assert(current_size + to_append_size < R3S_STRING_SZ);     \
+        strncat((dst), (buffer), to_append_size);                  \
     }
 
 R3S_string_t R3S_packet_to_string(R3S_packet_t p)
