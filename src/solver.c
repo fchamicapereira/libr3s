@@ -16,6 +16,22 @@
 #include "packet.h"
 #include "config.h"
 
+int wp;
+int wid;
+
+void alarm_handler(int sig)
+{
+    R3S_status_t status = R3S_STATUS_TIMEOUT;
+
+    if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
+        DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
+    }
+
+    DEBUG_PLOG("terminated (timeout)\n");
+
+    exit(0);
+}
+
 Z3_solver mk_solver(Z3_context ctx)
 {
     Z3_solver s = Z3_mk_solver(ctx);
@@ -676,10 +692,18 @@ Z3_ast mk_rss_stmt(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, Z3_ast *keys)
                     left_implies_and[0] = try_convert_extract_equalities_to_concat(cfg->ctx, left_implies_and[0]);
                     left_implies_and[0] = Z3_simplify(cfg->ctx, left_implies_and[0]);
 
+                    if (wid == 0) {
+                      DEBUG_LOG("[Constraint info]\n");
+                      DEBUG_LOG("p1 option: %s\n", R3S_opt_to_string(p1_ast.loaded_opt.opt));
+                      DEBUG_LOG("p1 device: %u\n", p1_ast.key_id);
+                      DEBUG_LOG("p2 option: %s\n", R3S_opt_to_string(p2_ast.loaded_opt.opt));
+                      DEBUG_LOG("p2 device: %u\n", p2_ast.key_id);
+                      DEBUG_LOG("Constraint: \n%s\n\n", Z3_ast_to_string(cfg->ctx, left_implies_and[0]));
+                    }
+
                     left_implies_and[1] = Z3_mk_not(cfg->ctx, Z3_mk_eq(cfg->ctx, p1_ast.ast, p2_ast.ast));
 
                     left_implies       = Z3_mk_and(cfg->ctx, 2, left_implies_and);
-                    //left_implies = left_implies_and[0];
                     right_implies      = mk_hash_eq(cfg, keys, p1_ast, p2_ast);
                     implies[n_implies] = Z3_mk_implies(cfg->ctx, left_implies, right_implies);
 
@@ -1085,21 +1109,6 @@ R3S_status_t sat_checker(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
     return R3S_STATUS_HAS_SOLUTION;
 }
 
-int wp;
-
-void alarm_handler(int sig)
-{
-    R3S_status_t status = R3S_STATUS_TIMEOUT;
-
-    if (write(wp, &status, sizeof(R3S_status_t)) == -1) {
-        DEBUG_PLOG("IO ERROR: unable to communicate status to manager\n");
-    }
-
-    DEBUG_PLOG("terminated (timeout)\n");
-
-    exit(0);
-}
-
 void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
 {
     R3S_status_t status;
@@ -1232,6 +1241,7 @@ void launch_worker(R3S_worker worker, R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs
     if (!(pid = fork())) 
     {
         wp = comm.wpipe[p];
+        wid = p;
         worker(cfg, mk_p_cnstrs);
     }
 
