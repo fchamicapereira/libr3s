@@ -41,10 +41,6 @@ Z3_ast mk_p_cnstrs(R3S_cfg_t cfg, R3S_packet_ast_t p1, R3S_packet_ast_t p2)
         return Z3_simplify(cfg->ctx, eq_dst_ip);
     }
 
-    else if (p1.key_id == 1 && p2.key_id == 1) {
-        return Z3_mk_eq(cfg->ctx, p1.ast, p2.ast);
-    }
-
     return NULL;
 }
 
@@ -97,7 +93,7 @@ int main() {
     R3S_cfg_init(&cfg);
     R3S_cfg_set_number_of_keys(cfg, 2);
     R3S_opts_from_pfs(pfs, 1, &opts, &opts_sz);
-    R3S_cfg_set_skew_analysis(cfg, false);
+    R3S_cfg_set_skew_analysis(cfg, true);
 
     printf("Resulting options:\n");
     for (unsigned i = 0; i < opts_sz; i++) {

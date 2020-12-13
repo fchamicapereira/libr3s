@@ -194,9 +194,6 @@ R3S_string_t R3S_opt_to_string(R3S_opt_t opt)
             sprintf(result, "Non-frag UDP/IPv4");   break;
         case R3S_OPT_NON_FRAG_IPV4_SCTP:
             sprintf(result, "Non-frag SCTP/IPv4");  break;
-        case R3S_OPT_NON_FRAG_IPV4:
-            sprintf(result, "Non-frag IPv4");       break;
-        case R3S_OPT_FRAG_IPV4:
             sprintf(result, "Frag IPv4");           break;
         case R3S_OPT_NON_FRAG_IPV6_TCP:
             sprintf(result, "Non-frag TCP/IPv6");   break;

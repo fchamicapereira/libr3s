@@ -134,20 +134,6 @@ typedef enum
     R3S_OPT_NON_FRAG_IPV4_SCTP,
 
     /**
-     * Configures RSS to accept non fragmented IPv4 packets.
-     * - ::R3S_PF_IPV4_SRC
-     * - ::R3S_PF_IPV4_DST
-     */
-    R3S_OPT_NON_FRAG_IPV4,
-
-    /**
-     * Configures RSS to accept fragmented IPv4 packets.
-     * - ::R3S_PF_IPV4_SRC
-     * - ::R3S_PF_IPV4_DST
-     */
-    R3S_OPT_FRAG_IPV4,
-
-    /**
      * Configures RSS to accept non fragmented TCP/IPv6 packets.
      * - ::R3S_PF_IPV6_SRC
      * - ::R3S_PF_IPV6_DST

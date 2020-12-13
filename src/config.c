@@ -104,8 +104,6 @@ bool is_valid_opt(R3S_opt_t opt)
         case R3S_OPT_NON_FRAG_IPV4_TCP:
         case R3S_OPT_NON_FRAG_IPV4_UDP:
         case R3S_OPT_NON_FRAG_IPV4_SCTP:
-        case R3S_OPT_NON_FRAG_IPV4:
-        case R3S_OPT_FRAG_IPV4:
         case R3S_OPT_NON_FRAG_IPV6_TCP:
         case R3S_OPT_NON_FRAG_IPV6_UDP:
         case R3S_OPT_NON_FRAG_IPV6_SCTP:
@@ -162,15 +160,6 @@ R3S_status_t R3S_opt_to_pfs(R3S_opt_t opt, R3S_pf_t **pfs, unsigned *n_pfs)
             (*pfs)[2] = R3S_PF_SCTP_SRC;
             (*pfs)[3] = R3S_PF_SCTP_DST;
             (*pfs)[4] = R3S_PF_SCTP_V_TAG;
-
-            break;
-        case R3S_OPT_NON_FRAG_IPV4:
-        case R3S_OPT_FRAG_IPV4:
-            *n_pfs    = 2;
-            *pfs      = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * (*n_pfs));
-
-            (*pfs)[0] = R3S_PF_IPV4_SRC;
-            (*pfs)[1] = R3S_PF_IPV4_DST;
 
             break;
         case R3S_OPT_NON_FRAG_IPV6_UDP:
