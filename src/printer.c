@@ -24,7 +24,7 @@
         size_t current_size = strlen(dst);                         \
         size_t to_append_size = strlen(buffer);                    \
         assert(current_size + to_append_size < R3S_STRING_SZ);     \
-        strncat((dst), (buffer), to_append_size);                  \
+        strncat((dst), (buffer));                                  \
     }
 
 R3S_string_t R3S_packet_to_string(R3S_packet_t p)
