@@ -125,7 +125,7 @@ void parse_packet_with_opt(
             break;
 
         default:
-            printf("Undealt l3 protocol\n");
+            fprintf(stderr, "Undealt l3 protocol\n");
             break;
     }
 
@@ -199,7 +199,7 @@ void parse_packet_with_opt(
             break;
 
         default:
-            printf("Undealt l4 protocol\n");
+            fprintf(stderr, "Undealt l4 protocol\n");
             break;
     }
 }

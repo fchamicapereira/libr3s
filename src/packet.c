@@ -48,7 +48,7 @@ R3S_bytes_t R3S_packet_get_field(R3S_packet_t *p, R3S_pf_t pf)
         case R3S_PF_ETHERTYPE:        return (R3S_bytes_t) p->ethertype;
     }
     
-    printf("ERROR: field %d not found on header\n", pf);
+    fprintf(stderr, "ERROR: field %d not found on header\n", pf);
     assert(false);
 }
 

@@ -10,10 +10,10 @@
 #endif
 
 #if DEBUG
-    #define DEBUG_LOG(f_, ...)       !DEBUG || printf((f_), ##__VA_ARGS__)
+    #define DEBUG_LOG(f_, ...)       !DEBUG || fprintf(stderr, (f_), ##__VA_ARGS__)
     #define DEBUG_PLOG(f_, ...)      !DEBUG || \
-        ( printf("[%d] ", getpid()) &&         \
-          printf((f_), ##__VA_ARGS__) )
+        ( fprintf(stderr, "[%d] ", getpid()) &&         \
+          fprintf(stderr, (f_), ##__VA_ARGS__) )
 #else
     #define DEBUG_LOG(f_, ...)
     #define DEBUG_PLOG(f_, ...)
