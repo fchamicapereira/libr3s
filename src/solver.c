@@ -1117,6 +1117,10 @@ void worker_key_adjuster(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs)
     
     keys    = (R3S_key_t*) malloc(sizeof(R3S_key_t) * cfg->n_keys);
 
+    unsigned int n_cores = cfg->skew_analysis_params.n_cores == 0 ?
+                           get_nprocs() : cfg->skew_analysis_params.n_cores;
+    R3S_stats_init(cfg, n_cores, &stats);
+
     DEBUG_PLOG("started\n");
 
     signal(SIGALRM, alarm_handler);

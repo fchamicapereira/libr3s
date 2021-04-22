@@ -24,13 +24,14 @@ void R3S_stats_init(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats)
 
 void R3S_stats_reset(R3S_cfg_t cfg, unsigned n_cores, out R3S_stats_t *stats)
 {
-    free(stats->core_stats);
+    R3S_stats_delete(stats);
     R3S_stats_init(cfg, n_cores, stats);
 }
 
 void R3S_stats_delete(out R3S_stats_t *stats)
 {
-    free(stats->core_stats);
+    if (stats->core_stats)
+        free(stats->core_stats);
 }
 
 R3S_status_t R3S_stats_from_packets(R3S_key_t key, R3S_packet_t *packets, int n_packets, out R3S_stats_t *stats)

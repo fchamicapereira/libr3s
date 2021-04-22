@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX(x,y) ((x) >= (y) ? (x) : (y))
 
@@ -79,7 +80,9 @@ R3S_status_t R3S_cfg_set_number_of_keys(out R3S_cfg_t cfg, unsigned n_keys) {
 }
 
 void cfg_del_ctx(R3S_cfg_t cfg) {
-    if (cfg->ctx != NULL) Z3_del_context(cfg->ctx);
+    if (cfg->ctx != NULL) {
+        Z3_del_context(cfg->ctx);
+    }
     cfg->ctx = NULL;
 }
 
@@ -348,7 +351,7 @@ void opt_cmp_pfs(R3S_opt_t opt, R3S_pf_t *pfs, size_t pfs_sz, opt_pfs_match_t *r
     if (report->excess_sz > 0)  free(report->excess);
 
     *report = build_opt_pfs_match();
-    report->opt        = opt;
+    report->opt = opt;
 
     if (pfs_sz == 0) return;
 
@@ -375,6 +378,8 @@ void opt_cmp_pfs(R3S_opt_t opt, R3S_pf_t *pfs, size_t pfs_sz, opt_pfs_match_t *r
             report->excess[report->excess_sz - 1] = opt_pfs[i];
         }
     }
+
+    free(opt_pfs);
 }
 
 bool opt_array_constains(R3S_opt_t* arr, size_t sz, R3S_opt_t opt) {
@@ -383,7 +388,7 @@ bool opt_array_constains(R3S_opt_t* arr, size_t sz, R3S_opt_t opt) {
     return false;
 }
 
-R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opts, out size_t *opts_sz) {
+R3S_status_t R3S_opts_from_pfs(R3S_pf_t *_pfs, size_t pfs_sz, out R3S_opt_t** opts, out size_t *opts_sz) {
     R3S_status_t     status;
     R3S_opt_t        opt;
     opt_pfs_match_t *reports;
@@ -395,6 +400,10 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
 
     reports_sz = R3S_LAST_OPT - R3S_FIRST_OPT + 1;
     reports    = (opt_pfs_match_t*) malloc(sizeof(opt_pfs_match_t) * reports_sz);
+
+    // create a copy first
+    R3S_pf_t *pfs = (R3S_pf_t*) malloc(sizeof(R3S_pf_t) * pfs_sz);
+    memcpy(pfs, _pfs, sizeof(R3S_pf_t) * pfs_sz);
 
     remove_dup((void**) &pfs, &pfs_sz, sizeof(R3S_pf_t));
 
@@ -472,12 +481,13 @@ R3S_status_t R3S_opts_from_pfs(R3S_pf_t *pfs, size_t pfs_sz, out R3S_opt_t** opt
         }
     }
 
-    for (unsigned i = 0; i < reports_sz - 1; i++) {
+    for (unsigned i = 0; i < reports_sz; i++) {
         if (reports[i].missing_sz > 0) free(reports[i].missing);
         if (reports[i].excess_sz > 0)  free(reports[i].excess);
     }
 
     free(reports);
+    free(pfs);
 
     return status;
 }
