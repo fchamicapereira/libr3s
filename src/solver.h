@@ -4,7 +4,6 @@
 #include "../include/r3s.h"
 
 #define SOLVER_TIMEOUT_SEC      (60 * 60 * 3) // 3 hours
-#define SOLVER_TIMEOUT_SEC      (2 * 60 * 60) // 2 hours
 
 typedef struct {
     int *pid;
