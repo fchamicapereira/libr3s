@@ -5,7 +5,7 @@ set -euo pipefail
 
 function link {
     if [ ! -L $1 ]; then
-        ln -s $2 $1
+        ln -sf $2 $1
     fi
 }
 
@@ -45,7 +45,7 @@ echo "[*] Building release"
 
 mkdir -p $RELEASE_BUILD
 cd $RELEASE_BUILD
-CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Release $R3S_DIR > /dev/null
+CMAKE_PREFIX_PATH="$Z3_DIR/build" CMAKE_INCLUDE_PATH="$Z3_DIR/build/include/" cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON $R3S_DIR > /dev/null
 make > /dev/null
 
 echo "[*] Generating documentation"

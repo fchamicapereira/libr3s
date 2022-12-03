@@ -926,22 +926,25 @@ void check_unsat_core(Z3_context ctx, Z3_solver s, unsigned num_soft_cnstrs, Z3_
     free(aux_vars);
 }
 
-void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast *keys, R3S_key_t *keys_proposals)
+void pseudo_partial_maxsat(Z3_context ctx, Z3_solver s, Z3_ast *keys, R3S_key_t *keys_proposals, unsigned n_keys)
 {
-    Z3_ast   key_constr[KEY_SIZE_BITS];
-    bool     core[KEY_SIZE_BITS];
+    Z3_ast   key_constr[KEY_SIZE_BITS * n_keys];
+    bool     core[KEY_SIZE_BITS * n_keys];
     unsigned num_soft_cnstrs;
     unsigned num_soft_cnstrs_new;
     unsigned unsat_core_sz;
 
     init_rand();
 
-    for (int bit = 0; bit < KEY_SIZE_BITS; bit++)
-        key_constr[bit] = mk_key_bit_const(ctx, keys[0], KEY_SIZE_BITS - 1 - bit, BIT_FROM_KEY(bit, keys_proposals[0]));
+    num_soft_cnstrs = KEY_SIZE_BITS * n_keys;
 
-    for (unsigned i = 0; i < KEY_SIZE_BITS; i++) core[i] = false;
+    for (unsigned ikey = 0; ikey < n_keys; ikey++) {
+        for (int bit = 0; bit < KEY_SIZE_BITS; bit++)
+            key_constr[KEY_SIZE_BITS * ikey + bit] = mk_key_bit_const(ctx, keys[ikey], KEY_SIZE_BITS - 1 - bit, BIT_FROM_KEY(bit, keys_proposals[ikey]));
+    }
 
-    num_soft_cnstrs = KEY_SIZE_BITS;
+    for (unsigned i = 0; i < num_soft_cnstrs; i++) core[i] = false;
+
     for (;;) {
         check_unsat_core(ctx, s, num_soft_cnstrs, key_constr, core);
 
@@ -1054,7 +1057,7 @@ R3S_status_t adjust_keys_to_cnstrs(R3S_cfg_t cfg, R3S_cnstrs_func mk_p_cnstrs, R
     setup = mk_setup(cfg, mk_p_cnstrs);
 
     if (cfg->skew_analysis) {
-        pseudo_partial_maxsat(cfg->ctx, setup.s, setup.keys, keys_seeds);
+        pseudo_partial_maxsat(cfg->ctx, setup.s, setup.keys, keys_seeds, cfg->n_keys);
     } else if (Z3_solver_check(cfg->ctx, setup.s) == Z3_L_FALSE) {
         /*
          * It is not possible to make the formula satisfiable

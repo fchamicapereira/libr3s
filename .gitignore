@@ -10,3 +10,5 @@ release
 debug
 pcaps
 libr3s.*
+docs
+include/include
